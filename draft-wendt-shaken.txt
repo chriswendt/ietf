@@ -60,7 +60,7 @@ Table of Contents
      2.1.  Trust Framework Overview
      2.2.  Token Overview
      2.3.  Key Management Overview
-     2.4.  Key Management Overview
+     2.4.  Key Distribution Overview
    3.  Verify Token (VT)
      3.1.  Token Claim
      3.2.  Token Signature
@@ -157,7 +157,7 @@ Table of Contents
    evolution of the security needed, for example, intermediate trust
    anchors, or other X.509 supported mechanisms.
 
-2.4.  Key Management Overview
+2.4.  Key Distribution Overview
 
    In order to facilitate ease of distribution of public key
    certificates, particularly for the applications that SHAKEN is
@@ -216,7 +216,7 @@ Table of Contents
 4.  Acknowledgements
 
    Would like to thank members of the ATIS and SIP Forum NNI Task Group
-   for feedback encouragment particularly ...
+   for feedback encouragement particularly ...
 
 5.  IANA Considerations
 
