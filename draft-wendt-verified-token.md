@@ -21,11 +21,11 @@ Tokens are a convenient way of encapsulating information with associated cryptog
 
 **3. Verified Token (VT)**
 
-The Verify Token (VT) is constructed based on JWT [RFC7519] and JWS [RFC7515] specifications.  JWS defines the use of JSON data structures in a specified canonical format for signing data coresponding to JOSE header, JWS Payload, and JWS Signature.  JWT defines specific set of claims that are represented by specified key value pairs which can be extended with custom keys for specific applications. 
+The Verify Token (VT) is constructed based on JWT [RFC7519] and JWS [RFC7515] specifications.  JWS defines the use of JSON data structures in a specified canonical format for signing data corresponding to JOSE header, JWS Payload, and JWS Signature.  JWT defines specific set of claims that are represented by specified key value pairs which can be extended with custom keys for specific applications. 
 
 **3.1. Verified Token Header**
 
-The JWS token header is a JOSE header that defines the type and encryption algoirthm used in the token.  An example of the header for the case of a RSASSA-PKCS1-v1_5 SHA-256 digital signature would be the following,
+The JWS token header is a JOSE header that defines the type and encryption algorithm used in the token.  An example of the header for the case of a RSASSA-PKCS1-v1_5 SHA-256 digital signature would be the following,
 
 	{ "typ":"JWT",
       "alg":"RS256"}
@@ -91,7 +91,7 @@ Use of X.509 based signatures for the JWT implies normal validation of the certi
 **4.2 Avoidance of replay and cut and paste attacks**
 
 There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks.
-Verified tokens should be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in [RFC3261]).  There should be a link between various infomation provided in the token and information provided by the application level protocol information.
+Verified tokens should be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in [RFC3261]).  There should be a link between various information provided in the token and information provided by the application level protocol information.
 These would include:
 
 * "iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the verified token.
@@ -115,8 +115,11 @@ These would include:
 
 **Appendix A.  Example Usage of Verified Tokens for SIP**
 
-Specific usage of verified tokens shall be defined for various usage, however to illustrate the need to link certain 
-   
+Specific usage of verified tokens shall be defined for various usage, however to serve as an example and illustrate the need to link certain message metadata for security reasons as discussed in the security considerations section above
+
+**Appendix B. Example Reference Tokens**
+
+Example tokens with corresponding certificates and keys to serve as test data for reference implementation.
    
 **Acknowledgements**
 
