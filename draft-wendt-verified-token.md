@@ -62,8 +62,8 @@ The JSON claim MUST include the following registered JWT defined claims unless n
 
 Verified Token specific claims MUST be included unless noted optional:
 
-* "orig" - the identity claimed by the originating party.  (e.g. for SIP, the FROM or PAI associated e.164 telephone number, TEL or SIP URI)  This MAY be in URI format as defined in [RFC3986] or an application specific identity string.
-* "term" - the terminating identity claimed by the originating party. (e.g. for SIP, the TO associated e.164 telephone number, TEL or SIP URI)  This MAY be in URI format as defined in [RFC3986] or an application specific identity string.
+* "orig" - required - the identity claimed by the originating party.  (e.g. for SIP, the FROM or PAI associated e.164 telephone number, TEL or SIP URI)  This MAY be in URI format as defined in [RFC3986] or an application specific identity string.
+* "term" - required - the terminating identity claimed by the originating party. (e.g. for SIP, the TO associated e.164 telephone number, TEL or SIP URI)  This MAY be in URI format as defined in [RFC3986] or an application specific identity string.
 
 NOTE: for identities such as SIP URIs where there is a domain associated with a user part, i.e. user@domain, the domain in the claim, may or may not correspond to either the TO/FROM/PAI and/or the "iss".  The determination of the validity of the claimed identity, either user part alone or the full user@domain would be up to the application.
 
@@ -75,24 +75,30 @@ An example claim is as follows,
       "jti": "FAhNaPk0onffyJvykJZC2A==",
       "iat": 1443208345 }
  
-**4. Verified Token Signature**
+**3.3 Verified Token Signature**
+
+The signature of the verified token is computed fully as specified by JWS.
 
 
+**4. Security Considerations**
 
-**4. Acknowledgements**
+There are a number of security considerations required for preventing various attacks on the validity or impersonation of the signature.
 
-   Would like to thank members of the ATIS and SIP Forum NNI Task Group
-   for feedback encouragement particularly ...
+**4.1 Validation of the Issuer and Certificate Signature**
 
-**5. IANA Considerations**
+Use of X.509 based signatures for the JWT implies normal validation of the certificate ownership based on the binding of the public key certificate to the distinguished name representing the authorized originator.  The iss field of the signed claim should also match this distinguished name to provide
 
-   This memo includes no request to IANA.
+**4.2 Avoidance of replay and cut and paste attacks**
 
-**6. Security Considerations**
+There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks.
+Verified tokens should be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in [RFC3261]).  There should be a link between various infomation provided in the token and information provided by the application level protocol information.
+These would include:
 
-   Security Considerations
+* "iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the verified token.
+* "jti" claim could be used to exactly correspond to a unique identifier (e.g. STRAW for SIP)
+* "term" claim is included to prevent the ability to use a previously originated message to send to another terminating party
 
-**7. Normative References**
+**5. Normative References**
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -107,9 +113,15 @@ An example claim is as follows,
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
               <http://www.rfc-editor.org/info/rfc7519>.
 
-**Appendix A.  Example Tokens**
+**Appendix A.  Example Usage of Verified Tokens for SIP**
 
-   Provide some example tokens
+Specific usage of verified tokens shall be defined for various usage, however to illustrate the need to link certain 
+   
+   
+**Acknowledgements**
+
+   Would like to thank members of the ATIS and SIP Forum NNI Task Group
+   for feedback encouragement particularly ...
 
 **Author's Address**
 
