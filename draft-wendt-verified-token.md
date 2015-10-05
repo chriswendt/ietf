@@ -95,7 +95,7 @@ Verified tokens should be sent along with other application level protocol infor
 These would include:
 
 * "iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the verified token.
-* "jti" claim could be used to exactly correspond to a unique identifier (e.g. STRAW for SIP)
+* "jti" claim could be used to exactly correspond to a unique identifier (e.g. INSIPID for SIP)
 * "term" claim is included to prevent the ability to use a previously originated message to send to another terminating party
 
 **5. Normative References**
