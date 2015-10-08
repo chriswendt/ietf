@@ -119,16 +119,18 @@ Example tokens with corresponding certificates and keys to serve as test data fo
    
 **Acknowledgements**
 
-   Would like to thank members of the ATIS and SIP Forum NNI Task Group
-   for feedback encouragement particularly ...
+Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Martin Dolly, Richard Shockey, Jim McEchern, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, also thanks to Henning Schulzrinne, Russ Housley, Jon Peterson, Alan Johnston for valuable feedback on the technical and security aspects of the document.
 
 **Author's Address**
 
    Chris Wendt (editor)
+   
    Comcast
+   
    One Comcast Center
-   Philadelphia, PA
+   
+   Philadelphia, PA 19103
+   
    US
 
-   Phone: +1-215-286-7093
    Email: chris_wendt@cable.comcast.com
