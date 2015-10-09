@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3261.xml">
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml">
+<!ENTITY RFC7515 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml">
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7518.xml">
+<!ENTITY RFC7519 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml">
+]>
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt" ?>
+<?rfc strict="yes" ?>
+<?rfc toc="yes" ?>
+<?rfc tocdepth="4"?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="yes" ?>
+<?rfc rfcedstyle="no" ?>
+<?rfc iprnotified="no" ?>
+<?rfc colonspace="yes" ?>
+<rfc category="info" docName="draft-wendt-verified-token-00" ipr="trust200902">
+
+  <front>
+    <title abbrev="Verified Token">Verified Token</title>
+
+    <author fullname="Chris Wendt" initials="C." surname="Wendt" role="editor">
+      <organization>Comcast</organization>
+
+      <address>
+        <postal>
+          <street>One Comcast Center</street>
+          <city>Philadelphia</city>
+          <region>PA</region>
+          <code>19103</code>
+          <country>USA</country>
+        </postal>
+        <email>chris-ietf@chriswendt.net</email>
+      </address>
+    </author>
+    
+    <date month="October" year="2015" />
+    
+    <area>General</area>
+    
+    <workgroup>Internet Engineering Task Force</workgroup>
+    
+    <keyword></keyword>
+    
+    <abstract>
+      <t> This memo defines a token format for verifying with non-repudiation the originator of a set of information. The originator uses a cryptographic signature generally with a key that proves authorization from a trust anchor to prove to a terminating party that the originator is both an authorized sender and the information wasn't altered or modified in transit.  The token incorporates the ability for the originator to assert a application specific but extensible set of information that could include network identity, device identity, realm of origin, and other metadata.  Verification of this information in the telephony world is important for validating telephone calls and the telephone numbers they are presenting and can be utilized as an important tool for combat spoofing of identity and other forms of impersonation.</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section title="Introduction" anchor="sec.introduction">
+      <t>This document will define a method for the creation and verification of an extensible canonical token that is intended for cryptographically verifying both an originator, the validity of the originator, information associated with a specific transaction and an application specific a set of information through digital signatures and the associated chain of trust. A goal of this approach is to be implementable in a straight-forward, extensible way. A second goal is to be separable from any specific signaling call logic, so creation and verification of information can be implemented in a flexible way with minimal dependence on specific signaling constructs. A third goal is to utilize as much as possible existing technologies and infrastructure dependency to allow flexible deployment strategies.  Deployment specifics will be out of scope for this document to allow industry specific solutions for managing PKI and other dependencies.</t>
+      
+    </section>
+    
+    <section title="Token Overview" anchor="sec.token_overview">
+      
+      <t>Tokens are a convenient way of encapsulating information with associated cryptographic signatures. They are used in many applications that require authentication, authorization, encryption and other use cases that involve digital signatures. JWT <xref target="RFC7519"></xref> and JWS <xref target="RFC7515"></xref> are designed to provide a compact form for many of these purposes and define a specific form for specifying information associated with the token and an extensible mechanisms for applying digital signatures and the cryptographic algorithms used. JWT has the form "header.claim.signature" and JWS provides standard ways to form a digital signature. Note: In this document, we will focus on digital signatures, but JWT and JWS also support HMAC symmetric key based algorithms as well.</t>
+      
+    </section>
+    
+    <section title="Verified Token (VT)" anchor="sec.verified_token">
+      
+      <t>The Verify Token (VT) is constructed based on JWT <xref target="RFC7519"></xref> and JWS <xref target="RFC7515"></xref> specifications. JWS defines the use of JSON data structures in a specified canonical format for signing data corresponding to JOSE header, JWS Payload, and JWS Signature. JWT defines specific set of claims that are represented by specified key value pairs which can be extended with custom keys for specific applications.</t>
+      
+      <section title="Verified Token Header" anchor="sec.verified_token_header">
+        <t>The JWS token header is a JOSE header that defines the type and encryption algorithm used in the token. An example of the header for the case of a RSASSA-PKCS1-v1_5 SHA-256 digital signature would be the following,
+          <figure>
+            <artwork><![CDATA[
+            { "typ":"JWT",
+              "alg":"RS256"}
+            ]]></artwork>
+          </figure>
+        </t>
+        
+        <t>This represents that the encoded token is a JWT, and the JWT is a JWS using the RSASSA-PKCS1-v1_5 SHA-256 algorithm.</t>
+        
+        <t>For Verified Token the "typ" header MUST be "JWT".</t>
+        
+        <t>Because Verified Token is defined for use with PKI based digital signatures, the "alg" header is recommended to be one of the following algorithms as defined in JWA <xref target="RFC7518"></xref>:</t>
+        <t>
+          <list style="symbols">
+            <t>RS256</t>
+            <t>ES256</t>
+          </list> 
+        </t>
+        
+        <t>The "alg" header could optionally be one of the following:</t>
+        <t>
+          <list style="symbols">
+            <t>RS384</t>
+            <t>RS512</t>
+            <t>ES384</t>
+              <t>ES512</t>
+         </list> 
+        </t>
+        
+      </section>
+      
+      <section title="Verified Token Claim" anchor="sec.verified_token_claim">
+        <t>The token claim should consist of the information which needs to be verified at the terminating party. This claim should correspond to a JWT claim <xref target="RFC7519"></xref> and be encoded as defined by the JWS Payload <xref target="RFC7515"></xref>.</t>
+        
+        <t>The Verified Token should use a number of standard defined token headers as well as some addition custom headers specifically required for two party communications with an originator and terminator. These headers or key value pairs will be explained here, but some of the security implications will be explained further in the security considerations section below.</t>
+        
+        <t>The JSON claim MUST include the following registered JWT defined claims unless noted optional:</t>
+        <t>
+          <list style="symbols">
+            <t>"iss" - required - principal that issued and signed the JWT. This is an https URL with the domain of the authorized originator of the token (e.g. "https://pstn.example.com)</t>
+            
+            <t>"jti" - required - unique identifier of the JWT, useful for both tracking and avoiding replay of JWT</t>
+            
+            <t>"iat" - required - issued at, time the JWT was issued, used for expiration</t>
+          </list> 
+        </t>
+        
+        <t>Verified Token specific claims MUST be included unless noted optional:</t>
+        <t>
+          <list style="symbols">
+            <t>"orig" - required - the identity claimed by the originating party. (e.g. for SIP, the FROM or PAI associated e.164 telephone number, TEL or SIP URI) This MAY be in URI format as defined in <xref target="RFC3986"></xref> or an application specific identity string.</t>
+            <t>"term" - required - the terminating identity claimed by the originating party. (e.g. for SIP, the TO associated e.164 telephone number, TEL or SIP URI) This MAY be in URI format as defined in <xref target="RFC3986"></xref> or an application specific identity string.</t>
+          </list> 
+        </t>
+        
+        <t>NOTE: for identities such as SIP URIs where there is a domain associated with a user part, i.e. user@domain, the domain in the claim, may or may not correspond to either the TO/FROM/PAI and/or the "iss". The determination of the validity of the claimed identity, either user part alone or the full user@domain would be up to the application.</t>
+        
+        <t>An example claim is as follows,
+          <figure>
+            <artwork><![CDATA[
+              { "orig":"+12155551212",
+                "term":"sip:+12155551213@example.com",
+                "iss":"https://pstn.example.com",
+                "jti": "FAhNaPk0onffyJvykJZC2A==",
+                "iat": 1443208345 }
+              ]]>
+            </artwork>
+          </figure>
+        </t>
+        
+      </section>
+      
+      <section title="Verified Token Signature" anchor="sec.verified_token_signature">
+        <t>The signature of the verified token is computed fully as specified by JWS.</t>
+      </section>
+      
+    </section>
+    
+    <section title="Security Considerations" anchor="sec.security_considerations">
+      <t>There are a number of security considerations required for preventing various attacks on the validity or impersonation of the signature.</t>
+      
+      <section title="Validation of the Issuer and Certificate Signature" anchor="sec.validation_of_issuer">
+        <t>Use of X.509 based signatures for the JWT implies normal validation of the certificate ownership based on the binding of the public key certificate to the distinguished name representing the authorized originator.  The iss field of the signed claim should also match this distinguished name of the certificate used for signing the verified token.</t>
+      </section>
+      
+      <section title="Avoidance of replay and cut and paste attacks" anchor="sec.avoidance_of_attacks">
+        <t>There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks.</t>
+        <t>Verified tokens must be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in <xref target="RFC3261"></xref>).  There should be a link between various information provided in the token and information provided by the application level protocol information.</t>
+        <t>These would include:</t>
+        <t>
+          <list style="symbols">
+            <t>"iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the verified token.</t>
+            <t>"jti" claim could be used to exactly correspond to a unique identifier (e.g. INSIPID for SIP)</t>
+            <t>"term" claim is included to prevent the ability to use a previously originated message to send to another terminating party</t>
+          </list> 
+        </t>
+      </section>
+    
+    </section>
+    
+    <section title="Acknowledgements" anchor="sec.acknowledgements">
+      <t>Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Martin Dolly, Richard Shockey, Jim McEchern, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Jon Peterson, Alan Johnston for valuable feedback on the technical and security aspects of the document.</t>
+      <t>Would also like to acknowledge the RFC4474bis framework for providing inspiration on this document particularly the security protection aspects.</t>
+    </section>
+  </middle>
+  
+  <back>
+    <references title="References">
+      <reference anchor="RFC3261" target="http://www.rfc-editor.org/info/rfc3261">
+        <front>
+          <title>SIP: Session Initiation Protocol</title>
+          <author initials="J." surname="Rosenberg" fullname="J. Rosenberg">
+            <organization/>
+          </author>
+          <author initials="H." surname="Schulzrinne" fullname="H. Schulzrinne">
+            <organization/>
+          </author>
+          <author initials="G." surname="Camarillo" fullname="G. Camarillo">
+            <organization/>
+          </author>
+          <author initials="A." surname="Johnston" fullname="A. Johnston">
+            <organization/>
+          </author>
+          <author initials="J." surname="Peterson" fullname="J. Peterson">
+            <organization/>
+          </author>
+          <author initials="R." surname="Sparks" fullname="R. Sparks">
+            <organization/>
+          </author>
+          <author initials="M." surname="Handley" fullname="M. Handley">
+            <organization/>
+          </author>
+          <author initials="E." surname="Schooler" fullname="E. Schooler">
+            <organization/>
+          </author>
+          <date year="2002" month="June"/>
+        </front>
+        <seriesInfo name="RFC" value="3261"/>
+        <seriesInfo name="DOI" value="10.17487/RFC3261"/>
+      </reference>
+
+      <reference anchor="RFC3986" target="http://www.rfc-editor.org/info/rfc3986">
+        <front>
+          <title>Uniform Resource Identifier (URI): Generic Syntax</title>
+          <author initials="T." surname="Berners-Lee" fullname="T. Berners-Lee">
+            <organization/>
+          </author>
+          <author initials="R." surname="Fielding" fullname="R. Fielding">
+            <organization/>
+          </author>
+          <author initials="L." surname="Masinter" fullname="L. Masinter">
+            <organization/>
+          </author>
+          <date year="2005" month="January"/>
+        </front>
+        <seriesInfo name="STD" value="66"/>
+        <seriesInfo name="RFC" value="3986"/>
+        <seriesInfo name="DOI" value="10.17487/RFC3986"/>
+      </reference>
+
+      <reference anchor="RFC7515" target="http://www.rfc-editor.org/info/rfc7515">
+        <front>
+          <title>JSON Web Signature (JWS)</title>
+          <author initials="M." surname="Jones" fullname="M. Jones">
+            <organization/>
+          </author>
+          <author initials="J." surname="Bradley" fullname="J. Bradley">
+            <organization/>
+          </author>
+          <author initials="N." surname="Sakimura" fullname="N. Sakimura">
+            <organization/>
+          </author>
+          <date year="2015" month="May"/>
+        </front>
+        <seriesInfo name="RFC" value="7515"/>
+        <seriesInfo name="DOI" value="10.17487/RFC7515"/>
+      </reference>
+
+      <reference anchor="RFC7518" target="http://www.rfc-editor.org/info/rfc7518">
+        <front>
+          <title>JSON Web Algorithms (JWA)</title>
+          <author initials="M." surname="Jones" fullname="M. Jones">
+            <organization/>
+          </author>
+          <date year="2015" month="May"/>
+        </front>
+        <seriesInfo name="RFC" value="7518"/>
+        <seriesInfo name="DOI" value="10.17487/RFC7518"/>
+      </reference>
+
+      <reference anchor="RFC7519" target="http://www.rfc-editor.org/info/rfc7519">
+        <front>
+          <title>JSON Web Token (JWT)</title>
+          <author initials="M." surname="Jones" fullname="M. Jones">
+            <organization/>
+          </author>
+          <author initials="J." surname="Bradley" fullname="J. Bradley">
+            <organization/>
+          </author>
+          <author initials="N." surname="Sakimura" fullname="N. Sakimura">
+            <organization/>
+          </author>
+          <date year="2015" month="May"/>
+        </front>
+        <seriesInfo name="RFC" value="7519"/>
+        <seriesInfo name="DOI" value="10.17487/RFC7519"/>
+      </reference>
+    </references>
+    
+    <section title="Example Usage of Verified Tokens for SIP" anchor="anc.example_usage">
+      <t>Specific usage of verified tokens shall be defined for various usage, however to serve as an example and illustrate the need to link certain message metadata for security reasons as discussed in the security considerations section above</t>
+    </section>
+    <section title="Example Reference Tokens" anchor="anc.example_reference_tokens">
+      <t>Example tokens with corresponding certificates and keys to serve as test data for reference implementation.</t>
+    </section>
+    
+  </back>
+</rfc>

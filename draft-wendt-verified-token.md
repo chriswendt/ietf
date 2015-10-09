@@ -5,7 +5,7 @@
 
 **Abstract**
 
-This memo defines a token format for verifying with non-repudiation the originator of a set of information.  The originator uses a cryptographic signature generally with a key that proves authorization from a trust anchor to prove to a terminating party that the originator is both an authorized sender and the information wasn’t altered or modified in transit. The token incorporates the ability for the originator to assert a application specific but extensible set of information that could include network identity, device identity, realm of origin, and other metadata.  Verification of this information in the telephony world is important for validating telephone calls and the telephone numbers they are presenting and can be utilized as an important tool for combat spoofing of identity and other forms of impersonation.
+This memo defines a token format for verifying with non-repudiation the originator of a set of information.  The originator uses a cryptographic signature generally with a key that proves authorization from a trust anchor to prove to a terminating party that the originator is both an authorized sender and the information wasn't altered or modified in transit. The token incorporates the ability for the originator to assert a application specific but extensible set of information that could include network identity, device identity, realm of origin, and other metadata.  Verification of this information in the telephony world is important for validating telephone calls and the telephone numbers they are presenting and can be utilized as an important tool for combat spoofing of identity and other forms of impersonation.
 
 **1. Introduction**
 
@@ -53,7 +53,6 @@ The JSON claim MUST include the following registered JWT defined claims unless n
 
 * "iss" - required - principal that issued and signed the JWT.  This is an https URL with the domain of the authorized originator of the token (e.g. "https://pstn.example.com)
 * "jti" - required - unique identifier of the JWT, useful for both tracking and avoiding replay of JWT
-* "exp" - optional - expiration time, typically used with an application specific leeway on success of verification of token (e.g. 30 seconds)
 * "iat" - required - issued at, time the JWT was issued, used for expiration
 
 Verified Token specific claims MUST be included unless noted optional:
@@ -82,33 +81,48 @@ There are a number of security considerations required for preventing various at
 
 **4.1 Validation of the Issuer and Certificate Signature**
 
-Use of X.509 based signatures for the JWT implies normal validation of the certificate ownership based on the binding of the public key certificate to the distinguished name representing the authorized originator.  The iss field of the signed claim should also match this distinguished name to provide
+Use of X.509 based signatures for the JWT implies normal validation of the certificate ownership based on the binding of the public key certificate to the distinguished name representing the authorized originator.  The iss field of the signed claim should also match this distinguished name of the certificate used for signing the verified token.
 
 **4.2 Avoidance of replay and cut and paste attacks**
 
 There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks.
-Verified tokens should be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in [RFC3261]).  There should be a link between various information provided in the token and information provided by the application level protocol information.
+Verified tokens must be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in [RFC3261]).  There should be a link between various information provided in the token and information provided by the application level protocol information.
 These would include:
 
 * "iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the verified token.
 * "jti" claim could be used to exactly correspond to a unique identifier (e.g. INSIPID for SIP)
 * "term" claim is included to prevent the ability to use a previously originated message to send to another terminating party
 
-**5. Normative References**
+**5. Acknowledgements**
 
-   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997,
-              <http://www.rfc-editor.org/info/rfc2119>.
+Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Martin Dolly, Richard Shockey, Jim McEchern, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Jon Peterson, Alan Johnston for valuable feedback on the technical and security aspects of the document.
+Would also like to acknowledge the RFC4474bis framework for providing inspiration on this document particularly the security protection aspects.
 
-   [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
+**6. References**
+
+   [RFC3261]  Rosenberg, J., Schulzrinne, H., Camarillo, G., Johnston,
+              A., Peterson, J., Sparks, R., Handley, M. and E. Schooler,
+              "SIP: Session Initiation Protocol", RFC 3261, DOI 10.17487
+              /RFC3261, June 2002, <http://www.rfc-editor.org/info/
+              rfc3261>.
+
+   [RFC3986]  Berners-Lee, T., Fielding, R. and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66, RFC
+              3986, DOI 10.17487/RFC3986, January 2005, <http://www.rfc-
+              editor.org/info/rfc3986>.
+
+   [RFC7515]  Jones, M., Bradley, J. and N. Sakimura, "JSON Web
               Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
               2015, <http://www.rfc-editor.org/info/rfc7515>.
 
-   [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
-              (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
-              <http://www.rfc-editor.org/info/rfc7519>.
+   [RFC7518]  Jones, M., "JSON Web Algorithms (JWA)", RFC 7518, DOI
+              10.17487/RFC7518, May 2015, <http://www.rfc-editor.org/
+              info/rfc7518>.
 
+   [RFC7519]  Jones, M., Bradley, J. and N. Sakimura, "JSON Web Token
+              (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015, <http://
+              www.rfc-editor.org/info/rfc7519>.
+              
 **Appendix A.  Example Usage of Verified Tokens for SIP**
 
 Specific usage of verified tokens shall be defined for various usage, however to serve as an example and illustrate the need to link certain message metadata for security reasons as discussed in the security considerations section above
@@ -116,10 +130,6 @@ Specific usage of verified tokens shall be defined for various usage, however to
 **Appendix B. Example Reference Tokens**
 
 Example tokens with corresponding certificates and keys to serve as test data for reference implementation.
-   
-**Acknowledgements**
-
-Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Martin Dolly, Richard Shockey, Jim McEchern, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, also thanks to Henning Schulzrinne, Russ Housley, Jon Peterson, Alan Johnston for valuable feedback on the technical and security aspects of the document.
 
 **Author's Address**
 
@@ -133,4 +143,4 @@ Particular thanks to members of the ATIS and SIP Forum NNI Task Group including 
    
    US
 
-   Email: chris_wendt@cable.comcast.com
+   Email: chris-ietf@chriswendt.net
