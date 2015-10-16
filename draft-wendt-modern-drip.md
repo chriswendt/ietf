@@ -98,6 +98,37 @@ When the Initiator node has data to provision, the update is propagated to its p
 
 See section 4.5
 
+##### 4.4.2.2 State Diagram
+
+                                                            ---------------------------------------   
+                                                           |                                       |
+                                                           |          Real-Time Updates,           |
+                                                           |          Synchronization              |
+                                                   ________|_______   From Peer Nodes              |
+            ________________                      |                |  (If data received is same or |
+           |                |                     |                |   data already provisioned -  |
+           |                |-------------------> | Waiting For    |   vote "NO".                  |
+       --->| Waiting For    | (Real-Time Update,  | Response From  |   Otherwise, vote "YES".      |
+      |    | Events         |   Start Timer)      | Peer Nodes     |<------------------------------ 
+      |    |________________|                     |                |
+      |                                           |                |
+      |                                  ---------|                |---------
+      |                                 |         |________________|         |
+      |                         Timer   |                                    |Received Votes
+      |                         Expired |                                    |From All Peer
+      |                                 |                                    |Nodes
+      |                                 |                                    |
+      |                                 |          _______________           |
+      |                                 |         |                |         |
+      |                                  -------->|                |         |
+      |                                           |                |         |
+      |                                           |  Validating    |         |
+      |                                           |  Votes         |         |
+      |                                           |                |         |
+      |     (If all Votes are "YES",              |                |<--------
+      |      propagate commit)                    |                |
+       -------------------------------------------|________________|
+       
 #### 4.4.2 Periodic Full Synchronization
 
 For maximum reliability and validation of information contained in the distributed registry, periodically, a node SHOULD propagate all of the entries of information to its peers. In practice, this could be done in low traffic times or other convienient times that would have less chance to slow down any concurrent real-time updates being processed. The two phase commit described in Section 3.5 applies for full syncronization. **Conflict handling during full synchronization is yet to be done**.
