@@ -17,7 +17,7 @@ This document describes the Distributed Registry Protocol (DRiP).  DRiP defines 
 
 ## 3. DRiP Overview
 
-DRiP uses a mix of Gossip protocol with the addition of a voting system.
+DRiP uses a mix of Gossip protocol for distrition of entiries with the addition of a voting system to avoid race conditions on writing of entries.
 
 ### 3.1 Distributed MESH Architecture
 
