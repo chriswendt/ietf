@@ -98,7 +98,7 @@ When the Initiator node has data to provision, the update is propagated to its p
 
 See section 4.5
 
-##### 4.4.2.2 State Diagram
+##### 4.4.1.2 State Diagram
 
                                                             ---------------------------------------   
                                                            |                                       |
