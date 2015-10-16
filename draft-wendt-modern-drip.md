@@ -148,7 +148,7 @@ The peer nodes known to the originating node will continue propagate the informa
 **Example (using cURL)**
 Request
 ```sh
-$ curl -i  -H "Content-Type: application/json" -H "DRiP-Node-ID: nodeA" -H "DRiP-Node-Counter: 1234" -H "DRiP-Node-Counter-reset: false" -X POST -d '{”publicID”:"+12155551212","service":"pstn","routingID":+12155551212@pstn.comcast.com, "timestamp":"1422980496943", “public_key”:” ”,”signature”:” ZYNBbHC00VMZr2kZt6VmCvPonWJMGvQTBDqghoWeLxJfzB2a1pxAr3VgrB0SsSAaifsRdiOPoQZYOy2wrVghuhcsMbHWUSFxI6p6q5TOQXHMmz6uEo3svJsSH49thyGnFVcnyaZ++yRlBYYQTLqWzJ+KVhPKbfU/pryhVn9Yc6U= “ }' https:// nodebregistry.com/voting
+$ curl -i  -H "Content-Type: application/json" -H "DRiP-Node-ID: nodeA" -H "DRiP-Node-Counter: 1234" -H "DRiP-Node-Counter-reset: false" -X POST -d '{"publicID":"+12155551212","service":"pstn","routingID":+12155551212@pstn.comcast.com, "timestamp":"1422980496943" }' https:// nodebregistry.com/voting
 ```
 Response
 ```sh
@@ -216,7 +216,7 @@ Figure 4: Commit Phase
 
 **Example (using cURL)**
 Request
-$ curl -i  -H "Content-Type: application/json" -H "DRiP-Node-ID: nodeA" -H "DRiP-Node-Counter: 1234" -H "DRiP-Node-Counter-reset: false" -X POST -d '{”publicID”:"+12155551212","service":"pstn","routingID":+12155551212@pstn.comcast.com, "timestamp":"1422980496943", “public_key”:” ”,”signature”:” ZYNBbHC00VMZr2kZt6VmCvPonWJMGvQTBDqghoWeLxJfzB2a1pxAr3VgrB0SsSAaifsRdiOPoQZYOy2wrVghuhcsMbHWUSFxI6p6q5TOQXHMmz6uEo3svJsSH49thyGnFVcnyaZ++yRlBYYQTLqWzJ+KVhPKbfU/pryhVn9Yc6U= “ }' https:// nodebregistry.com/commit
+$ curl -i  -H "Content-Type: application/json" -H "DRiP-Node-ID: nodeA" -H "DRiP-Node-Counter: 1234" -H "DRiP-Node-Counter-reset: false" -X POST -d '{Â”publicIDÂ”:"+12155551212","service":"pstn","routingID":+12155551212@pstn.comcast.com, "timestamp":"1422980496943", Â“public_keyÂ”:Â” Â”,Â”signatureÂ”:Â” ZYNBbHC00VMZr2kZt6VmCvPonWJMGvQTBDqghoWeLxJfzB2a1pxAr3VgrB0SsSAaifsRdiOPoQZYOy2wrVghuhcsMbHWUSFxI6p6q5TOQXHMmz6uEo3svJsSH49thyGnFVcnyaZ++yRlBYYQTLqWzJ+KVhPKbfU/pryhVn9Yc6U= Â“ }' https:// nodebregistry.com/commit
 Response
 HTTP/1.1 200 OK
 
