@@ -107,7 +107,7 @@ See section 4.5
 
 #### 4.4.3 Full Synchronization On Demand
 
-A node, either newly added to the mesh or re-activated after being out of service due to network issues or other anomalies, will inform its peer nodes to add this node to their list of peer nodes. The resulting action from the peer nodes to start synchronizing data from their respective data stores. The **two phase commit does NOT apply here** as the contents of the data store is either outdated or empty. During this phase, this node **SHOULD NOT** become an Initiator node to provision data. While this transaction is going on, the peer nodes **MUST NOT** propagate **real-time updates** or "periodic full synchronization** transaction types. The next cycle of periodic syncronization will resolve any discrepancy in data contained in this node's data store and its peer nodes.
+A node, either newly added to the mesh or re-activated after being out of service due to network issues or other anomalies, will inform its peer nodes to add this node to their list of peer nodes. The resulting action from the peer nodes is to start synchronizing data from their respective data stores. The **two phase commit does NOT apply here** as the contents of the nodes's data store is either outdated or empty. During this phase, this node **SHOULD NOT** become an Initiator node to provision data. While this transaction is going on, the peer nodes **MUST NOT** propagate **real-time updates** or "periodic full synchronization** transaction types. The next cycle of periodic syncronization will resolve discrepancy, if any,  in data contained in this node's data store.
 
 ##### 4.4.3.1 REST API
 
