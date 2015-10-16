@@ -12,16 +12,16 @@ This document describes the Distributed Registry Protocol (DRiP).  DRiP defines 
 
 ## 2. Terminology
 
-  - Initiator node - A node that initiates data propagation.
-  - Non-Initiator node - A node that receives the propagated data.
+  - Initiator node - A node that initiates key-value data propagation.
+  - Non-Initiator node - A node that receives the propagated key-value data.
 
 ## 3. DRiP Overview
 
-DRiP uses a mix of Gossip protocol for distrition of entiries with the addition of a voting system to avoid race conditions on writing of entries.
+DRiP uses a mix of Gossip protocol for distribution of key-value data with the addition of a voting system to avoid race conditions on writing of key-value data.
 
 ### 3.1 Distributed MESH Architecture
 
-The DRiP architecture is based on a peer-to-peer communication model where a given node associated with a data store is not necessarily aware of the total number of nodes in the entire network. Minimally, every node should reachable by at least one multi-node path from every other node. Each node in the DRiP network maintains a list of peer nodes from which it receives and transmits updates. Information is propogated by forwarding to it's peer nodes until the information received by a node has already been received.
+The DRiP architecture is based on a peer-to-peer communication model where a given node associated with a data store is not necessarily aware of the total number of nodes in the entire network. Minimally, every node should reachable by at least one multi-node path from every other node. Each node in the DRiP network maintains a list of peer nodes from which it receives and transmits updates. Information is propagated by forwarding to it's peer nodes until the information received by a node has already been received.
 
        ___           ___                         ___           ___ 
       |DB |_________|DB |                       |DB |_________|DB |
@@ -70,16 +70,16 @@ Custom HTTP header fields will be used to carry Node specific information.
 
 Field Name| Description |
 -------------:   | :----------- |
-**DRiP-Node-ID** | Each node in the mesh MUST have a **unique** identifier.  An Initiator node **MUST** set its own node ID as the field value. A Non-Initiator node **MUST NOT** change the **DRiP-Node-ID** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
-**DRiP-Node-Counter** | Every node maintains a count of the number of times it **initiates** data propagation. This counter **MUST** be an **unsigned** type, typically, a 64 bit integer. The Initiator node **MUST** set this count as the field value. The Non-Initiator node **MUST NOT** change the **DRiP-Node-Counter** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
-**DRiP-Node-Counter-reset** | A node can reset the count (to zero) of the number of times it **initiates** data propagation. If the counter value is reset, prior to initiating data propagation, then this field value **MUST** be set to **true**. Otherwise, it **MUST** be set to **false**, at all times. A typical use case to reset the counter value is when the counter (of **unsigned** type) value **wraps around**. The Initiator node **MUST** set this field value to either **true** or **false**. The Non-Initiator node **MUST NOT** change the **DRiP-Node-Counter-reset** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
+DRiP-Node-ID | Each node in the mesh MUST have a unique identifier.  An Initiator node MUST set its own node ID as the field value. A Receiver Node MUST NOT change the DRiP-Node-ID field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
+DRiP-Node-Counter | Every node maintains a count of the number of times it initiates key-value data propagation. This counter MUST be an unsigned type, typically, a 64 bit integer. The Initiator node MUST set this count as the field value. The Non-Initiator node **MUST NOT** change the **DRiP-Node-Counter** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
+**DRiP-Node-Counter-reset** | A node can reset the count (to zero) of the number of times it **initiates** key-value data propagation. If the counter value is reset, prior to initiating data propagation, then this field value **MUST** be set to **true**. Otherwise, it **MUST** be set to **false**, at all times. A typical use case to reset the counter value is when the counter (of **unsigned** type) value **wraps around**. The Initiator node **MUST** set this field value to either **true** or **false**. The Non-Initiator node **MUST NOT** change the **DRiP-Node-Counter-reset** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
 **DRiP-Transaction-Type** | The Initiator node **MUST** set this field value to be either **real-time update**, **periodic sync** or **sync on demand**. See section 3.4. The Non-Initiator node **MUST NOT** change the **DRiP-Transaction-Type** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).
 **DRiP-Sync-Complete** | During **periodic sync** or **sync on demand** transaction type, the Initiator node **MUST** set this field value to be **true**, if no more data is left to be propagated. Otherwise, this field value **MUST** be set to **false**. The Non-Initiator node **MUST NOT** change the **DRiP-Sync-Complete** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
 
 
 ### 4.3 Data Propagation Rules
 
-- A node propagates data to all its peer nodes except the the node from which it received data. For example, in Figure 1, when node B receives data from node A, it will propagate the data received to nodes C and D but not back to node A.
+- A node propagates key-value data to all its peer nodes except the the node from which it received data. For example, in Figure 1, when node B receives data from node A, it will propagate the data received to nodes C and D but not back to node A.
 - For each transaction type (**real-time update**, **periodic sync** or **sync on demand**), the following action MUST take place when a node receives a HTTPS request with propagated data
   - If DRiP-Node-ID field value (in the HTTP header) contains Initiator node ID that has never been seen, both DRiP-Node-ID and DRiP-Node-Counter field values MUST be stored for future reference and the     data is propagated to all peer nodes.
   - If DRiP-Node-ID field value ((in the HTTP header) matches with a stored node ID and DRiP-Node-Counter-reset field value is **false**
@@ -94,44 +94,46 @@ Field Name| Description |
 
 When the Initiator node has data to provision, the update is propagated to its peers immediately to provide timely updates of information. Section 3.5 details the steps involved in a real-time update.
 
-##### 4.4.1.1 REST API
+##### 4.4.1.1 State Diagram
 
-See section 4.5
-
-##### 4.4.1.2 State Diagram
-
-                                                            ---------------------------------------   
-                                                           |                                       |
-                                                           |          Real-Time Updates,           |
-                                                           |          Synchronization              |
-                                                   ________|_______   From Peer Nodes              |
-            ________________                      |                |  (If data received is same or |
-           |                |                     |                |   data already provisioned -  |
-           |                |-------------------> | Waiting For    |   vote "NO".                  |
-       --->| Waiting For    | (Real-Time Update,  | Response From  |   Otherwise, vote "YES".      |
-      |    | Events         |   Start Timer)      | Peer Nodes     |<------------------------------ 
-      |    |________________|                     |                |
-      |                                           |                |
-      |                                  ---------|                |---------
-      |                                 |         |________________|         |
-      |                         Timer   |                                    |Received Votes
-      |                         Expired |                                    |From All Peer
-      |                                 |                                    |Nodes
-      |                                 |                                    |
-      |                                 |          _______________           |
-      |                                 |         |                |         |
-      |                                  -------->|                |         |
-      |                                           |                |         |
-      |                                           |  Validating    |         |
-      |                                           |  Votes         |         |
-      |                                           |                |         |
-      |     (If all Votes are "YES",              |                |<--------
-      |      propagate commit)                    |                |
-       -------------------------------------------|________________|
-       
+	                           _________ 
+	  ----------------------->|         |
+	 |                        | Waiting |
+	 |                        | For     |
+	 |   ---------------------| Events  |
+	 |  |                     |_________|
+	 |  |(Real-Time Update,               
+	 |  | Start Timer)         --------------------------------------  
+	 |  |                     |         Real-Time Updates,           |
+	 |  |                     |         Synchronization              |
+	 |  |             ________|_______  From Peer Nodes              |
+	 |  |            |                | If key matches an in-progress|
+	 |   ------------|                |  real-time update            |
+	 |               | Waiting For    |  vote "NO".                  |
+	 |               | Response From  |  Otherwise, vote "YES".      |
+	 |               | Peer Nodes     |<------------------------------ 
+	 |               |                |                                
+	 |               |                |                                
+	 |           ----|                |----                            
+	 |  Timer   |    |________________|    |                           
+	 |  Expired |                          | Received Votes
+	 |          |                          | From All Peer 
+	 |          |                          | Nodes         
+	 |          |      _______________     |
+	 |          |    |                |    |
+	 |          |    |                |    |
+	 |           --->|                |<---
+	 |               |  Validating    |    
+	 | (If all Votes |  Votes         |    
+	 |  are "YES",   |                |    
+	 | propagate     |                |        
+	 | commit)       |                |        
+	  ---------------|________________|        
+                          
+                         
 #### 4.4.2 Periodic Full Synchronization
 
-For maximum reliability and validation of information contained in the distributed registry, periodically, a node SHOULD propagate all of the entries of information to its peers. In practice, this could be done in low traffic times or other convienient times that would have less chance to slow down any concurrent real-time updates being processed. The two phase commit described in Section 3.5 applies for full syncronization. **Conflict handling during full synchronization is yet to be done**.
+For maximum reliability and validation of information contained in the distributed registry, periodically, a node SHOULD propagate all of the entries of information to its peers. In practice, this could be done in low traffic times or other convenient times that would have less chance to slow down any concurrent real-time updates being processed. The two phase commit described in Section 3.5 applies for full synchronization. **Conflict handling during full synchronization is yet to be done**.
 
 ##### 4.4.2.1 REST API
 
@@ -139,7 +141,7 @@ See section 4.5
 
 #### 4.4.3 Full Synchronization On Demand
 
-A node, either newly added to the mesh or re-activated after being out of service due to network issues or other anomalies, will inform its peer nodes to add this node to their list of peer nodes. The resulting action from the peer nodes is to start synchronizing data from their respective data stores. The **two phase commit does NOT apply here** as the contents of the nodes's data store is either outdated or empty. During this phase (HTTPS requests received will have DRiP-Sync-Complete field value set to **false**), this node **SHOULD NOT** become an Initiator node to provision data. While this transaction is going on, the peer nodes **MUST NOT** propagate **real-time updates** or "periodic full synchronization** transaction types. The next cycle of periodic syncronization will resolve discrepancy, if any,  in data contained in this node's data store.
+A node, either newly added to the mesh or re-activated after being out of service due to network issues or other anomalies, will inform its peer nodes to add this node to their list of peer nodes. The resulting action from the peer nodes is to start synchronizing data from their respective data stores. The **two phase commit does NOT apply here** as the contents of the nodes's data store is either outdated or empty. During this phase (HTTPS requests received will have DRiP-Sync-Complete field value set to **false**), this node **SHOULD NOT** become an Initiator node to provision data. While this transaction is going on, the peer nodes **MUST NOT** propagate **real-time updates** or "periodic full synchronization** transaction types. The next cycle of periodic synchronization will resolve discrepancy, if any,  in data contained in this node's data store.
 
 ##### 4.4.3.1 REST API
 
@@ -247,7 +249,7 @@ Figure 4: Commit Phase
 
 **Example (using cURL)**
 Request
-$ curl -i  -H "Content-Type: application/json" -H "DRiP-Node-ID: nodeA" -H "DRiP-Node-Counter: 1234" -H "DRiP-Node-Counter-reset: false" -X POST -d '{publicID:"+12155551212","service":"pstn","routingID":+12155551212@pstn.comcast.com, "timestamp":"1422980496943", public_key: ,signature: ZYNBbHC00VMZr2kZt6VmCvPonWJMGvQTBDqghoWeLxJfzB2a1pxAr3VgrB0SsSAaifsRdiOPoQZYOy2wrVghuhcsMbHWUSFxI6p6q5TOQXHMmz6uEo3svJsSH49thyGnFVcnyaZ++yRlBYYQTLqWzJ+KVhPKbfU/pryhVn9Yc6U=  }' https:// nodebregistry.com/commit
+$ curl -i  -H "Content-Type: application/json" -H "DRiP-Node-ID: nodeA" -H "DRiP-Node-Counter: 1234" -H "DRiP-Node-Counter-reset: false" -X POST -d '{publicID:"+12155551212","service":"pstn","routingID":+12155551212@pstn.comcast.com, "timestamp":"1422980496943"}' https:// nodebregistry.com/commit
 Response
 HTTP/1.1 200 OK
 
