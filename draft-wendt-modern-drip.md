@@ -76,8 +76,13 @@ DRiP-Node-Counter | Every node maintains a count of the number of times it initi
 **DRiP-Transaction-Type** | The Initiator node **MUST** set this field value to be either **real-time update**, **periodic sync** or **sync on demand**. See section 3.4. The Receiver node **MUST NOT** change the **DRiP-Transaction-Type** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).
 **DRiP-Sync-Complete** | During **periodic sync** or **sync on demand** transaction type, the Initiator node **MUST** set this field value to be **true**, if no more key-value data is left to be propagated. Otherwise, this field value **MUST** be set to **false**. The Receiver node **MUST NOT** change the **DRiP-Sync-Complete** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
 
+### 4.3 Specific Registry Requirements
 
-### 4.3 Key-Value Data Propagation Rules
+- All nodes in the distributed mesh MUST agree upon a specific key-value data model. The choice of data store is implementation specific.
+- All nodes MUST know the peer nodes before propagation. To that end, a node MUST have the ability to get Real-Time updates, of peer nodes. If a node receives key-value data from a node that is not its peer, it must be ignored and reported as spam. The specifics on how to report spam is not in the scope of this document. However, the reporting mechanism MUST be agreed upon by all nodes.
+- All nodes MUST send periodic heartbeat or keep-alive messages via HTTPS to the respective peer nodes.
+
+### 4.4 Key-Value Data Propagation Rules
 
 - A node propagates key-value data to all its peer nodes except the the node from which it received data. For example, in Figure 1, when node B receives key-value data from node A, it will propagate the data received to nodes C and D but not back to node A.
 - For each transaction type (**real-time update**, **periodic sync** or **sync on demand**), the following action MUST take place when a node receives a HTTPS request with propagated key-value data
@@ -88,13 +93,15 @@ DRiP-Node-Counter | Every node maintains a count of the number of times it initi
   - If DRiP-Node-ID field value matches with a stored node ID and DRiP-Node-Counter-reset field value is **true**
     - The received key-value data MUST be propagated to the peer nodes. The DRiP-Node-Counter field value MUST be saved as the new counter for the stored node ID.
 
-### 4.4 Transaction Types
+### 4.5 Handling Corner Cases
 
-#### 4.4.1 Real-Time Updates
+### 4.6 Transaction Types
+
+#### 4.6.1 Real-Time Updates
 
 When the Initiator node has key-value data to provision, the update is propagated to its peers immediately to provide timely updates of information. Section 3.5 details the steps involved in a real-time update.
 
-##### 4.4.1.1 State Diagram
+##### 4.6.1.1 State Diagram
 
 	                           _________ 
 	  ----------------------->|         |
@@ -131,18 +138,18 @@ When the Initiator node has key-value data to provision, the update is propagate
 	  ---------------|________________|        
                           
 
-#### 4.4.3 Full Synchronization On Demand
+#### 4.6.2 Full Synchronization On Demand
 
 A node, either newly added to the mesh or re-activated after being out of service due to network issues or other anomalies, will inform its peer nodes to add this node to their list of peer nodes. The resulting action from the peer nodes is to start synchronizing key-value data from their respective data stores. The **two phase commit does NOT apply here** as the contents of the nodes's data store is either outdated or empty. During this phase (HTTPS requests received will have DRiP-Sync-Complete field value set to **false**), this node **SHOULD NOT** become an Initiator node to provision data. While this transaction is going on, the peer nodes **MUST NOT** propagate **real-time updates** or "periodic full synchronization** transaction types. The next cycle of periodic synchronization will resolve discrepancy, if any,  in data contained in this node's data store.
 
-##### 4.4.3.1 REST API
+##### 4.6.2.1 REST API
 
-**PUT /addnode/node/:nodeid**
+**PUT /syncondemand/node/:nodeid**
 
 
-### 4.5 Two Phase Commit
+### 4.7 Two Phase Commit
 
-#### 4.5.1 Voting Phase
+#### 4.7.1 Voting Phase
 
 The Initiator node sets a timeout period to get response from its peer nodes, for data propagated. This response (see section 4.5.1.2) will indicate a "vote" for whether the transaction can be completed based on any conflicting updates to the same entry. If all peer nodes vote "yes", then a commit of the information to the local node is initiated. If any one of the peer nodes votes "no" or if there is no response from one or more peer nodes, then the commit of the information MUST not be completed. No action is taken for responses (see section 4.5.1.2) received after the timeout period.
 
@@ -166,9 +173,9 @@ The Initiator node sets a timeout period to get response from its peer nodes, fo
 
 The peer nodes known to the originating node will continue propagate the information to their peer nodes and so on. However, these peer nodes will no longer need to keep track of the time interval for responses. A node will stop continuing to propagate information when it determines it has received the same information again. This can be determined by keeping track of the counter and originating node id.
 
-##### 4.5.1.1 REST API
+##### 4.7.1.1 REST API
 
-###### 4.5.1.1 POST /voting
+###### 4.7.1.1 POST /voting
 
 **Example (using cURL)**
 Request
@@ -180,7 +187,7 @@ Response
 HTTP/1.1 200 OK
 ```
 
-###### 4.5.1.2 POST /votingphase/node/:nodeid/response/:response
+###### 4.7.1.2 POST /votingphase/node/:nodeid/response/:response
 
 **Example (using cURL)**
 Request
@@ -192,7 +199,7 @@ Response
 HTTP/1.1 200 OK
 ```
 
-#### 4.5.2 Commit Phase
+#### 4.7.2 Commit Phase
 
 The Initiator node upon receiving a "yes" from all the peer registries, the registry that originated the gossip will now commit the data in the HTTPS request payload to its data store. Subsequently, this information is propagated to all the nodes so that each node in the mesh will commit the same information in to their respective data stores.
 
@@ -235,9 +242,9 @@ Figure 4: Commit Phase
       
 Figure 4: Commit Phase
 
-##### 4.5.2.1 REST API
+##### 4.7.2.1 REST API
 
-###### 4.5.1.1 POST /commit
+###### 4.7.2.2 POST /commit
 
 **Example (using cURL)**
 Request
