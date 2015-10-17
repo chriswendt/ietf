@@ -1,0 +1,648 @@
+
+
+
+Internet Engineering Task Force                                H. Bellur
+Internet-Draft                                             C. Wendt, Ed.
+Intended status: Standards Track                                 Comcast
+Expires: April 01, 2016                                     October 2015
+
+                     Distributed Registry Protocol
+                       draft-wendt-modern-drip-00
+
+Abstract
+
+   This document describes a protocol for allowing a distributed set of
+   nodes to synchronize a set of information in real-time with minimal
+   amount of delay.  This is useful for registry types of information
+   like identity and telephone numbers with associated routing and
+   ownership information, although could be extended to support other
+   distributed real-time information updates as well.
+
+Status of this Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on April 01, 2016.
+
+Copyright Notice
+
+   Copyright (c) 2015 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (http://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Simplified BSD License text
+   as described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  2
+     1.1.  Terminology  . . . . . . . . . . . . . . . . . . . . . . .  2
+
+Bellur & Wendt           Expires April 01, 2016                 [Page 1]
+
+Internet-Draft                    DRiP                      October 2015
+
+   2.  DRiP Overview  . . . . . . . . . . . . . . . . . . . . . . . .  2
+   3.  Distributed MESH Architecture  . . . . . . . . . . . . . . . .  2
+   4.  DRiP procedures  . . . . . . . . . . . . . . . . . . . . . . .  3
+     4.1.  Entry Entitlement Verification . . . . . . . . . . . . . .  3
+     4.2.  Custom HTTP header fields  . . . . . . . . . . . . . . . .  4
+     4.3.  Data Propagation Rules . . . . . . . . . . . . . . . . . .  6
+     4.4.  Transaction Types  . . . . . . . . . . . . . . . . . . . .  6
+       4.4.1.  Real-Time Updates  . . . . . . . . . . . . . . . . . .  6
+         4.4.1.1.  State Diagram  . . . . . . . . . . . . . . . . . .  6
+       4.4.2.  Periodic Full Synchronization  . . . . . . . . . . . .  7
+       4.4.3.  Full Synchronization On Demand . . . . . . . . . . . .  7
+         4.4.3.1.  REST API . . . . . . . . . . . . . . . . . . . . .  8
+     4.5.  Two Phase Commit . . . . . . . . . . . . . . . . . . . . .  8
+       4.5.1.  Voting Phase . . . . . . . . . . . . . . . . . . . . .  8
+         4.5.1.1.  REST API . . . . . . . . . . . . . . . . . . . . .  9
+           4.5.1.1.1.  POST /voting . . . . . . . . . . . . . . . . .  9
+           4.5.1.1.2.  POST /votingphase/node/:nodeid/response/:response 9
+     4.6.  Commit Phase . . . . . . . . . . . . . . . . . . . . . . .  9
+       4.6.1.  REST API . . . . . . . . . . . . . . . . . . . . . . . 10
+         4.6.1.1.  POST /commit . . . . . . . . . . . . . . . . . . . 10
+   5.  Security Considerations  . . . . . . . . . . . . . . . . . . . 11
+     5.1.  HTTPS  . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+     5.2.  Authentication . . . . . . . . . . . . . . . . . . . . . . 11
+   6.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 11
+
+1.  Introduction
+
+   This document describes the Distributed Registry Protocol (DRiP).
+   DRiP defines a set of peer protocols for how an arbitrary number of
+   nodes arranged in a distributed mesh architecture can be used to
+   synchronize data in real-time across a network.
+
+1.1.  Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in RFC 2119 [RFC2119].
+
+   Initiator Node - A node that initiates data propagation.
+
+   Receiver Node - A node that receives the propagated data.
+
+2.  DRiP Overview
+
+   DRiP uses a mix of Gossip protocol for distribution of entries with
+   the addition of a voting system to avoid race conditions on writing
+   of entries.
+
+3.  Distributed MESH Architecture
+
+
+
+
+
+
+
+Bellur & Wendt           Expires April 01, 2016                 [Page 2]
+
+Internet-Draft                    DRiP                      October 2015
+
+
+   The DRiP architecture is based on a peer-to-peer communication model
+   where a given node associated with a data store is not necessarily
+   aware of the total number of nodes in the entire network.  Minimally,
+   every node should reachable by at least one multi-node path from
+   every other node.  Each node in the DRiP network maintains a list of
+   peer nodes from which it receives and transmits updates.  Information
+   is propagated by forwarding to it's peer nodes until the information
+   received by a node has already been received.
+
+      ___           ___                         ___           ___
+     |DB |_________|DB |                       |DB |_________|DB |
+     |___|         |___|                       |___|         |___|
+       |   Data      |                           |   Data      |
+       |   Store     |                           |   Store     |
+      _|_  Cluster  _|_                         _|_  Cluster  _|_
+     |DB |_________|DB |                       |DB |_________|DB |
+     |___|         |___|                       |___|         |___|
+                       \                       /
+                        \                     /
+                        _\___     DRIP     _ /__
+                       |Node |------------|Node |
+                       |  A  |    HTTPS   |  C  |
+                       |_____|            |_____|
+                           \H           H/
+                           D\T         T/D
+                            R\T       P/R
+                             I\P     P/I
+                              P\S   S/P
+                              __\__ /   DRIP     _____
+                             |Node |------------|Node |
+                             |  B  |   HTTPS    |  D  |
+                             |_____|            |_____|
+                            /                   /
+         ___           ___ /                 __/_          ___
+        |DB |_________|DB |                 |DB |_________|DB |
+        |___|         |___|                 |___|         |___|
+          |   Data      |                     |   Data      |
+          |   Store     |                     |   Store     |
+         _|_  Cluster  _|_                   _|_  Cluster  _|_
+        |DB |_________|DB |                 |DB |_________|DB |
+        |___|         |___|                 |___|         |___|
+
+                       Distributed Mesh Architecture
+
+4.  DRiP procedures
+
+4.1.  Entry Entitlement Verification
+
+
+
+
+
+
+
+Bellur & Wendt           Expires April 01, 2016                 [Page 3]
+
+Internet-Draft                    DRiP                      October 2015
+
+
+   When a node owner would like to create or modify a set of
+   information, generally in the context of a registry, there MAY be a
+   verification procedure that an entry can be created.  This could
+   include validating whether an entry is entitled to be written or
+   modified in the first place.  For example, identity or telephone
+   number ownership or porting.  The exact mechanics of this are out of
+   scope of this document and are generally application specific.
+
+4.2.  Custom HTTP header fields
+
+   Custom HTTP header fields will be used to carry Node specific
+   information.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bellur & Wendt           Expires April 01, 2016                 [Page 4]
+
+Internet-Draft                    DRiP                      October 2015
+
+
+   +-------------------------+-----------------------------------------+
+   |        Field Name       | Description                             |
+   +-------------------------+-----------------------------------------+
+   |       DRiP-Node-ID      | Each node in the mesh MUST have a       |
+   |                         | unique identifier. An Initiator node    |
+   |                         | MUST set its own node ID as the field   |
+   |                         | value. A Receiver Node MUST NOT change  |
+   |                         | the DRiP-Node-ID field value in the     |
+   |                         | HTTPS request as it is propagated to    |
+   |                         | its peer nodes (nodes it is aware of).  |
+   |    DRiP-Node-Counter    | Every node maintains a count of the     |
+   |                         | number of times it initiates key-value  |
+   |                         | data propagation. This counter MUST be  |
+   |                         | an unsigned type, typically, a 64 bit   |
+   |                         | integer. The Initiator node MUST set    |
+   |                         | this count as the field value. The Non- |
+   |                         | Initiator node MUST NOT change the      |
+   |                         | DRiP-Node-Counter field value in the    |
+   |                         | HTTPS request as it is propagated to    |
+   |                         | its peer nodes (nodes it is aware of).  |
+   | DRiP-Node-Counter-reset | A node can reset the count (to zero) of |
+   |                         | the number of times it initiates key-   |
+   |                         | value data propagation. If the counter  |
+   |                         | value is reset, prior to initiating     |
+   |                         | data propagation, then this field value |
+   |                         | MUST be set to true. Otherwise, it MUST |
+   |                         | be set to false, at all times. A        |
+   |                         | typical use case to reset the counter   |
+   |                         | value is when the counter (of unsigned  |
+   |                         | type) value wraps around. The Initiator |
+   |                         | node MUST set this field value to       |
+   |                         | either true or false. The Non-Initiator |
+   |                         | node MUST NOT change the DRiP-Node-     |
+   |                         | Counter-reset field value in the HTTPS  |
+   |                         | request as it is propagated to its peer |
+   |                         | nodes (nodes it is aware of).           |
+   |  DRiP-Transaction-Type  | The Initiator node MUST set this field  |
+   |                         | value to be either real-time update,    |
+   |                         | periodic sync or sync on demand. See    |
+   |                         | section 3.4. The Non-Initiator node     |
+   |                         | MUST NOT change the DRiP-Transaction-   |
+   |                         | Type field value in the HTTPS request   |
+   |                         | as it is propagated to its peer nodes   |
+   |                         | (nodes it is aware of).                 |
+   |    DRiP-Sync-Complete   | During periodic sync or sync on demand  |
+   |                         | transaction type, the Initiator node    |
+   |                         | MUST set this field value to be true,   |
+   |                         | if no more data is left to be           |
+   |                         | propagated. Otherwise, this field value |
+   |                         | MUST be set to false. The Non-Initiator |
+   |                         | node MUST NOT change the DRiP-Sync-     |
+   |                         | Complete field value in the HTTPS       |
+   |                         | request as it is propagated to its peer |
+
+Bellur & Wendt           Expires April 01, 2016                 [Page 5]
+
+Internet-Draft                    DRiP                      October 2015
+
+   |                         | nodes (nodes it is aware of).           |
+   +-------------------------+-----------------------------------------+
+
+4.3.  Data Propagation Rules
+
+   A node propagates key-value data to all its peer nodes except the the
+   node from which it received data.  For example, in Figure 1, when
+   node B receives data from node A, it will propagate the data received
+   to nodes C and D but not back to node A.
+
+   For each transaction type (real-time update, periodic sync or sync on
+   demand), the following action MUST take place when a node receives a
+   HTTPS request with propagated data
+
+   o  If DRiP-Node-ID field value (in the HTTP header) contains
+      Initiator node ID that has never been seen, both DRiP-Node-ID and
+      DRiP-Node-Counter field values MUST be stored for future reference
+      and the data is propagated to all peer nodes.
+   o  If DRiP-Node-ID field value ((in the HTTP header) matches with a
+      stored node ID and DRiP-Node-Counter-reset field value is false
+   o  The received data MUST be propagated to the peer nodes if DRiP-
+      Node-Counter field value is greater than the saved counter value.
+      The DRiP-Node-Counter field value MUST be saved as the new counter
+      for the stored node ID.
+   o  If DRiP-Node-Counter field value is less than or equal to saved
+      counter value, then no action is necessary (data MUST NOT be
+      propagated to peer nodes). This ensures that data propagation
+      stops when all nodes have received data from the Initiator node.
+   o  If DRiP-Node-ID field value matches with a stored node ID and
+      DRiP-Node-Counter-reset field value is true
+   o  The received data MUST be propagated to the peer nodes.  The DRiP-
+      Node-Counter field value MUST be saved as the new counter for the
+      stored node ID.
+
+4.4.  Transaction Types
+
+4.4.1.  Real-Time Updates
+
+   When the Initiator node has data to provision, the update is
+   propagated to its peers immediately to provide timely updates of
+   information.  Section 3.5 details the steps involved in a real-time
+   update.
+
+4.4.1.1.  State Diagram
+
+
+
+
+
+
+
+
+
+
+
+Bellur & Wendt           Expires April 01, 2016                 [Page 6]
+
+Internet-Draft                    DRiP                      October 2015
+
+
+                               _________
+      ----------------------->|         |
+     |                        | Waiting |
+     |                        | For     |
+     |   ---------------------| Events  |
+     |  |                     |_________|
+     |  |(Real-Time Update,
+     |  | Start Timer)         --------------------------------------
+     |  |                     |         Real-Time Updates,           |
+     |  |                     |         Synchronization              |
+     |  |             ________|_______  From Peer Nodes              |
+     |  |            |                | If key matches an in-progress|
+     |   ------------|                |  real-time update            |
+     |               | Waiting For    |  vote "NO".                  |
+     |               | Response From  |  Otherwise, vote "YES".      |
+     |               | Peer Nodes     |<------------------------------
+     |               |                |
+     |               |                |
+     |           ----|                |----
+     |  Timer   |    |________________|    |
+     |  Expired |                          | Received Votes
+     |          |                          | From All Peer
+     |          |                          | Nodes
+     |          |      _______________     |
+     |          |    |                |    |
+     |          |    |                |    |
+     |           --->|                |<---
+     |               |  Validating    |
+     | (If all Votes |  Votes         |
+     |  are "YES",   |                |
+     | propagate     |                |
+     | commit)       |                |
+      ---------------|________________|
+
+4.4.2.  Periodic Full Synchronization
+
+   For maximum reliability and validation of information contained in
+   the distributed registry, periodically, a node SHOULD propagate all
+   of the entries of information to its peers.  In practice, this could
+   be done in low traffic times or other convenient times that would
+   have less chance to slow down any concurrent real-time updates being
+   processed.  The two phase commit described in Section 3.5 applies for
+   full synchronization.  Conflict handling during full synchronization
+   is TBD.
+
+4.4.3.  Full Synchronization On Demand
+
+
+
+
+
+
+
+
+Bellur & Wendt           Expires April 01, 2016                 [Page 7]
+
+Internet-Draft                    DRiP                      October 2015
+
+
+   A node, either newly added to the mesh or re-activated after being
+   out of service due to network issues or other anomalies, will inform
+   its peer nodes to add this node to their list of peer nodes.  The
+   resulting action from the peer nodes is to start synchronizing data
+   from their respective data stores.  The two phase commit does NOT
+   apply here as the contents of the nodes's data store is either
+   outdated or empty.  During this phase (HTTPS requests received will
+   have DRiP-Sync-Complete field value set to false), this node SHOULD
+   NOT become an Initiator node to provision data.  While this
+   transaction is going on, the peer nodes MUST NOT propagate real-time
+   updates or periodic full synchronization transaction types.  The next
+   cycle of periodic synchronization will resolve discrepancy, if any,
+   in data contained in this node's data store.
+
+4.4.3.1.  REST API
+
+   PUT /addnode/node/:nodeid
+
+4.5.  Two Phase Commit
+
+4.5.1.  Voting Phase
+
+   The Initiator node sets a timeout period to get response from its
+   peer nodes, for data propagated.  This response (see section 4.5.1.2)
+   will indicate a "vote" for whether the transaction can be completed
+   based on any conflicting updates to the same entry.  If all peer
+   nodes vote "yes", then a commit of the information to the local node
+   is initiated.  If any one of the peer nodes votes "no" or if there is
+   no response from one or more peer nodes, then the commit of the
+   information MUST not be completed.  No action is taken for responses
+   (see section 4.5.1.2) received after the timeout period.
+
+      ___           ___      ___           ___      ___           ___
+     |DB |_________|DB |    |DB |_________|DB |    |DB |_________|DB |
+     |___|         |___|    |___|         |___|    |___|         |___|
+       |   Data      |        |   Data      |        |   Data      |
+       |   Store     |        |   Store     |        |   Store     |
+      _|_  Cluster  _|_      _|_  Cluster  _|_      _|_  Cluster  _|_
+     |DB |_________|DB |    |DB |_________|DB |    |DB |_________|DB |
+     |___|         |___|    |___|         |___|    |___|         |___|
+         \                     \                      |
+          \                     \                     |
+          _\___    Vote(HTTPS)  _\___    Vote(HTTPS)  |____
+         |Node |  <----------  |Node |  ---------->  |Node |
+         |  B  |---------------|  A  |---------------|  C  |
+         |_____|  ---------->  |_____|  <----------  |_____|
+                    Yes/No                Yes/No
+
+                               Voting Phase
+
+
+
+
+
+Bellur & Wendt           Expires April 01, 2016                 [Page 8]
+
+Internet-Draft                    DRiP                      October 2015
+
+
+   The peer nodes known to the originating node will continue propagate
+   the information to their peer nodes and so on.  However, these peer
+   nodes will no longer need to keep track of the time interval for
+   responses.  A node will stop continuing to propagate information when
+   it determines it has received the same information again.  This can
+   be determined by keeping track of the counter and originating node
+   id.
+
+4.5.1.1.  REST API
+
+4.5.1.1.1.  POST /voting
+
+   Example (using cURL)
+
+   Request
+
+     $ curl -i -H "Content-Type: application/json" -H "DRiP-Node-ID:
+         nodeA" -H "DRiP-Node-Counter: 1234" -H "DRiP-Node-Counter-reset:
+         false" -X POST -d '{"publicID":"+12155551212","service":"pstn",
+         "routingID":+12155551212@pstn.comcast.com, "timestamp":
+         "1422980496943" }' https:// nodebregistry.com/voting
+
+   Response
+
+     HTTP/1.1 200 OK
+
+4.5.1.1.2.  POST /votingphase/node/:nodeid/response/:response
+
+   Example (using cURL)
+
+   Request
+
+     $ curl -i -X POST http://nodearegistry.com/node/nodeA/response/yes
+
+   Response
+
+     HTTP/1.1 200 OK
+
+4.6.  Commit Phase
+
+   The Initiator node upon receiving a "yes" from all the peer
+   registries, the registry that originated the gossip will now commit
+   the data in the HTTPS request payload to its data store.
+   Subsequently, this information is propagated to all the nodes so that
+   each node in the mesh will commit the same information in to their
+   respective data stores.
+
+
+
+
+
+
+
+
+Bellur & Wendt           Expires April 01, 2016                 [Page 9]
+
+Internet-Draft                    DRiP                      October 2015
+
+
+       ___           ___                         ___           ___
+      |DB |_________|DB |                       |DB |_________|DB |
+      |___|         |___|                       |___|         |___|
+        |   Data      |                           |   Data      |
+        |   Store     |                           |   Store     |
+       _|_  Cluster  _|_                         _|_  Cluster  _|_
+      |DB |_________|DB |                       |DB |_________|DB |
+      |___|         |___|                       |___|         |___|
+                        \                       /
+                         \COMMIT               /COMMIT
+                         _\___     COMMIT   _ /__
+                        |Node |------------|Node |
+                        |  A  |    HTTPS   |  C  |
+                        |_____|            |_____|
+                            \H           H/
+                             \T         T/
+                        COMMIT\T       P/COMMIT
+                               \P     P/
+                                \S   S/
+                               __\__ /  COMMIT    _____
+                              |Node |------------|Node |
+                              |  B  |   HTTPS    |  D  |
+                              |_____|            |_____|
+                             /                   /
+                            /COMMIT             /COMMIT
+          ___           ___/                  _/__          ___
+         |DB |_________|DB |                 |DB |_________|DB |
+         |___|         |___|                 |___|         |___|
+           |   Data      |                     |   Data      |
+           |   Store     |                     |   Store     |
+          _|_  Cluster  _|_                   _|_  Cluster  _|_
+         |DB |_________|DB |                 |DB |_________|DB |
+         |___|         |___|                 |___|         |___|
+    
+
+                               Commit Phase
+
+4.6.1.  REST API
+
+4.6.1.1.  POST /commit
+
+   Example (using cURL)
+
+   Request
+
+   $ curl -i -H "Content-Type: application/json" -H "DRiP-Node-ID:
+      nodeA" -H "DRiP-Node-Counter: 1234" -H
+      "DRiP-Node-Counter-reset: false" -X POST -d
+      '{"publicID":"+12155551212","service":"pstn","routingID":
+      +12155551212@pstn.comcast.com, "timestamp":"1422980496943"}'
+      https:// nodebregistry.com/commit
+
+   Response
+
+Bellur & Wendt           Expires April 01, 2016                [Page 10]
+
+Internet-Draft                    DRiP                      October 2015
+
+
+   HTTP/1.1 200 OK
+
+5.  Security Considerations
+
+5.1.  HTTPS
+
+   All nodes MUST perform HTTP transactions using TLS.
+
+5.2.  Authentication
+
+   Secure authentication of node to node communication is beyond the
+   scope of this document, however best practices in terms of protecting
+   the node API interface should be followed.
+
+6.  References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels ", BCP 14, RFC 2119, DOI 10.17487/
+              RFC2119, March 1997, <http://www.rfc-editor.org/info/
+              rfc2119>.
+
+Authors' Addresses
+
+   Harsha Bellur
+   Comcast
+   One Comcast Center
+   Philadelphia, PA 19103
+   USA
+   
+   Email: Harsha_Bellur@cable.comcast.com
+
+
+   Chris Wendt, editor
+   Comcast
+   One Comcast Center
+   Philadelphia, PA 19103
+   USA
+   
+   Email: chris-ietf@chriswendt.net
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bellur & Wendt           Expires April 01, 2016                [Page 11]
