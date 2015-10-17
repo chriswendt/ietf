@@ -13,7 +13,7 @@ This document describes the Distributed Registry Protocol (DRiP).  DRiP defines 
 ## 2. Terminology
 
   - Initiator node - A node that initiates key-value data propagation.
-  - Non-Initiator node - A node that receives the propagated key-value data.
+  - Receiver node - A node that receives the propagated key-value data.
 
 ## 3. DRiP Overview
 
@@ -71,28 +71,28 @@ Custom HTTP header fields will be used to carry Node specific information.
 Field Name| Description |
 -------------:   | :----------- |
 DRiP-Node-ID | Each node in the mesh MUST have a unique identifier.  An Initiator node MUST set its own node ID as the field value. A Receiver Node MUST NOT change the DRiP-Node-ID field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
-DRiP-Node-Counter | Every node maintains a count of the number of times it initiates key-value data propagation. This counter MUST be an unsigned type, typically, a 64 bit integer. The Initiator node MUST set this count as the field value. The Non-Initiator node **MUST NOT** change the **DRiP-Node-Counter** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
-**DRiP-Node-Counter-reset** | A node can reset the count (to zero) of the number of times it **initiates** key-value data propagation. If the counter value is reset, prior to initiating data propagation, then this field value **MUST** be set to **true**. Otherwise, it **MUST** be set to **false**, at all times. A typical use case to reset the counter value is when the counter (of **unsigned** type) value **wraps around**. The Initiator node **MUST** set this field value to either **true** or **false**. The Non-Initiator node **MUST NOT** change the **DRiP-Node-Counter-reset** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
-**DRiP-Transaction-Type** | The Initiator node **MUST** set this field value to be either **real-time update**, **periodic sync** or **sync on demand**. See section 3.4. The Non-Initiator node **MUST NOT** change the **DRiP-Transaction-Type** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).
-**DRiP-Sync-Complete** | During **periodic sync** or **sync on demand** transaction type, the Initiator node **MUST** set this field value to be **true**, if no more data is left to be propagated. Otherwise, this field value **MUST** be set to **false**. The Non-Initiator node **MUST NOT** change the **DRiP-Sync-Complete** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
+DRiP-Node-Counter | Every node maintains a count of the number of times it initiates key-value data propagation. This counter MUST be an unsigned type, typically, a 64 bit integer. The Initiator node MUST set this count as the field value. The Receiver node **MUST NOT** change the **DRiP-Node-Counter** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
+**DRiP-Node-Counter-reset** | A node can reset the count (to zero) of the number of times it **initiates** key-value data propagation. If the counter value is reset, prior to initiating data propagation, then this field value **MUST** be set to **true**. Otherwise, it **MUST** be set to **false**, at all times. A typical use case to reset the counter value is when the counter (of **unsigned** type) value **wraps around**. The Initiator node **MUST** set this field value to either **true** or **false**. The Receiver node **MUST NOT** change the **DRiP-Node-Counter-reset** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
+**DRiP-Transaction-Type** | The Initiator node **MUST** set this field value to be either **real-time update**, **periodic sync** or **sync on demand**. See section 3.4. The Receiver node **MUST NOT** change the **DRiP-Transaction-Type** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).
+**DRiP-Sync-Complete** | During **periodic sync** or **sync on demand** transaction type, the Initiator node **MUST** set this field value to be **true**, if no more key-value data is left to be propagated. Otherwise, this field value **MUST** be set to **false**. The Receiver node **MUST NOT** change the **DRiP-Sync-Complete** field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).|
 
 
-### 4.3 Data Propagation Rules
+### 4.3 Key-Value Data Propagation Rules
 
-- A node propagates key-value data to all its peer nodes except the the node from which it received data. For example, in Figure 1, when node B receives data from node A, it will propagate the data received to nodes C and D but not back to node A.
-- For each transaction type (**real-time update**, **periodic sync** or **sync on demand**), the following action MUST take place when a node receives a HTTPS request with propagated data
-  - If DRiP-Node-ID field value (in the HTTP header) contains Initiator node ID that has never been seen, both DRiP-Node-ID and DRiP-Node-Counter field values MUST be stored for future reference and the     data is propagated to all peer nodes.
+- A node propagates key-value data to all its peer nodes except the the node from which it received data. For example, in Figure 1, when node B receives key-value data from node A, it will propagate the data received to nodes C and D but not back to node A.
+- For each transaction type (**real-time update**, **periodic sync** or **sync on demand**), the following action MUST take place when a node receives a HTTPS request with propagated key-value data
+  - If DRiP-Node-ID field value (in the HTTP header) contains Initiator node ID that has never been seen, both DRiP-Node-ID and DRiP-Node-Counter field values MUST be stored for future reference and the key-value data is propagated to all peer nodes.
   - If DRiP-Node-ID field value ((in the HTTP header) matches with a stored node ID and DRiP-Node-Counter-reset field value is **false**
-    - The received data MUST be propagated to the peer nodes if DRiP-Node-Counter field value is greater than the saved counter value. The DRiP-Node-Counter field value MUST be saved as the new counter   for the stored node ID.
-    - If DRiP-Node-Counter field value is less than or equal to saved counter value, then no action is necessary (data **MUST NOT** be propagated to peer nodes). This ensures that data propagation stops when all nodes have received data from the Initiator node.
+    - The received key-value data MUST be propagated to the peer nodes if DRiP-Node-Counter field value is greater than the saved counter value. The DRiP-Node-Counter field value MUST be saved as the new counter for the stored node ID.
+    - If DRiP-Node-Counter field value is less than or equal to saved counter value, then no action is necessary (key-value data **MUST NOT** be propagated to peer nodes). This ensures that propagation stops when all nodes have received the key-value data from the Initiator node.
   - If DRiP-Node-ID field value matches with a stored node ID and DRiP-Node-Counter-reset field value is **true**
-    - The received data MUST be propagated to the peer nodes. The DRiP-Node-Counter field value MUST be saved as the new counter for the stored node ID.
+    - The received key-value data MUST be propagated to the peer nodes. The DRiP-Node-Counter field value MUST be saved as the new counter for the stored node ID.
 
 ### 4.4 Transaction Types
 
 #### 4.4.1 Real-Time Updates
 
-When the Initiator node has data to provision, the update is propagated to its peers immediately to provide timely updates of information. Section 3.5 details the steps involved in a real-time update.
+When the Initiator node has key-value data to provision, the update is propagated to its peers immediately to provide timely updates of information. Section 3.5 details the steps involved in a real-time update.
 
 ##### 4.4.1.1 State Diagram
 
@@ -108,7 +108,7 @@ When the Initiator node has data to provision, the update is propagated to its p
 	 |  |                     |         Synchronization              |
 	 |  |             ________|_______  From Peer Nodes              |
 	 |  |            |                | If key matches an in-progress|
-	 |   ------------|                |  real-time update            |
+	 |   ----------->|                |  real-time update            |
 	 |               | Waiting For    |  vote "NO".                  |
 	 |               | Response From  |  Otherwise, vote "YES".      |
 	 |               | Peer Nodes     |<------------------------------ 
@@ -130,18 +130,10 @@ When the Initiator node has data to provision, the update is propagated to its p
 	 | commit)       |                |        
 	  ---------------|________________|        
                           
-                         
-#### 4.4.2 Periodic Full Synchronization
-
-For maximum reliability and validation of information contained in the distributed registry, periodically, a node SHOULD propagate all of the entries of information to its peers. In practice, this could be done in low traffic times or other convenient times that would have less chance to slow down any concurrent real-time updates being processed. The two phase commit described in Section 3.5 applies for full synchronization. **Conflict handling during full synchronization is yet to be done**.
-
-##### 4.4.2.1 REST API
-
-See section 4.5
 
 #### 4.4.3 Full Synchronization On Demand
 
-A node, either newly added to the mesh or re-activated after being out of service due to network issues or other anomalies, will inform its peer nodes to add this node to their list of peer nodes. The resulting action from the peer nodes is to start synchronizing data from their respective data stores. The **two phase commit does NOT apply here** as the contents of the nodes's data store is either outdated or empty. During this phase (HTTPS requests received will have DRiP-Sync-Complete field value set to **false**), this node **SHOULD NOT** become an Initiator node to provision data. While this transaction is going on, the peer nodes **MUST NOT** propagate **real-time updates** or "periodic full synchronization** transaction types. The next cycle of periodic synchronization will resolve discrepancy, if any,  in data contained in this node's data store.
+A node, either newly added to the mesh or re-activated after being out of service due to network issues or other anomalies, will inform its peer nodes to add this node to their list of peer nodes. The resulting action from the peer nodes is to start synchronizing key-value data from their respective data stores. The **two phase commit does NOT apply here** as the contents of the nodes's data store is either outdated or empty. During this phase (HTTPS requests received will have DRiP-Sync-Complete field value set to **false**), this node **SHOULD NOT** become an Initiator node to provision data. While this transaction is going on, the peer nodes **MUST NOT** propagate **real-time updates** or "periodic full synchronization** transaction types. The next cycle of periodic synchronization will resolve discrepancy, if any,  in data contained in this node's data store.
 
 ##### 4.4.3.1 REST API
 
