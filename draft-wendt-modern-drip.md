@@ -81,9 +81,9 @@ All nodes MUST send a periodic heartbeat or keep-alive message via HTTPS to the 
 
 The peer node should maintain a state that defines whether it is active, inactive, or synchronizing key-value data with a peer node.
 
-The node should proactively tell it's peer nodes its state by sending the following POST messages.
+The node should proactively tell it's peer nodes its state by sending the following POST messages.  The GET query is available for nodes to query the state of peer nodes.
 
-#### 4.2.1.1 API - POST /node/:nodeid/active
+#### 4.2.1 API - POST /node/:nodeid/active
 
 Request: 
 
@@ -97,7 +97,7 @@ Example:
 
 TBD
 
-#### 4.2.1.2 API - POST /node/:nodeid/inactive
+#### 4.2.2 API - POST /node/:nodeid/inactive
 
 Request: 
 
@@ -111,7 +111,7 @@ Example:
 
 TBD
 
-#### 4.2.1.2 API - GET /state
+#### 4.2.3 API - GET /state
 
 Request: 
 
@@ -378,15 +378,15 @@ TBD - determination of the need to sync after heartbeat fails
 When a node owner would like to create or modify particular key-value data, generally in the context of a registry, there MAY be a verification procedure that key-value data write or modification can be performed.  This could include validating whether key-value data is entitled to be written, modified or subsequently propagated based on application policy.  For example, identity or telephone number ownership or porting.  The exact mechanics of this are out of scope of this document and are generally application specific.
 
 
-#### 5. Transport-Specific Guidelines
+#### 5. Security Considerations
 
 #### 5.1 HTTPS
 
-The specifics of secure communication is beyond the scope of this document. However, at a minimum, all nodes communicate via HTTPS and must contain CA signed certificates installed on them.
+All nodes MUST perform HTTP transactions using TLS.
 
 #### 5.2 Authentication
 
-The specifics of authentication is beyond the scope of this document.
+Secure authentication of node to node communication is beyond the scope of this document, however best practices in terms of protecting the node API interface should be followed.
 
 #### 6. Acknowledgements
 
