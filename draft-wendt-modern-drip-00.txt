@@ -15,7 +15,7 @@ Abstract
    nodes to synchronize a set of information in real-time with minimal
    amount of delay.  This is useful for registry types of information
    like identity and telephone numbers with associated routing and
-   ownership information, although could be extended to support other
+   ownership information and could be extended to support other
    distributed real-time information updates as well.
 
 Status of this Memo
@@ -464,7 +464,7 @@ Internet-Draft                    DRiP                      October 2015
    nodes beyond the initiator node will no longer need to keep track of
    the time interval for responses.  A node will stop continuing to
    propagate information when it determines it has received the same
-   information again.  This can be determined by keeping track of a
+   information again.  This can be determined by keeping track of the
    counter and originating node id.
 
 
