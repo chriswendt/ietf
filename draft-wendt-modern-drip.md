@@ -14,9 +14,13 @@ This document describes the Distributed Registry Protocol (DRiP).  DRiP defines 
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC2119].
 
-Initiator node - A node that initiates key-value data propagation.
+Initiator node 
+	
+A node that initiates key-value data propagation.
 
-Receiver node - A node that receives the propagated key-value data.
+Receiver node 
+	
+A node that forwards the propagated key-value data.
 
 #### 3. DRiP Overview
 
@@ -69,46 +73,152 @@ All nodes in the distributed mesh MUST agree upon a specific key-value data mode
 
 All nodes MUST be configured with at least one peer node before propagation. 
 
-A node MUST have the ability to receive updates from all configured peer nodes. 
+A node MUST ignore any updates or commands it receives from other nodes that are not configured as peer nodes.
 
-A node MUST NOT receive any updates or commands from peer nodes it is not configured, or MUST ignore any updates or commands it receives that are not from any configured peer nodes.
+All nodes MUST send a periodic heartbeat or keep-alive message via HTTPS to the respective peer nodes. If a heartbeat is not received the peer node is removed from the list of active peer nodes.
 
-All nodes MUST send a periodic heartbeat or keep-alive messages via HTTPS to the respective peer nodes, if a heartbeat is not received the peer node is removed from the list of active peer nodes.
+#### 4.2 Node State
 
-#### 4.2 Node State Types
+The peer node should maintain a state that defines whether it is active, inactive, or synchronizing key-value data with a peer node.
 
-A DRiP node should have mulitple peer nodes configured with either IP or FQDN association.  It should maintain a number of states of each peer node that impact when transactions can and can not be initiated to peer nodes or processed from peer nodes.
+The node should proactively tell it's peer nodes its state by sending the following POST messages.
 
-#### 4.2.1 Authorized
-
-The Authorized peer node state defines whether a configured peer node can send any API commands to the node.  If the authorized state is false, all communications from that peer node to the node MUST be ignored.  (May not need this)
-
-#### 4.2.2 Active
-
-The Active peer node state defines whether the node should send any API command to the peer node.  If the active state is false, no API commands should be sent.
-
-#### 4.2.2.1 API
+#### 4.2.1.1 API - POST /node/:nodeid/active
 
 Request: 
 
-POST /active/:nodeid
+POST /node/:nodeid/active
+
+Description:
 
 TBD
 
+Example:
 
-#### 4.3 Key-Value Data Update
+TBD
 
-When a node has new data it wants to propogate to the distributed mesh, it initiates an Update.  This node is called the Initiator Node.
+#### 4.2.1.2 API - POST /node/:nodeid/inactive
 
-The Update consists of a Two-Phase Commit procedure in order to guarentee there are no race conditions for updating the same key's data, as well as for any error conditions in the distributed mesh that would cause the update to not complete for all nodes in the network.
+Request: 
+
+POST /node/:nodeid/inactive
+
+Description:
+
+TBD
+
+Example: 
+
+TBD
+
+#### 4.2.1.2 API - GET /state
+
+Request: 
+
+GET /state
+
+Description:
+
+A node should query the state of its peer node before it initiates a sync operation.
+This request responds with either "active" or "sync" or no response, if in "inactive" state.
+
+Example:
+
+TBD
+
+#### 4.3 Custom HTTP header fields
+
+Custom HTTP header fields will be used to carry node specific information.  
+
+| Field Name       | Description                                        | Example              |
+| :--------------- | :------------------------------------------------- | :------------------- |
+| DRiP-Node-ID | Each node in the mesh MUST have a unique identifier.  An Initiator node MUST set its own node ID as the field value. A Receiver Node MUST NOT change the DRiP-Node-ID field value as it forward the HTTPS request to its peer nodes. | DRiP-Node-ID: xyz123 |
+
+| Field Name       | Description                                        | Example              |
+| :--------------- | :------------------------------------------------- | :------------------- |
+DRiP-Node-Counter | Every node maintains a count of the number of times it initiates key-value data propagation. This counter MUST be an unsigned type, typically, a 64 bit integer. The Initiator node MUST set this count as the field value.  A Receiver Node MUST NOT change the DRiP-Node-Counter field value as it forward the HTTPS request to its peer nodes. | DRiP-Node-Counter: 123
+
+| Field Name       | Description                                        | Example              |
+| :--------------- | :------------------------------------------------- | :------------------- |
+DRiP-Node-Counter-reset | A node can reset the count (to zero) of the number of times it initiates key-value data propagation. If the counter value is reset, prior to initiating data propagation, then this field value MUST be set to true. Otherwise, it MUST be set to false, at all times. A typical use case to reset the counter value is when the counter (of unsigned type) value wraps around. The Initiator node MUST set this field value to either true or false. A Receiver Node MUST NOT change the DRiP-Node-Counter-reset field value as it forward the HTTPS request to its peer nodes. | DRiP-Node-Counter-reset: false
+
+| Field Name       | Description                                        | Example              |
+| :--------------- | :------------------------------------------------- | :------------------- |
+DRiP-Transaction-Type | The Initiator node MUST set this field value to be either "update" or "sync". A Receiver Node MUST NOT change the DRiP-Transaction-Type field value as it forward the HTTPS request to its peer nodes. | DRiP-Transaction-Type: update
+
+| Field Name       | Description                                        | Example              |
+| :--------------- | :------------------------------------------------- | :------------------- |
+DRiP-Sync-Complete | For sync transaction type, the Initiator node MUST set this field value to be true, if synchronization is complete. Otherwise, this field value MUST be set to false. | DRiP-Sync-Complete: false
+
+#### 4.4 Key-Value Data Propagation Rules
+
+A node propagates key-value data to all its peer nodes except the the node from which it received data. For example, in Figure 1, when node B receives key-value data from node A, it will propagate the data received to nodes C and D but not back to node A.
+
+For each transaction type (Update or Sync), the following set of actions MUST take place when a node receives a HTTPS request with propagated key-value data:
+
+- If DRiP-Node-ID field value (in the HTTP header) contains Initiator node ID that has never been seen, both DRiP-Node-ID and DRiP-Node-Counter field values MUST be stored for future reference and the key-value data is propagated to all peer nodes.
+
+- If DRiP-Node-ID field value (in the HTTP header) matches with a stored node ID and DRiP-Node-Counter-reset field value is false.
+
+ - The received key-value data MUST be propagated to the peer nodes if DRiP-Node-Counter field value is greater than the saved counter value. The DRiP-Node-Counter field value MUST be saved as the new counter for the stored node ID.
+
+ - If DRiP-Node-Counter field value is less than or equal to saved counter value, then the key-value data has already been received and MUST NOT be propagated to peer nodes. This ensures that propagation stops when all nodes have received the key-value data from the Initiator node.
+- If DRiP-Node-ID field value matches with a stored node ID and DRiP-Node-Counter-reset field value is true:
+ - The received key-value data MUST be propagated to the peer nodes. The DRiP-Node-Counter field value MUST be saved as the new counter for the stored node ID.
+
+
+#### 4.5 Key-Value Data Update
+
+When an Initiator node has new data it wants to propagate to the distributed mesh, it initiates an Update.  The Update consists of a two-phase commit (2PC) procedure in order to guarantee there are no race conditions for updating the same key's data, as well as for any error conditions in the distributed mesh that would cause the update to not complete for all nodes in the network.
 
 The two phases are called the "voting" phase and the "commit" phase.
 
-#### 4.3.1 Voting Phase
+	                           _________ 
+	  ----------------------->|         |
+	 |                        | Waiting |
+	 |                        | For     |
+	 |   ---------------------| Events  |
+	 |  | (Update,            |_________|
+	 |  |  Start Timer)           
+	 |  |                            --------------------------------  
+	 |  |                           | Received Update From Peer Node |
+	 |  |                           |                                |
+	 |  |             ______________|_  If key matches an            |
+	 |  |            |                |  in-progress update          |
+	 |   ----------->|                |  vote "no".                  |
+	 |               | Waiting For    |  Otherwise, vote "yes".      |
+	 |               | Response From  |                              |
+	 |               | Peer Nodes     |<-----------------------------
+	 |               |                |                                
+	 |           ----|                |----                            
+	 |  Timer   |    |________________|    |                           
+	 |  Expired |                          | Received Votes
+	 |          |                          | From All Peer 
+	 |          |                          | Nodes         
+	 |          |      _______________     |
+	 |          |    |                |    |
+	 |          |    |                |    |
+	 |           --->|                |<---
+	 |               |  Validating    |    
+	 | (If all Votes |  Votes         |    
+	 |  are "YES",   |                |    
+	 | propagate     |                |        
+	 | commit)       |                |        
+	  ---------------|________________|        
+                          
+**Figure 2: Update State Diagram**
+
+#### 4.5.1 Voting Phase
 
 The voting phase is the phase where all nodes are queried to "vote" whether they are aware of any potential conflict that would cause the transaction not to complete.
 
-The Initiator node MUST set a timeout period to get response from its peer nodes, for data propagated. This response (see section 4.5.1.2) will indicate a "vote" for whether the transaction can be completed based on any conflicting updates to the same entry. If all peer nodes vote "yes", then the second phase or commit phase in the local node is initiated. If any one of the peer nodes votes "no" or if there is no response from one or more peer nodes, then the commit of the information MUST not be completed. No action is taken for responses (see section 4.5.1.2) received after the timeout period.
+The Initiator node MUST set a timeout period to get response from its peer nodes. 
+
+The peer nodes known to the initiator node will continue propagate the information to their peer nodes and so on. However, these peer nodes beyond the initiator node will no longer need to keep track of the time interval for responses. A node will stop continuing to propagate information when it determines it has received the same information again. This can be determined by keeping track of a counter and originating node id.
+
+If all peer nodes vote "yes", then the second phase or commit phase in the local node is initiated. If any node in the distributed mesh votes "no" or if the timeout period expires and all peer nodes have not responded, then the commit of the information MUST NOT be completed. No action is taken for responses received after the timeout period.
+
+Note: The voting procedure is intentionally split into two separate full HTTP transactions for reliability.
 
        ___           ___      ___           ___      ___           ___ 
       |DB |_________|DB |    |DB |_________|DB |    |DB |_________|DB |
@@ -126,11 +236,9 @@ The Initiator node MUST set a timeout period to get response from its peer nodes
           |_____|  ---------->  |_____|  <----------  |_____|
                      Yes/No                Yes/No     
                      
-**Figure 2: Voting Phase**  
+**Figure 3: Voting Phase**  
 
-The peer nodes known to the initiator node will continue propagate the information to their peer nodes and so on. However, these peer nodes beyond the initiator node will no longer need to keep track of the time interval for responses. A node will stop continuing to propagate information when it determines it has received the same information again. This can be determined by keeping track of a counter and originating node id.
-
-#### 4.3.1.1 API - POST /voting
+#### 4.5.1.1 API - POST /voting
 
 Request:
 
@@ -153,7 +261,7 @@ Response:
 
 	HTTP/1.1 200 OK
 
-#### 4.3.1.2 API - POST /voting/peernode/:nodeid/response/:response
+#### 4.5.1.2 API - POST /voting/peernode/:nodeid/response/:response
 
 Request:
 
@@ -161,7 +269,7 @@ POST /voting/peernode/:nodeid/response/:response
 
 Description:
 
-A POST from peer node back to node with response of vote.  Note: the voting procedure is intentionally split into two seperate full HTTP transactions for reliability.
+A POST from peer node back to node with response of vote.
 
 **Example (using cURL)**
 
@@ -173,9 +281,9 @@ Response
 
 	HTTP/1.1 200 OK
 
-#### 4.3.2 Commit Phase
+#### 4.5.2 Commit Phase
 
-The Initiator node upon receiving a succesful aggregated "yes" vote from all the peer registries should start the commit phase the registry that originated the gossip will now commit the data in the HTTPS request payload to its data store. Subsequently, this information is propagated to all the nodes so that each node in the mesh will commit the same information in to their respective data stores.
+The Initiator node, that originated the gossip, upon receiving a successful aggregated "yes" vote from all the peer nodes should start the commit phase. This node MUST commit the data to its data store. Subsequently, this information is propagated to all the nodes so that each node in the mesh will commit the same information in their respective data stores.
 
        ___           ___                         ___           ___ 
       |DB |_________|DB |                       |DB |_________|DB |
@@ -214,7 +322,7 @@ The Initiator node upon receiving a succesful aggregated "yes" vote from all the
       
 Figure 4: Commit Phase
 
-#### 4.3.2.1 API - POST /commit
+#### 4.5.2.1 API - POST /commit
 
 Request:
 
@@ -222,7 +330,7 @@ POST /commit
 
 Description:
 
-A commit command is sent from Initiator or subsequent peer nodes to signal the commit of the data to the data base.  Once a 200OK response is received back, the key-value data should be written to the local data store.
+A commit message is sent from Initiator or subsequent peer nodes to signal the Receiver node to commit the data to its data store. 
 
 **Example (using cURL)**
 
@@ -238,130 +346,51 @@ Response:
 	HTTP/1.1 200 OK
 
 
-#### 4.4 Node Sync Operation
+#### 4.6 Node Sync Operation
 
-A node, either newly added to the ditsributed mesh or re-activated after being out-of-service due to network issues or other anomalies, will first inform its peer nodes to add this node to their list of peer nodes via the active state API. The node should be prepared to start receiving Updates at this point.
+A node, either newly added to the distributed mesh or put back into service after being inactive, will get the state of a peer node to determine if it is in "active" state.  If so, the node can immediately initiate a Sync transaction.  The peer node MUST start propagating a comprehensive and complete set of key-value data from its data store. 
 
-The node should immediately select a peer node and send a Sync transaction.  The peer node MUST start propogating a comprehensive and complete set of Updates of key-value data from data store. 
+The two phase commit does NOT apply here as the contents of the initiating node's data store is either outdated or empty. During this phase (HTTPS requests received will have DRiP-Sync-Complete field value set to false), this node SHOULD NOT become an Initiator node to provision data. While this transaction is going on, this node MUST vote "yes" to all real-time updates.  The commits corresponding to the Updates should also be completed and reflected in the data store.
 
-The two phase commit does NOT apply here as the contents of the nodes's data store is either outdated or empty. During this phase (HTTPS requests received will have DRiP-Sync-Complete field value set to false), this node SHOULD NOT become an Initiator node to provision data. While this transaction is going on, this node MUST vote "yes" to all real-time updates.
-
-#### 4.3.2.1 API
-
-Description: API call for initiating a full registry synchronization from node to peer-node.
+#### 4.6.1 API - PUT /sync/node/:nodeid
 
 Request:
 
 PUT /sync/node/:nodeid
 
-Response:
+Description: 
 
-HTTP/1.1 200OK
+API call for initiating a full registry synchronization from node to peer-node.
 
-#### 4.3.3 Transaction State Diagram
+Example:
 
-	                           _________ 
-	  ----------------------->|         |
-	 |                        | Waiting |
-	 |                        | For     |
-	 |   ---------------------| Events  |
-	 |  | (Update,            |_________|
-	 |  |  Start Timer)           
-	 |  |                            --------------------------------  
-	 |  |                           | Received Update From Peer Node |
-	 |  |                           |                                |
-	 |  |             ______________|_  If key matches an            |
-	 |  |            |                |  in-progress update          |
-	 |   ----------->|                |  vote "no".                  |
-	 |               | Waiting For    |  Otherwise, vote "yes".      |
-	 |               | Response From  |                              |
-	 |               | Peer Nodes     |  Received Sync               |
-	 |               |                |<-----------------------------
-	 |               |                |                                
-	 |           ----|                |----                            
-	 |  Timer   |    |________________|    |                           
-	 |  Expired |                          | Received Votes
-	 |          |                          | From All Peer 
-	 |          |                          | Nodes         
-	 |          |      _______________     |
-	 |          |    |                |    |
-	 |          |    |                |    |
-	 |           --->|                |<---
-	 |               |  Validating    |    
-	 | (If all Votes |  Votes         |    
-	 |  are "YES",   |                |    
-	 | propagate     |                |        
-	 | commit)       |                |        
-	  ---------------|________________|        
-                          
+TBD
+
+#### 4.7 Heartbeat
+
+TBD - definition of heartbeat
+
+TBD - determination of the need to sync after heartbeat fails
 
 
-### 4.4 Key-Value Data Propagation Rules
+#### 4.8 Key-Value Data Update Entitlement Verification
 
-A node propagates key-value data to all its peer nodes except the the node from which it received data. For example, in Figure 1, when node B receives key-value data from node A, it will propagate the data received to nodes C and D but not back to node A.
-
-For each transaction type (Update or Sync), the following action MUST take place when a node receives a HTTPS request with propagated key-value data
-
-If DRiP-Node-ID field value (in the HTTP header) contains Initiator node ID that has never been seen, both DRiP-Node-ID and DRiP-Node-Counter field values MUST be stored for future reference and the key-value data is propagated to all peer nodes.
-
-If DRiP-Node-ID field value ((in the HTTP header) matches with a stored node ID and DRiP-Node-Counter-reset field value is false.
-
-The received key-value data MUST be propagated to the peer nodes if DRiP-Node-Counter field value is greater than the saved counter value. The DRiP-Node-Counter field value MUST be saved as the new counter for the stored node ID.
-
-- If DRiP-Node-Counter field value is less than or equal to saved counter value, then no action is necessary (key-value data MUST NOT be propagated to peer nodes). This ensures that propagation stops when all nodes have received the key-value data from the Initiator node.
-- If DRiP-Node-ID field value matches with a stored node ID and DRiP-Node-Counter-reset field value is true.
-- The received key-value data MUST be propagated to the peer nodes. The DRiP-Node-Counter field value MUST be saved as the new counter for the stored node ID.
-
-#### 4.4.1 Key-Value Data Update Entitlement Verification
-
-When a node owner would like to create or modify particular key-value data, generally in the context of a registry, there MAY be a verification procedure that key-value data write or modification can be performed.  This could include validating whether key-value data is entitled to be written, modified or subsequently propogated based on application policy.  For example, identity or telephone number ownership or porting.  The exact mechanics of this are out of scope of this document and are generally application specific.
-
-### 4.5 Custom HTTP header fields
-
-Custom HTTP header fields will be used to carry node specific information.
-
-| Field Name       | Description                                        | Example              |
-| :--------------- | :------------------------------------------------- | :------------------- |
-| DRiP-Node-ID | Each node in the mesh MUST have a unique identifier.  An Initiator node MUST set its own node ID as the field value. A Receiver Node MUST NOT change the DRiP-Node-ID field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of). | DRiP-Node-ID: xyz123 |
-
-| Field Name       | Description                                        | Example              |
-| :--------------- | :------------------------------------------------- | :------------------- |
-DRiP-Node-Counter | Every node maintains a count of the number of times it initiates key-value data propagation. This counter MUST be an unsigned type, typically, a 64 bit integer. The Initiator node MUST set this count as the field value. The Receiver node MUST NOT change the DRiP-Node-Counter field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of).| DRiP-Node-Counter: 123
-
-| Field Name       | Description                                        | Example              |
-| :--------------- | :------------------------------------------------- | :------------------- |
-DRiP-Node-Counter-reset | A node can reset the count (to zero) of the number of times it initiates key-value data propagation. If the counter value is reset, prior to initiating data propagation, then this field value MUST be set to true. Otherwise, it MUST be set to false, at all times. A typical use case to reset the counter value is when the counter (of unsigned type) value wraps around. The Initiator node MUST set this field value to either true or false. The Receiver node MUST NOT change the DRiP-Node-Counter-reset field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of). | DRiP-Node-Counter-reset: false
-
-| Field Name       | Description                                        | Example              |
-| :--------------- | :------------------------------------------------- | :------------------- |
-DRiP-Transaction-Type | The Initiator node MUST set this field value to be either "update" or "sync". See section 3.4. The Receiver node MUST NOT change the DRiP-Transaction-Type field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of). | DRiP-Transaction-Type: update
-
-| Field Name       | Description                                        | Example              |
-| :--------------- | :------------------------------------------------- | :------------------- |
-DRiP-Sync-Complete | For sync on demand transaction type, the Initiator node MUST set this field value to be true, if no more key-value data is left to be propagated. Otherwise, this field value MUST be set to false. The Receiver node MUST NOT change the DRiP-Sync-Complete field value in the HTTPS request as it is propagated to its peer nodes (nodes it is aware of). | DRiP-Sync-Complete: false
-
-### 4.5 Error Conditions
-
-- A node does not receive periodic heartbeat from one or more peer nodes.
-
-### 4.6 Handling Corner Cases
-
-- TBD
+When a node owner would like to create or modify particular key-value data, generally in the context of a registry, there MAY be a verification procedure that key-value data write or modification can be performed.  This could include validating whether key-value data is entitled to be written, modified or subsequently propagated based on application policy.  For example, identity or telephone number ownership or porting.  The exact mechanics of this are out of scope of this document and are generally application specific.
 
 
-## 5. Transport-Specific Guidelines
+#### 5. Transport-Specific Guidelines
 
-### 5.1 HTTPS
+#### 5.1 HTTPS
 
 The specifics of secure communication is beyond the scope of this document. However, at a minimum, all nodes communicate via HTTPS and must contain CA signed certificates installed on them.
 
-### 5.2 Authentication
+#### 5.2 Authentication
 
 The specifics of authentication is beyond the scope of this document.
 
-## 6. Acknowledgements
+#### 6. Acknowledgements
 
-## 7. References
+#### 7. References
 
 **Author's Address**
 
