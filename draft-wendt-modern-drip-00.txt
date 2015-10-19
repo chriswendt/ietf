@@ -71,7 +71,7 @@ Internet-Draft                    DRiP                      October 2015
      4.5.  Key-Value Data Update  . . . . . . . . . . . . . . . . . .  7
        4.5.1.  Voting Phase . . . . . . . . . . . . . . . . . . . . .  8
          4.5.1.1.  API - POST /voting . . . . . . . . . . . . . . . .  9
-         4.5.1.2.  POST /votingphase/node/:nodeid/response/:response   9
+         4.5.1.2.  POST /votingphase/node/:nodeid/response/:response  10
        4.5.2.  Commit Phase . . . . . . . . . . . . . . . . . . . . . 10
          4.5.2.1.  API - POST /commit . . . . . . . . . . . . . . . . 11
      4.6.  Node Sync Operation  . . . . . . . . . . . . . . . . . . . 12
@@ -253,35 +253,35 @@ Internet-Draft                    DRiP                      October 2015
    Custom HTTP header fields will be used to carry node specific
    information.
 
-   +--------------+----------------------------------+-----------------+
-   |  Field Name  | Description                      | Example         |
-   +--------------+----------------------------------+-----------------+
-   | DRiP-Node-ID | Each node in the mesh MUST have  | DRiP-Node-ID:   |
-   |              | a unique identifier. An          | xyz             |
-   |              | Initiator node MUST set its own  |                 |
-   |              | node ID as the field value. A    |                 |
-   |              | Receiver Node MUST NOT change    |                 |
-   |              | the DRiP-Node-ID field value as  |                 |
-   |              | it forward the HTTPS request to  |                 |
-   |              | its peer nodes.                  |                 |
-   +--------------+----------------------------------+-----------------+
+   +----------------+--------------------------------------------------+
+   |   Field Name   | Description                                      |
+   +----------------+--------------------------------------------------+
+   |  DRiP-Node-ID  | Each node in the mesh MUST have a unique         |
+   |                | identifier. An Initiator node MUST set its own   |
+   |                | node ID as the field value. A Receiver Node MUST |
+   |                | NOT change the DRiP-Node-ID field value as it    |
+   |                | forward the HTTPS request to its peer nodes.     |
+   +----------------+--------------------------------------------------+
 
-   +--------------+-----------------------------------+----------------+
-   |  Field Name  | Description                       | Example        |
-   +--------------+-----------------------------------+----------------+
-   |  DRiP-Node-  | Every node maintains a count of   | DRiP-Node-     |
-   |   Counter    | the number of times it initiates  | Counter: 123   |
-   |              | key-value data propagation. This  |                |
-   |              | counter MUST be an unsigned type, |                |
-   |              | typically, a 64 bit integer. The  |                |
-   |              | Initiator node MUST set this      |                |
-   |              | count as the field value. A       |                |
-   |              | Receiver Node MUST NOT change the |                |
-   |              | DRiP-Node-Counter field value as  |                |
-   |              | it forward the HTTPS request to   |                |
-   |              | its peer nodes.                   |                |
-   +--------------+-----------------------------------+----------------+
+   Example: 
+         DRiP-Node-ID: xyz
 
+   +---------------------+---------------------------------------------+
+   |      Field Name     | Description                                 |
+   +---------------------+---------------------------------------------+
+   |  DRiP-Node-Counter  | Every node maintains a count of the number  |
+   |                     | of times it initiates key-value data        |
+   |                     | propagation. This counter MUST be an        |
+   |                     | unsigned type, typically, a 64 bit integer. |
+   |                     | The Initiator node MUST set this count as   |
+   |                     | the field value. A Receiver Node MUST NOT   |
+   |                     | change the DRiP-Node-Counter field value as |
+   |                     | it forward the HTTPS request to its peer    |
+   |                     | nodes.                                      |
+   +---------------------+---------------------------------------------+
+
+   Example: 
+         DRiP-Node-Counter: 123
 
 
 
@@ -297,64 +297,69 @@ Bellur & Wendt           Expires April 01, 2016                 [Page 5]
 Internet-Draft                    DRiP                      October 2015
 
 
-   +--------------+-----------------------------------+----------------+
-   |  Field Name  | Description                       | Example        |
-   +--------------+-----------------------------------+----------------+
-   |  DRiP-Node-  | A node can reset the count (to    | DRiP-Node-     |
-   |   Counter-   | zero) of the number of times it   | Counter-reset: |
-   |    reset     | initiates key-value data          | false          |
-   |              | propagation. If the counter value |                |
-   |              | is reset, prior to initiating     |                |
-   |              | data propagation, then this field |                |
-   |              | value MUST be set to true.        |                |
-   |              | Otherwise, it MUST be set to      |                |
-   |              | false, at all times. A typical    |                |
-   |              | use case to reset the counter     |                |
-   |              | value is when the counter (of     |                |
-   |              | unsigned type) value wraps        |                |
-   |              | around. The Initiator node MUST   |                |
-   |              | set this field value to either    |                |
-   |              | true or false. A Receiver Node    |                |
-   |              | MUST NOT change the DRiP-Node-    |                |
-   |              | Counter-reset field value as it   |                |
-   |              | forward the HTTPS request to its  |                |
-   |              | peer nodes.                       |                |
-   +--------------+-----------------------------------+----------------+
+   +-------------------------+-----------------------------------------+
+   |        Field Name       | Description                             |
+   +-------------------------+-----------------------------------------+
+   | DRiP-Node-Counter-reset | A node can reset the count (to zero) of |
+   |                         | the number of times it initiates key-   |
+   |                         | value data propagation. If the counter  |
+   |                         | value is reset, prior to initiating     |
+   |                         | data propagation, then this field value |
+   |                         | MUST be set to true. Otherwise, it MUST |
+   |                         | be set to false, at all times. A        |
+   |                         | typical use case to reset the counter   |
+   |                         | value is when the counter (of unsigned  |
+   |                         | type) value wraps around. The Initiator |
+   |                         | node MUST set this field value to       |
+   |                         | either true or false. A Receiver Node   |
+   |                         | MUST NOT change the DRiP-Node-Counter-  |
+   |                         | reset field value as it forward the     |
+   |                         | HTTPS request to its peer nodes.        |
+   +-------------------------+-----------------------------------------+
 
-   +--------------+-----------------------------------+----------------+
-   |  Field Name  | Description                       | Example        |
-   +--------------+-----------------------------------+----------------+
-   |    DRiP-     | The Initiator node MUST set this  | DRiP-          |
-   | Transaction- | field value to be either "update" | Transaction-   |
-   |     Type     | or "sync". A Receiver Node MUST   | Type: update   |
-   |              | NOT change the DRiP-Transaction-  |                |
-   |              | Type field value as it forward    |                |
-   |              | the HTTPS request to its peer     |                |
-   |              | nodes.                            |                |
-   +--------------+-----------------------------------+----------------+
+   Example: 
+         DRiP-Node-Counter-reset: false
 
-   +--------------+-----------------------------------+----------------+
-   |  Field Name  | Description                       | Example        |
-   +--------------+-----------------------------------+----------------+
-   |  DRiP-Sync-  | For sync transaction type, the    | DRiP-Sync-     |
-   |   Complete   | Initiator node MUST set this      | Complete:      |
-   |              | field value to be true, if        | false          |
-   |              | synchronization is complete.      |                |
-   |              | Otherwise, this field value MUST  |                |
-   |              | be set to false.                  |                |
-   +--------------+-----------------------------------+----------------+
+   +-------------------------+-----------------------------------------+
+   |        Field Name       | Description                             |
+   +-------------------------+-----------------------------------------+
+   |  DRiP-Transaction-Type  | The Initiator node MUST set this field  |
+   |                         | value to be either "update" or "sync".  |
+   |                         | A Receiver Node MUST NOT change the     |
+   |                         | DRiP-Transaction-Type field value as it |
+   |                         | forward the HTTPS request to its peer   |
+   |                         | nodes.                                  |
+   +-------------------------+-----------------------------------------+
+
+   Example: 
+         DRiP-Transaction-Type: update
+
+   +-----------------------+-------------------------------------------+
+   |       Field Name      | Description                               |
+   +-----------------------+-------------------------------------------+
+   |   DRiP-Sync-Complete  | For sync transaction type, the Initiator  |
+   |                       | node MUST set this field value to be      |
+   |                       | true, if synchronization is complete.     |
+   |                       | Otherwise, this field value MUST be set   |
+   |                       | to false.                                 |
+   +-----------------------+-------------------------------------------+
+
+   Example: 
+         DRiP-Sync-Complete: false
 
 4.4.  Key-Value Data Propagation Rules
 
-   A node propagates key-value data to all its peer nodes except the the
-   node from which it received data.  For example, in Figure 1, when
-   node B receives key-value data from node A, it will propagate the
-   data received to nodes C and D but not back to node A.
+
 
 Bellur & Wendt           Expires April 01, 2016                 [Page 6]
 
 Internet-Draft                    DRiP                      October 2015
 
+
+   A node propagates key-value data to all its peer nodes except the the
+   node from which it received data.  For example, in Figure 1, when
+   node B receives key-value data from node A, it will propagate the
+   data received to nodes C and D but not back to node A.
 
    For each transaction type (Update or Sync), the following set of
    actions MUST take place when a node receives a HTTPS request with
@@ -393,11 +398,6 @@ Internet-Draft                    DRiP                      October 2015
    to not complete for all nodes in the network.
 
    The two phases are called the "voting" phase and the "commit" phase.
-
-
-
-
-
 
 
 
@@ -518,20 +518,22 @@ Internet-Draft                    DRiP                      October 2015
 
    Request
 
-     $ curl -i -H "Content-Type: application/json" -H "DRiP-Node-ID:
-         nodeA" -H "DRiP-Node-Counter: 1234" -H "DRiP-Node-Counter-reset:
-         false" -X POST -d '{<key-value data>}' https:// nodebregistry.com/voting
+   $ curl -i -H "Content-Type: application/json" -H "DRiP-Node-ID:
+       nodeA" -H "DRiP-Node-Counter: 1234" -H
+       "DRiP-Node-Counter-reset: false" -X POST -d '{<key-value
+       data>}' https://nodebregistry.com/voting
 
    Response
 
      HTTP/1.1 200 OK
 
-4.5.1.2.  POST /votingphase/node/:nodeid/response/:response
 
 Bellur & Wendt           Expires April 01, 2016                 [Page 9]
 
 Internet-Draft                    DRiP                      October 2015
 
+
+4.5.1.2.  POST /votingphase/node/:nodeid/response/:response
 
    Request:
 
@@ -545,7 +547,7 @@ Internet-Draft                    DRiP                      October 2015
 
    Request
 
-     $ curl -i -X POST http://nodearegistry.com/node/nodeA/response/yes
+   $ curl -i -X POST http://nodearegistry.com/node/nodeA/response/yes
 
    Response
 
@@ -559,8 +561,6 @@ Internet-Draft                    DRiP                      October 2015
    Subsequently, this information is propagated to all the nodes so that
    each node in the mesh will commit the same information in their
    respective data stores.
-
-
 
 
 

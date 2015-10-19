@@ -162,45 +162,70 @@
      <section title="Custom HTTP header fields" anchor="custom_http_header_fields">
        <t>Custom HTTP header fields will be used to carry node specific information.</t>
        <texttable>
-         <ttcol align="center" width="20">Field Name</ttcol>
-         <ttcol align="left" width="55">Description</ttcol>
-         <ttcol align="left" width="25">Example</ttcol>
+         <ttcol align="center" width="20%">Field Name</ttcol>
+         <ttcol align="left">Description</ttcol>
          <c>DRiP-Node-ID</c>
          <c>Each node in the mesh MUST have a unique identifier. An Initiator node MUST set its own node ID as the field value. A Receiver Node MUST NOT change the DRiP-Node-ID field value as it forward the HTTPS request to its peer nodes.</c>
-         <c>DRiP-Node-ID: xyz</c>
        </texttable>
+       <t>
+         <list style="hanging" hangIndent='6'>
+           <t hangText="Example:">
+             <vspace />
+             DRiP-Node-ID: xyz</t>
+         </list>
+       </t>
        <texttable> 
-         <ttcol align="center" width="20">Field Name</ttcol>
-         <ttcol align="left" width="55">Description</ttcol>
-         <ttcol align="left" width="25">Example</ttcol>
+         <ttcol align="center" width="20%">Field Name</ttcol>
+         <ttcol align="left">Description</ttcol>
          <c>DRiP-Node-Counter</c>
          <c>Every node maintains a count of the number of times it initiates key-value data propagation. This counter MUST be an unsigned type, typically, a 64 bit integer. The Initiator node MUST set this count as the field value. A Receiver Node MUST NOT change the DRiP-Node-Counter field value as it forward the HTTPS request to its peer nodes.</c>
-         <c>DRiP-Node-Counter: 123</c>
        </texttable>
+       <t>
+         <list style="hanging" hangIndent='6'>
+           <t hangText="Example:">
+             <vspace />
+             DRiP-Node-Counter: 123</t>
+         </list>
+       </t>
        <texttable> 
-         <ttcol align="center" width="20">Field Name</ttcol>
-         <ttcol align="left" width="55">Description</ttcol>
-         <ttcol align="left" width="25">Example</ttcol>         
+         <ttcol align="center" width="20%">Field Name</ttcol>
+         <ttcol align="left">Description</ttcol>        
          <c>DRiP-Node-Counter-reset</c>
          <c>A node can reset the count (to zero) of the number of times it initiates key-value data propagation. If the counter value is reset, prior to initiating data propagation, then this field value MUST be set to true. Otherwise, it MUST be set to false, at all times. A typical use case to reset the counter value is when the counter (of unsigned type) value wraps around. The Initiator node MUST set this field value to either true or false. A Receiver Node MUST NOT change the DRiP-Node-Counter-reset field value as it forward the HTTPS request to its peer nodes.</c>
-         <c>DRiP-Node-Counter-reset: false</c>
        </texttable>
+       <t>
+         <list style="hanging" hangIndent='6'>
+           <t hangText="Example:">
+             <vspace />
+             DRiP-Node-Counter-reset: false</t>
+         </list>
+       </t>
        <texttable> 
-         <ttcol align="center" width="20">Field Name</ttcol>
-         <ttcol align="left" width="55">Description</ttcol>
-         <ttcol align="left" width="25">Example</ttcol>          
+         <ttcol align="center" width="20%">Field Name</ttcol>
+         <ttcol align="left">Description</ttcol>         
          <c>DRiP-Transaction-Type</c>
          <c>The Initiator node MUST set this field value to be either "update" or "sync". A Receiver Node MUST NOT change the DRiP-Transaction-Type field value as it forward the HTTPS request to its peer nodes.</c>
-         <c>DRiP-Transaction-Type: update</c>
        </texttable>
+       <t>
+         <list style="hanging" hangIndent='6'>
+           <t hangText="Example:">
+             <vspace />
+             DRiP-Transaction-Type: update</t>
+         </list>
+       </t>
        <texttable> 
-         <ttcol align="center" width="20">Field Name</ttcol>
-         <ttcol align="left" width="55">Description</ttcol>
-         <ttcol align="left" width="25">Example</ttcol>  
+         <ttcol align="center" width="20%">Field Name</ttcol>
+         <ttcol align="left">Description</ttcol> 
          <c>DRiP-Sync-Complete</c>
          <c>For sync transaction type, the Initiator node MUST set this field value to be true, if synchronization is complete. Otherwise, this field value MUST be set to false.</c>
-         <c>DRiP-Sync-Complete: false</c>
        </texttable>
+       <t>
+         <list style="hanging" hangIndent='6'>
+           <t hangText="Example:">
+             <vspace />
+             DRiP-Sync-Complete: false</t>
+         </list>
+       </t>
      </section>
      <section title="Key-Value Data Propagation Rules" anchor="key-value_data_propagation_rules">
        <t>A node propagates key-value data to all its peer nodes except the the node from which it received data. For example, in Figure 1, when node B receives key-value data from node A, it will propagate the data received to nodes C and D but not back to node A.</t>
@@ -297,9 +322,10 @@
            <t>Request</t>
            <figure>
              <artwork> <![CDATA[
-     $ curl -i -H "Content-Type: application/json" -H "DRiP-Node-ID: 
-         nodeA" -H "DRiP-Node-Counter: 1234" -H "DRiP-Node-Counter-reset: 
-         false" -X POST -d '{<key-value data>}' https:// nodebregistry.com/voting
+   $ curl -i -H "Content-Type: application/json" -H "DRiP-Node-ID: 
+       nodeA" -H "DRiP-Node-Counter: 1234" -H 
+       "DRiP-Node-Counter-reset: false" -X POST -d '{<key-value 
+       data>}' https://nodebregistry.com/voting
            ]]></artwork>
            </figure>
            <t>Response</t>
@@ -318,7 +344,7 @@
            <t>Request</t>
            <figure>
              <artwork> <![CDATA[               
-     $ curl -i -X POST http://nodearegistry.com/node/nodeA/response/yes
+  $ curl -i -X POST http://nodearegistry.com/node/nodeA/response/yes
              ]]></artwork>
            </figure>
            <t>Response</t>
