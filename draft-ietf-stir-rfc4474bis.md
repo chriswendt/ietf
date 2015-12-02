@@ -4,14 +4,7 @@
 
 **Abstract**
 
-The baseline security mechanisms in the Session Initiation Protocol
-(SIP) are inadequate for cryptographically assuring the identity of
-the end users that originate SIP requests, especially in an
-interdomain context.  This document defines a mechanism for securely
-identifying originators of SIP requests.  It does so by defining a
-SIP header field for conveying a signature used for validating the
-identity, and for conveying a reference to the credentials of the
-signer.
+The baseline security mechanisms in the Session Initiation Protocol (SIP) are inadequate for cryptographically assuring the identity of the end users that originate SIP requests, especially in an interdomain context.  This document defines a mechanism for securely identifying originators of SIP requests.  It does so by defining a SIP header field for conveying a signature used for validating the identity, and for conveying a reference to the credentials of the signer.
 
 **1. Introduction**
 
