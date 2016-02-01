@@ -51,7 +51,7 @@ The "alg" header could optionally be one of the following:
  * ES384
  * ES512
  
-For PASSporT, the recommended algorithm is RS256, but this may be updated in the future depending on cryptographic strength requirements guided by general accepted best practice.
+For PASSporT, the recommended algorithm is RS256, but this may be updated in the future depending on cryptographic strength requirements guided by current security best practice.
  
 **3.1.3 "x5u" (X.509 URL) Header Parameter**
 
@@ -75,25 +75,58 @@ Verified Token specific claims MUST be included unless noted optional:
 
 An example claim is as follows,
 
-	{ "oid":"+12155551212",
-	  "tid":"sip:+12155551213@example.com",
-      "jti": "FAhNaPk0onffyJvykJZC2A==",
-      "iat": 1443208345 }
+	{ 
+    "jti": "FAhNaPk0onffyJvykJZC2A==",
+    "iat": 1443208345, 
+    "oid":"+12155551212",
+	  "tid":"sip:+12155551213@example.com"
+  }
  
 **3.3 Verified Token Signature**
 
 The signature of the PASSporT is created as specified by JWS using the private key corresponding to the X.509 public key certificate referenced by the "x5u" header parameter. 
 
+**4. Extending PASSporT**
 
-**4. Security Considerations**
+PASSporT represents the bare minimum set of claims needed to assert the originating identity, however there will certainly be new and extended applications and usage of PASSPorT that will have the need of extending claims to represent other information specific to the origination identities beyond the identity itself.
+
+The suggested mechanism would be to create a new media subtype, inline with MIME media type definitions.  This subtype SHOULD follow the convention that if passport is the base subtype, the extended application subtype should use the prefix "passport+" and append the name.  For example, the base application type is "application" and subtype is "passport".  If a new specification would like to define a new usage and set of claims and call it "foo", the new subtype would be defined as "passport+foo". 
+
+**5. Deterministic JSON Serialization**
+
+It is anticipated with PASSporT usage for a particular signalling protocol, e.g. SIP or XMPP, there will be a specification that will define specific interoperable serialization definition of how the PASSporT token JSON will appear and be signed in the signalling to facilitate interoperability between implementations.
+
+JSON Objects are generally constructed using loose syntax definitions, i.e. no specific requirements around spaces and line breaks and ordering, therefore we provide a recommended JSON serialization that can be used either various related signalling protocols toward the goal of better interoperability constraints.
+
+**5.1 JSON Key Value Pair ordering**
+
+For the JWS header and the JWT claims there are a particular set of defined key pair values.  In order to make the signature deterministic, the ordering of the header key pairs and claim key pairs should follow the spec.  For PASSporT defined minimal set of claims, the header values and claims should be ordered as presented in the previous sections and as shown in the examples.
+
+**5.2 JSON Whitespace removal**
+
+For PASSporT, all whitespace characters, e.g. space or line feed characters, MUST be removed, leaving only key value pair characters and strings and any JSON bracketing or structural characters.
+
+**5.3 Escape values and Unicode**
+
+For PASSporT, escape values and Unicode values SHOULD be avoided if possible, but can be used as long as the formating
+
+**5.4 Numerical Values**
+
+Numerical strings MUST NOT be modified.  For example, "0.0" MUST NOT be normalized to "0", or "-0" MUST NOT be changed to "0".
+
+**6. Human Readability**
+
+JWT is defined to apply Base64 encoding to the Header and Claims sections.  Many protocols, like SIP and XMPP, generally utilize a "human readable" format to allow for ease of use and ease of operational debugging and monitoring.  For these protocols, the specifications defining the usage of PASSporT SHOULD provide guidance on whether Base64 encoding can be removed from the construction of the JWT.
+
+**7. Security Considerations**
 
 There are a number of security considerations required for preventing various attacks on the validity or impersonation of the signature.
 
-**4.1 Validation of the Issuer and Certificate Signature**
+**7.1 Validation of the Issuer and Certificate Signature**
 
 Use of X.509 based signatures for the JWT implies normal validation of the certificate ownership based on the binding of the public key certificate to the distinguished name representing the authorized originator.  The iss field of the signed claim should also match this distinguished name of the certificate used for signing the verified token.
 
-**4.2 Avoidance of replay and cut and paste attacks**
+**7.2 Avoidance of replay and cut and paste attacks**
 
 There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks.
 Verified tokens must be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in [RFC3261]).  There should be a link between various information provided in the token and information provided by the application level protocol information.
@@ -103,11 +136,11 @@ These would include:
 * "jti" claim could be used to exactly correspond to a unique identifier generated by originator of PASSporT
 * "term" claim is included to prevent the ability to use a previously originated message to send to another terminating party
 
-**5. IANA Considerations**
+**8. IANA Considerations**
 
-**5.1 Media Type Registration**
+**8.1 Media Type Registration**
 
-**5.1.1  Media Type Registry Contents Additions Requested**
+**8.1.1  Media Type Registry Contents Additions Requested**
 
 This section registers the "application/passport" media type [RFC2046] in the "Media Types" registry [IANA.MediaTypes] in the manner described in RFC 6838 [RFC6838], which can be used to indicate that the content is a PASSporT defined JWT and JWS.
 
@@ -134,9 +167,9 @@ This section registers the "application/passport" media type [RFC2046] in the "M
 * Change Controller: IESG
 * Provisional registration?  No
 
-**5.2 JSON Web Token Claims Registration**
+**8.2 JSON Web Token Claims Registration**
 
-**5.2.1 Registry Contents Additions Requested**
+**8.2.1 Registry Contents Additions Requested**
 
 * Claim Name: "oid"
 * Claim Description: Originating Identity
@@ -148,11 +181,11 @@ This section registers the "application/passport" media type [RFC2046] in the "M
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-wendt-verified-token-00
 
-**6. Acknowledgements**
+**9. Acknowledgements**
 
 Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Martin Dolly, Richard Shockey, Jim McEchern, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, Richard Barnes for valuable feedback on the technical and security aspects of the document.
 
-**7. References**
+**10. References**
 
    [RFC3261]  Rosenberg, J., Schulzrinne, H., Camarillo, G., Johnston,
               A., Peterson, J., Sparks, R., Handley, M. and E. Schooler,
