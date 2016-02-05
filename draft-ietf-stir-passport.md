@@ -1,15 +1,15 @@
 
 ### Persona Assertion Token (PASSporT)
 
-**draft-wendt-stir-passport-00**
+**draft-ietf-stir-passport-00**
 
 **Abstract**
 
-This memo defines a token format for verifying with non-repudiation the originator of a set of information.  This set of information, minimally the persona, in the context of this document represents the actor that either directly or indirectly represents the identity and associated data related to the entity that is originating the transmission of that information to another entity in a network.  For protecting the integrity of the transmission of this information, the originator uses a cryptographic signature generally with a key that embeds authorization from a trust anchor to prove to a terminating party that the originator is both authorized to assert the information including the persona of the sender and the information wasn't altered or modified in transit. Additionally, the token is extensible to incorporate other profiles of information related to the persona of the originator, other actors that may be part of the delivery of the token and other metadata.  In particular, verification of this information in the VoIP world is important for validating telephone calls and the telephone numbers they are presenting and can be utilized as an important tool for combat spoofing of identity and other forms of impersonation, but it is imagined that the PASSporT will be useful for many applications where there is an originating and terminating party that may not have a direct trust relationship.
+This document defines a token format for verifying with non-repudiation information associated with the originator of personal communications.  In the process of originating personal communications and in order to protect the integrity of the information used to identify the originator, a cryptographic signature is defined.  The cryptographic signature is defined with the intention that the terminating party can verify the originator identity related information, that the originator is an authorized entity to assert the information, and that the originator information wasn't altered or modified in transit. Additionally, the token should be extensible to incorporate new types and profiles of information related to the originator identity or perhaps other information regarding the delivery of the personal communications.  In particular, verification of this information in the VoIP world is important for validating originating telephone numbers to avoid illegitimate "spoofing" of the identity for fraudulent or deceptive purposes.  PASSporT is particularly useful for many personal communications applications over IP networks and other multi-hop interconnection scenerios where there is an originating and terminating parties may not have a direct trusted relationship.
 
 **1. Introduction**
 
-This document will define a method for the creation and verification of an extensible canonical token that is intended for cryptographically verifying both an originator, the validity of the originator, information associated with a specific transaction and an application specific a set of information through digital signatures and the associated chain of trust. The primary goal of PASSporT is to provide a framework for signing persona related information using a common, extensible approach. A second goal is for this token approach is to abstract from any specific signaling call logic, so creation and verification of information can be implemented in a flexible way with minimal dependence on specific signaling constructs.  There will be specifications that will provide signaling specific guidance on how to use and transport PASSporT tokens, but this is out of scope for this document.  Note: As of the authoring of this document, draft-ietf-stir-rfc4474bis provides details of how to use PASSporT within SIP signaling for the signing and verification of telephone numbers.
+This document will define a method for the creation and verification of an extensible canonical token that is intended for cryptographically verifying minimally an originating identity or more generally a URI representing the originator of personal communications and through extended profiles other information associated with the originating party or the transport of the personal communications.  The primary goal of PASSporT is to provide a common framework for signing persona related information in an extensible way.  A secondary goal is to provide this functionality independent of any specific personal communications signaling call logic, so creation and verification of information can be implemented in a flexible way and used in many personal communications implementations or even between different signaling protocol interworking.  It is anticipated that there will be signaling protocol specific guidance on how to use and transport PASSporT tokens, however this is intentionally out of scope for this document.  Note: As of the authoring of this document, draft-ietf-stir-rfc4474bis provides details of how to use PASSporT within SIP signaling for the signing and verification of telephone numbers.
 
 **2. Token Overview**
 
@@ -39,19 +39,7 @@ For PASSporT Token the "typ" header MUST minimally be "passport".
 
 **3.1.2 "alg" (Algorithm) Header Parameter**
 
-Because PASSporT is defined for use with PKI based digital signatures, the "alg" header is recommended to be one of the following algorithms as defined in JWA [RFC7518]:
- 
- * RS256
- * ES256
-
-The "alg" header could optionally be one of the following:
- 
- * RS384
- * RS512
- * ES384
- * ES512
- 
-For PASSporT, the recommended algorithm is RS256, but this may be updated in the future depending on cryptographic strength requirements guided by current security best practice.
+For PASSporT, the "alg" should be defined as RS256 as the recommended algorithm.  Note that JWA [RFC7518] defines other algorithms that may be utilized or updated in the future depending on cryptographic strength requirements guided by current security best practice.
  
 **3.1.3 "x5u" (X.509 URL) Header Parameter**
 
@@ -70,16 +58,16 @@ The JSON claim MUST include the following registered JWT defined claims unless n
 
 Verified Token specific claims MUST be included unless noted optional:
 
-* "oid" - required - the originating identity claimed.  (e.g. for SIP, the FROM or PAI associated e.164 telephone number, TEL or SIP URI)  This MAY be in URI format as defined in [RFC3986] or an application specific identity string.
-* "tid" - required - the terminating identity claimed as the intended destination by the originating party. (e.g. for SIP, the TO associated e.164 telephone number, TEL or SIP URI)  This MAY be in URI format as defined in [RFC3986] or an application specific identity string.
+* "orig" - required - the originating identity claimed.  (e.g. for SIP, the FROM or PAI associated e.164 telephone number, TEL or SIP URI)  This MAY be in URI format as defined in [RFC3986] or an application specific identity string.
+* "term" - required - the terminating identity claimed as the intended destination by the originating party. (e.g. for SIP, the TO associated e.164 telephone number, TEL or SIP URI)  This MAY be in URI format as defined in [RFC3986] or an application specific identity string.
 
 An example claim is as follows,
 
 	{ 
-    "jti": "FAhNaPk0onffyJvykJZC2A==",
     "iat": 1443208345, 
-    "oid":"+12155551212",
-	  "tid":"sip:+12155551213@example.com"
+    "jti": "FAhNaPk0onffyJvykJZC2A==",
+    "orig":"+12155551212",
+	  "term":"sip:+12155551213@example.com"
   }
  
 **3.3 Verified Token Signature**
@@ -94,25 +82,11 @@ The suggested mechanism would be to create a new media subtype, inline with MIME
 
 **5. Deterministic JSON Serialization**
 
-It is anticipated with PASSporT usage for a particular signalling protocol, e.g. SIP or XMPP, there will be a specification that will define specific interoperable serialization definition of how the PASSporT token JSON will appear and be signed in the signalling to facilitate interoperability between implementations.
+In order to provide a deterministic representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signalling environments, the JSON header object and JSON Claim object should be computed as follows. 
 
-JSON Objects are generally constructed using loose syntax definitions, i.e. no specific requirements around spaces and line breaks and ordering, therefore we provide a recommended JSON serialization that can be used either various related signalling protocols toward the goal of better interoperability constraints.
+The JSON object should follow similar rules to the construction of the thumbprint of a JSON Web Key (JWK) [RFC7638] Section 3.  Each JSON object MUST contain no whitespace or line breaks before or after any syntactic elements and with the required members ordered lexicographically by the Unicode [UNICODE] code points of the member names.
 
-**5.1 JSON Key Value Pair ordering**
-
-For the JWS header and the JWT claims there are a particular set of defined key pair values.  In order to make the signature deterministic, the ordering of the header key pairs and claim key pairs should follow the spec.  For PASSporT defined minimal set of claims, the header values and claims should be ordered as presented in the previous sections and as shown in the examples.
-
-**5.2 JSON Whitespace removal**
-
-For PASSporT, all whitespace characters, e.g. space or line feed characters, MUST be removed, leaving only key value pair characters and strings and any JSON bracketing or structural characters.
-
-**5.3 Escape values and Unicode**
-
-For PASSporT, escape values and Unicode values SHOULD be avoided if possible, but can be used as long as the formating
-
-**5.4 Numerical Values**
-
-Numerical strings MUST NOT be modified.  For example, "0.0" MUST NOT be normalized to "0", or "-0" MUST NOT be changed to "0".
+In addition, the JSON header and claim members MUST follow the lexicographical ordering and character and string rules defined in [RFC7638] Section 3.3.
 
 **6. Human Readability**
 
@@ -171,13 +145,13 @@ This section registers the "application/passport" media type [RFC2046] in the "M
 
 **8.2.1 Registry Contents Additions Requested**
 
-* Claim Name: "oid"
-* Claim Description: Originating Identity
+* Claim Name: "orig"
+* Claim Description: Originating URI
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-wendt-verified-token-00
 
-* Claim Name: "tid"
-* Claim Description: Terminating Identity
+* Claim Name: "term"
+* Claim Description: Terminating URI
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-wendt-verified-token-00
 
