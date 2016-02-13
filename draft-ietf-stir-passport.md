@@ -101,9 +101,9 @@ profiles for deployment environments may make other "ppt" values mandatory). The
 
 **4.3 Alternate PASSporT Extension**
 
-Some applications may want to use the mechanism of the PASSporT digital signature that is not a superset of the base set of claims of the PASSporT token as defined in Section 3.  Rather, a specification may use PASSporT with it's own defined set of claims.
+Some applications may want to use the mechanism of the PASSporT digital signature that is not a superset of the base set of claims of the PASSporT token as defined in Section 3.  Rather, a specification may use PASSporT with its own defined set of claims.
 
-In this case, the specification should define it's own MIME media type [RFC2046] in the "Media Types" registry [IANA.MediaTypes].  It is recommended that the MIME subtype start with the string "passport-" to signify that it is related to the PASSporT token.  For example, for the "foo" application the MIME type/sub-type could be defined as "application/passport-foo".
+In this case, the specification should define its own MIME media type [RFC2046] in the "Media Types" registry [IANA.MediaTypes].  It is recommended that the MIME subtype start with the string "passport-" to signify that it is related to the PASSporT token.  For example, for the "foo" application the MIME type/sub-type could be defined as "application/passport-foo".
 
 **4.4 Registering PASSporT Extensions**
 
@@ -111,7 +111,7 @@ In order for interoperability and maintaining uniqueness of the extended PASSpor
 
 **5. Deterministic JSON Serialization**
 
-In order to provide a deterministic representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signalling environments, the JSON header object and JSON Claim object should be computed as follows. 
+In order to provide a deterministic representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, the JSON header object and JSON Claim object should be computed as follows. 
 
 The JSON object should follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3.  Each JSON object MUST contain no whitespace or line breaks before or after any syntactic elements and with the required members ordered lexicographically by the Unicode [UNICODE] code points of the member names.
 
