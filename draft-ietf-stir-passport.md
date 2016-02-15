@@ -5,17 +5,19 @@
 
 **Abstract**
 
-This document defines a token format for verifying with non-repudiation information associated with the originator of personal communications. A cryptographic signature is defined to protect the integrity of the information used to identify the originator of a personal communications session toward a terminating entity. The cryptographic signature is defined with the intention that it can confidentially verify the originating persona even when the signature is sent to the terminating party over a potentially unsecure channel.  This persona information minimally includes the originator identity, but could also, through an extensible mechanism, provide other identity related information or details of the origination of the communications. Using the digital signature can also confirm that the originator is authorized to assert the persona information. In particular, verification of the persona information in the VoIP world is important for validating originating telephone numbers to avoid illegitimate "spoofing" of the identity for fraudulent or deceptive purposes.  PASSporT is particularly useful for many personal communications applications over IP networks and other multi-hop interconnection scenarios where the originating and terminating parties may not have a direct trusted relationship.
+This document defines a token format for verifying with non-repudiation the sender of and authorization to send information related to the originator of personal communications. A cryptographic signature is defined to protect the integrity of the information used to identify the originator of a personal communications session toward a terminating entity. The cryptographic signature is defined with the intention that it can confidently verify the originating persona even when the signature is sent to the terminating party over a potentially unsecure channel. The Persona Assertion Token (PASSporT) is particularly useful for many personal communications applications over IP networks and other multi-hop interconnection scenarios where the originating and terminating parties may not have a direct trusted relationship.
 
 **1. Introduction**
 
-This document defines a method for creating and validating a token that cryptographically verifies an originating identity, or more generally a URI representing the originator of personal communications. Through extended profiles other information associated with the originating party or the transport of the personal communications can be attached to the token.  The primary goal of PASSporT is to provide a common framework for signing persona related information in an extensible way.  A secondary goal is to provide this functionality independent of any specific personal communications signaling call logic, so that creation and verification of persona information can be implemented in a flexible way and can be used in many personal communications applications including end-to-end applications that require different signaling protocol interworking.  It is anticipated that signaling protocol specific guidance will be provided in other related documents and specifications to specify how to use and transport PASSporT tokens, however this is intentionally out of scope for this document.  
+In today's IP-enabled telecommunications world, there is a growing concern about the ability to trust incoming invitations for communications sessions, including video, voice and messaging.  As an example, modern telephone networks provide the ability to spoof the telephone number for many legitimate purposes including providing network features and services on the behalf of a legitimate telephone number.  However, as we have seen, bad actors have taken advantage of this ability for illegitimate and fraudulent purposes meant to trick telephone users to believe they are someone they are not.  This problem can be extended to many emerging forms of personal communications.
 
-Note: As of the authoring of this document, ietf-stir-rfc4474bis provides details of how to use PASSporT within SIP signaling for the signing and verification of telephone numbers.
+This document defines a common method for creating and validating a token that cryptographically verifies an originating identity, or more generally a URI representing the originator of personal communications. Through extended profiles other information associated with the originating party or the transport of the personal communications can be attached to the token.  The primary goal of PASSporT is to provide a common framework for signing persona related information in an extensible way.  A secondary goal is to provide this functionality independent of any specific personal communications signaling call logic, so that creation and verification of persona information can be implemented in a flexible way and can be used in many personal communications applications including end-to-end applications that require different signaling protocol interworking.  It is anticipated that signaling protocol specific guidance will be provided in other related documents and specifications to specify how to use and transport PASSporT tokens, however this is intentionally out of scope for this document.  
+
+Note: As of the authoring of this document, ietf-stir-rfc4474bis provides details of how to use PASSporT within SIP signaling for the signing and verification of telephone numbers and there is a parallel.
 
 **2. Token Overview**
 
-Tokens are a convenient way of encapsulating information with associated digital signatures.  They are used in many applications that require authentication, authorization, encryption and other use cases.  JWT [RFC7519] and JWS [RFC7515] are designed to provide a compact form for many of these purposes and define a specific method and syntax for signing a specific set of information or "claims" within the token and therefore providing an extensible set of claims. Additionally, JWS provides extensible mechanisms for specifying the method and cryptographic algorithms used for the associated digital signatures. 
+Tokens are a convenient way of encapsulating information with associated digital signatures.  They are used in many applications that require authentication, authorization, encryption and other use cases.  JSON Web Token (JWT) [RFC7519] and JSON Web Signature (JWS) [RFC7515] are designed to provide a compact form for many of these purposes and define a specific method and syntax for signing a specific set of information or "claims" within the token and therefore providing an extensible set of claims. Additionally, JWS provides extensible mechanisms for specifying the method and cryptographic algorithms used for the associated digital signatures. 
 
 **3. PASSporT Definition**
 
@@ -23,7 +25,7 @@ The PASSporT is constructed based on JWT [RFC7519] and JWS [RFC7515] specificati
 
 **3.1. PASSporT Header**
 
-The JWS token header is a JOSE header that defines the type and encryption algorithm used in the token.  
+The JWS token header is a JOSE header [RFC7515] that defines the type and encryption algorithm used in the token.  
 
 An example of the header for the case of a RSASSA-PKCS1-v1_5 SHA-256 digital signature would be the following,
 
@@ -53,15 +55,15 @@ As defined in JWS, the "x5u" header parameter is used to provide a URI [RFC3986]
 
 The token claim should consist of the information which needs to be verified at the terminating party.  This claim should correspond to a JWT claim [RFC7519] and be encoded as defined by the JWS Payload [RFC7519]. 
 
-The PASSporT should use a number of standard JWT defined headers as well as some addition custom headers specifically required for two party communications with an originator and terminator.  These headers or key value pairs will be explained here, but some of the security implications will be explained further in the security considerations section below.
+The PASSporT defines the use of a number of standard JWT defined headers as well as two new custom headers corresponding to the two parties associated with personal communications, the originator and terminator.  These headers or key value pairs are detailed below. 
 
 The JSON claim MUST include the following registered JWT defined claims:
 
-* "iat" - issued at, time the JWT was issued, used for expiration
+* "iat" - issued at, time the JWT was issued, used for expiration.  This is included for securing the token against replay and cut and paste attacks, as explained further in the security considerations in section 7.
 
-Verified Token specific claims MUST that be included:
+Verified Token specific claims that MUST be included:
 
-* "orig" - the originating identity claimed.  (e.g. for SIP, the FROM or P-AssertedID associated e.164 telephone number, TEL or SIP URI)  This SHOULD be in URI format as defined in [RFC3986] but could also be an application specific identity string.
+* "orig" - the originating identity claimed.  (e.g. for SIP, the FROM or P-AssertedID [RFC3325] associated e.164 telephone number, TEL or SIP URI)  This SHOULD be in URI format as defined in [RFC3986] but could also be an application specific identity string.
 * "term" - the terminating identity claimed as the intended destination by the originating party. (e.g. for SIP, the TO associated e.164 telephone number, TEL or SIP URI)  This SHOULD be in URI format as defined in [RFC3986] but could also be an application specific identity string.
 
 An example claim is as follows,
@@ -80,9 +82,11 @@ The signature of the PASSporT is created as specified by JWS using the private k
 
 PASSporT represents the bare minimum set of claims needed to assert the originating identity, however there will certainly be new and extended applications and usage of PASSPorT that will need to extending claims to represent other information specific to the origination identities beyond the identity itself.
 
+There is two mechanisms defined to extend PASSporT
+
 **4.1 "ppt" (PASSporT) header parameter**
 
-For these extended profiles of PASSporT, the JWS header parameter "ppt" SHOULD be used with a string that uniquely identifies the profile specification that defines any new claims that would extend the base set of claims of PASSporT.
+For extended profiles of PASSporT, a new JWS header parameter "ppt" MUST be used with a string that uniquely identifies the profile specification that defines any new claims that would extend the base set of claims of PASSporT.
 
 An example header with an extended PASSporT profile of "foo" is as follows:
 
@@ -111,15 +115,15 @@ In order for interoperability and maintaining uniqueness of the extended PASSpor
 
 **5. Deterministic JSON Serialization**
 
-In order to provide a deterministic representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, the JSON header object and JSON Claim object should be computed as follows. 
+In order to provide a deterministic representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, the JSON header object and JSON Claim object MUST be computed as follows. 
 
-The JSON object should follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3.  Each JSON object MUST contain no whitespace or line breaks before or after any syntactic elements and with the required members ordered lexicographically by the Unicode [UNICODE] code points of the member names.
+The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3.  Each JSON object MUST contain no whitespace or line breaks before or after any syntactic elements and with the required members ordered lexicographically by the Unicode [UNICODE] code points of the member names.
 
 In addition, the JSON header and claim members MUST follow the lexicographical ordering and character and string rules defined in [RFC7638] Section 3.3.
 
 **6. Human Readability**
 
-JWT [RFC7519] and JWS [RFC7515] are defined to apply Base64 encoding to the Header and Claims sections.  Many personal communications protocols, such as SIP and XMPP, generally utilize a "human readable" format to allow for ease of use and ease of operational debugging and monitoring.  For these protocols, flexibility in the usage of Base64 encoding that obfuscates the readable JSON objects is a consideration.  Therefore, specifications defining the usage of PASSporT may provide guidance on whether Base64 encoding can be eliminated from the construction of the PASSporT Header and Claim sections.
+For many applications, JWT [RFC7519] and JWS [RFC7515] can use Base64 encoding to the Header and Claims sections as specified.  However, many personal communications protocols, such as SIP and XMPP, use a "human readable" format to allow for ease of use and ease of operational debugging and monitoring.  As such, specifications using PASSporT may provide guidance on whether Base64 encoding or plain text will be used for the construction of the PASSporT Header and Claim sections.
 
 **7. Security Considerations**
 
@@ -131,6 +135,16 @@ These would include:
 
 * "iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the verified token.
 * "term" claim is included to prevent the ability to use a previously originated message to send to another terminating party
+
+**7.2 Solution Considerations**
+
+It should be recognized that the use of this token should not, in it's own right, be considered a full solution for absolute non-repudiation of the persona being asserted.  This only provides non-repudiation of the signer of PASSporT.  If the signer and the persona are not one in the same, which can and often can be the case in telecommunications networks today, protecting the terminating party for being spoofed may take some interpretation or additional verification of the link between the PASSporT signature and the persona being asserted.  
+
+In addition, the telecommunications systems and specifications that use PASSporT should in practice provide mechanisms for:
+
+* Managing X.509 certificates and X.509 certificate chains to an authorized trust anchor that can be a trusted entity to all participants in the telecommunications network
+* Accounting for entities that may route calls from other peer or interconnected telecommunications networks that are not part of the "trusted" communications network or may not be following the usage of PASSporT or the profile of PASSporT appropriate to that network
+* Following best practices around management and security of X.509 certificates
 
 **8. IANA Considerations**
 
@@ -179,7 +193,7 @@ This section registers the "application/passport" media type [RFC2046] in the "M
 
 **9. Acknowledgements**
 
-Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, Richard Barnes for valuable feedback on the technical and security aspects of the document.
+Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, and Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, and Richard Barnes for valuable feedback on the technical and security aspects of the document.
 
 **10. References**
 
