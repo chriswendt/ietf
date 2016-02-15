@@ -11,7 +11,7 @@ This document defines a token format for verifying with non-repudiation the send
 
 In today's IP-enabled telecommunications world, there is a growing concern about the ability to trust incoming invitations for communications sessions, including video, voice and messaging.  As an example, modern telephone networks provide the ability to spoof the telephone number for many legitimate purposes including providing network features and services on the behalf of a legitimate telephone number.  However, as we have seen, bad actors have taken advantage of this ability for illegitimate and fraudulent purposes meant to trick telephone users to believe they are someone they are not.  This problem can be extended to many emerging forms of personal communications.
 
-This document defines a common method for creating and validating a token that cryptographically verifies an originating identity, or more generally a URI representing the originator of personal communications. Through extended profiles other information associated with the originating party or the transport of the personal communications can be attached to the token.  The primary goal of PASSporT is to provide a common framework for signing persona related information in an extensible way.  A secondary goal is to provide this functionality independent of any specific personal communications signaling call logic, so that creation and verification of persona information can be implemented in a flexible way and can be used in many personal communications applications including end-to-end applications that require different signaling protocol interworking.  It is anticipated that signaling protocol specific guidance will be provided in other related documents and specifications to specify how to use and transport PASSporT tokens, however this is intentionally out of scope for this document.  
+This document defines a common method for creating and validating a token that cryptographically verifies an originating identity, or more generally a URI or application specific identity string representing the originator of personal communications. Through extended profiles other information associated with the originating party or the transport of the personal communications can be attached to the token.  The primary goal of PASSporT is to provide a common framework for signing persona related information in an extensible way.  A secondary goal is to provide this functionality independent of any specific personal communications signaling call logic, so that creation and verification of persona information can be implemented in a flexible way and can be used in many personal communications applications including end-to-end applications that require different signaling protocol interworking.  It is anticipated that signaling protocol specific guidance will be provided in other related documents and specifications to specify how to use and transport PASSporT tokens, however this is intentionally out of scope for this document.  
 
 Note: As of the authoring of this document, ietf-stir-rfc4474bis provides details of how to use PASSporT within SIP signaling for the signing and verification of telephone numbers and there is a parallel.
 
@@ -63,8 +63,8 @@ The JSON claim MUST include the following registered JWT defined claims:
 
 Verified Token specific claims that MUST be included:
 
-* "orig" - the originating identity claimed.  (e.g. for SIP, the FROM or P-AssertedID [RFC3325] associated e.164 telephone number, TEL or SIP URI)  This SHOULD be in URI format as defined in [RFC3986] but could also be an application specific identity string.
-* "term" - the terminating identity claimed as the intended destination by the originating party. (e.g. for SIP, the TO associated e.164 telephone number, TEL or SIP URI)  This SHOULD be in URI format as defined in [RFC3986] but could also be an application specific identity string.
+* "orig" - the originating identity claimed.  (e.g. for SIP, the FROM or P-AssertedID [RFC3325] associated e.164 telephone number, TEL or SIP URI)  This SHOULD be in URI format as defined in [RFC3986] if appropriate but could also be an application specific identity string.
+* "term" - the terminating identity claimed as the intended destination by the originating party. (e.g. for SIP, the TO associated e.164 telephone number, TEL or SIP URI)  This SHOULD be in URI format as defined in [RFC3986] if appropriate but could also be an application specific identity string.
 
 An example claim is as follows,
 
@@ -182,12 +182,12 @@ This section registers the "application/passport" media type [RFC2046] in the "M
 **8.2.1 Registry Contents Additions Requested**
 
 * Claim Name: "orig"
-* Claim Description: Originating URI
+* Claim Description: Originating Identity String
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
 
 * Claim Name: "term"
-* Claim Description: Terminating URI
+* Claim Description: Terminating Identity String
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
 
