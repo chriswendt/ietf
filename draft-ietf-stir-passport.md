@@ -63,7 +63,7 @@ The JSON claim MUST include the "iat" [RFC7519] defined claim issued at.  As def
 
 PASSporT specific claims:
 
-If the originating identity is a telephone number, the claim "otn" should be included as a claim.  If the destination identity is a telephone number, the claim "dtn" should be included as a claim. The format of the telephone number for both "otn" and "ttn" claims should follow the canonicalization defined in Section 3.2.1.
+If the originating identity is a telephone number, the claim "otn" should be included as a claim.  If the destination identity is a telephone number, the claim "dtn" should be included as a claim. The format of the telephone number for both "otn" and "dtn" claims should follow the canonicalization defined in Section 3.2.1.
 
 If the originating identity is not a telephone number, the claim "ouri" should be included as a claim with the value cooresponding to the URI form of the identity as defined in [RFC3986], alternatively it could also contain an application specific identity string, if URI format is not appropriate.
 
