@@ -5,11 +5,11 @@
 
 **Abstract**
 
-This document defines a token format for verifying with non-repudiation the sender of and authorization to send information related to the originator of personal communications. A cryptographic signature is defined to protect the integrity of the information used to identify the originator of a personal communications session toward a terminating entity. The cryptographic signature is defined with the intention that it can confidently verify the originating persona even when the signature is sent to the terminating party over a potentially unsecure channel. The Persona Assertion Token (PASSporT) is particularly useful for many personal communications applications over IP networks and other multi-hop interconnection scenarios where the originating and terminating parties may not have a direct trusted relationship.
+This document defines a token format for verifying with non-repudiation the sender of and authorization to send information related to the originator of personal communications. A cryptographic signature is defined to protect the integrity of the information used to identify the originator of a personal communications session toward a destination entity. The cryptographic signature is defined with the intention that it can confidently verify the originating persona even when the signature is sent to the destination party over a potentially unsecure channel. The Persona Assertion Token (PASSporT) is particularly useful for many personal communications applications over IP networks and other multi-hop interconnection scenarios where the originating and destination parties may not have a direct trusted relationship.
 
 **1. Introduction**
 
-In today's IP-enabled telecommunications world, there is a growing concern about the ability to trust incoming invitations for communications sessions, including video, voice and messaging.  As an example, modern telephone networks provide the ability to spoof the telephone number for many legitimate purposes including providing network features and services on the behalf of a legitimate telephone number.  However, as we have seen, bad actors have taken advantage of this ability for illegitimate and fraudulent purposes meant to trick telephone users to believe they are someone they are not.  This problem can be extended to many emerging forms of personal communications.
+In today's IP-enabled telecommunications world, there is a growing concern about the ability to trust incoming invitations for communications sessions, including video, voice and messaging. As an example, modern telephone networks provide the ability to spoof the telephone number for many legitimate purposes including providing network features and services on the behalf of a legitimate telephone number.  However, as we have seen, bad actors have taken advantage of this ability for illegitimate and fraudulent purposes meant to trick telephone users to believe they are someone they are not. This problem can be extended to many emerging forms of personal communications.
 
 This document defines a common method for creating and validating a token that cryptographically verifies an originating identity, or more generally a URI or application specific identity string representing the originator of personal communications. Through extended profiles other information associated with the originating party or the transport of the personal communications can be attached to the token.  The primary goal of PASSporT is to provide a common framework for signing persona related information in an extensible way.  A secondary goal is to provide this functionality independent of any specific personal communications signaling call logic, so that creation and verification of persona information can be implemented in a flexible way and can be used in many personal communications applications including end-to-end applications that require different signaling protocol interworking.  It is anticipated that signaling protocol specific guidance will be provided in other related documents and specifications to specify how to use and transport PASSporT tokens, however this is intentionally out of scope for this document.  
 
@@ -32,7 +32,7 @@ An example of the header for the case of a RSASSA-PKCS1-v1_5 SHA-256 digital sig
 	  { 
       "typ":"passport",
       "alg":"RS256",
-      "x5u":"https://tel.example.org/passport.crt" 
+      "x5u":"https://cert.example.org/passport.crt" 
     }
       
 **3.1.1 "typ" (Type) Header Parameter**
@@ -53,28 +53,44 @@ As defined in JWS, the "x5u" header parameter is used to provide a URI [RFC3986]
 
 **3.2. PASSporT Token Claims**
 
-The token claim should consist of the information which needs to be verified at the terminating party.  This claim should correspond to a JWT claim [RFC7519] and be encoded as defined by the JWS Payload [RFC7519]. 
+The token claim should consist of the information which needs to be verified at the destination party.  This claim should correspond to a JWT claim [RFC7519] and be encoded as defined by the JWS Payload [RFC7519]. 
 
 The PASSporT defines the use of a number of standard JWT defined headers as well as two new custom headers corresponding to the two parties associated with personal communications, the originator and terminator.  These headers or key value pairs are detailed below. 
 
-The JSON claim MUST include the following registered JWT defined claims:
+JWT defined claim:
 
-* "iat" - issued at, time the JWT was issued, used for expiration.  This is included for securing the token against replay and cut and paste attacks, as explained further in the security considerations in section 7.
+The JSON claim MUST include the "iat" [RFC7519] defined claim issued at.  As defined this should be set to a date cooresponding to the origination of the personal communications. The time value should be of the format defined in [RFC7519] Section 2 NumericDate.  This is included for securing the token against replay and cut and paste attacks, as explained further in the security considerations in section 7.
 
-Verified Token specific claims that MUST be included:
+PASSporT specific claims:
 
-* "orig" - the originating identity claimed.  (e.g. for SIP, the FROM or P-AssertedID [RFC3325] associated e.164 telephone number, TEL or SIP URI)  This SHOULD be in URI format as defined in [RFC3986] if appropriate but could also be an application specific identity string.
-* "term" - the terminating identity claimed as the intended destination by the originating party. (e.g. for SIP, the TO associated e.164 telephone number, TEL or SIP URI)  This SHOULD be in URI format as defined in [RFC3986] if appropriate but could also be an application specific identity string.
+If the originating identity is a telephone number, the claim "otn" should be included as a claim.  If the destination identity is a telephone number, the claim "dtn" should be included as a claim. The format of the telephone number for both "otn" and "ttn" claims should follow the canonicalization defined in Section 3.2.1.
+
+If the originating identity is not a telephone number, the claim "ouri" should be included as a claim with the value cooresponding to the URI form of the identity as defined in [RFC3986], alternatively it could also contain an application specific identity string, if URI format is not appropriate.
+
+If the destination identity is not a telephone number, the claim "duri" should be included as a claim.  The same value format rules apply as stated for "ouri".
+
+In the case of personal communication protocols where the request contains an SDP message body, and if that SDP contains one or more "a=fingerprint" attributes, then the claim "mky" should be included.  The value part of the claim should be the quoted value(s) of the fingerprint attributes (if they differ).  Each attribute value consists of all characters following the colon after "a=fingerprint" including the algorithm description and hexadecimal key representation, any whitespace, carriage returns, and "/" line break indicators.  If multiple non-identical "a=fingerprint" attributes appear in an SDP body, then all non-identical attributes values MUST be concatenated, with no separating character, after sorting the values in alphanumeric order.  If the SDP body contains no "a=fingerprint" attribute, then the "mky" claim should not be used.
 
 An example claim is as follows,
 
 	{ 
     "iat": 1443208345, 
-    "orig":"+12155551212",
-	  "term":"sip:+12155551213@example.com"
+    "otn":"12155551212",
+	  "duri":"sip:alice@example.com"
+	  "mky":"SHA-256 \
+          4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:5D:49:6B:19:E5:7C:AB"
   }
+  
+**3.2.1. Telephone Number Canonicalization**
+
+Telephone Number strings for "otn" and "dtn" claims should be canonicalized according to the procedures specified in [ietf-stir-rfc4474bis-07] Section 6.1.1.
+
+**3.2.2. Multi-party Communications**
+
+Personal communications in the context of PASSporT can certainly extend to multi-party scenerios where there are more than one destination identities.  In the future, it is anticipated that PASSporT will be extended to support these cases.
+
  
-**3.3 Verified Token Signature**
+**3.3 PASSporT Signature**
 
 The signature of the PASSporT is created as specified by JWS using the private key corresponding to the X.509 public key certificate referenced by the "x5u" header parameter. 
 
@@ -82,7 +98,7 @@ The signature of the PASSporT is created as specified by JWS using the private k
 
 PASSporT represents the bare minimum set of claims needed to assert the originating identity, however there will certainly be new and extended applications and usage of PASSPorT that will need to extending claims to represent other information specific to the origination identities beyond the identity itself.
 
-There is two mechanisms defined to extend PASSporT
+There are two mechanisms defined to extend PASSporT. The first includes an extension of the base passport claims to include additional claims.  An alternative method of extending PASSporT is for applications of PASSporT unrelated to the base set of claims, that will define it's own set of claims.  Both are described below.
 
 **4.1 "ppt" (PASSporT) header parameter**
 
@@ -99,8 +115,7 @@ An example header with an extended PASSporT profile of "foo" is as follows:
 
 **4.2 Extended PASSporT Claims**
 
-Future specifications that define such extensions to the PASSporT mechanism MUST explicitly designate what claims they include, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST incorporate the baseline JWT elements specified in Section 3; claims may only be appended to the
-claims object specified in there, they can never be subtracted re-ordered. Specifying new claims follows the baseline JWT procedures ([RFC7519] Section 10.1 <https://tools.ietf.org/html/rfc7519#section-10.1>). Note that understanding an extension as a verifier is always optional for compliance with this specification (though future specifications or
+Future specifications that define such extensions to the PASSporT mechanism MUST explicitly designate what claims they include, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST incorporate the baseline JWT elements specified in Section 3; claims may only be appended to the claims object specified in there, they can never be subtracted re-ordered. Specifying new claims follows the baseline JWT procedures ([RFC7519] Section 10.1 <https://tools.ietf.org/html/rfc7519#section-10.1>). Note that understanding an extension as a verifier is always optional for compliance with this specification (though future specifications or
 profiles for deployment environments may make other "ppt" values mandatory). The creator of a PASSporT object cannot assume that verifiers will understand any given extension. Verifiers that do support an extension may then trigger appropriate application-level behavior in the presence of an extension; authors of extensions should provide appropriate extension-specific guidance to application developers on this point.
 
 **4.3 Alternate PASSporT Extension**
@@ -134,17 +149,21 @@ Verified tokens must be sent along with other application level protocol informa
 These would include:
 
 * "iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the verified token.
-* "term" claim is included to prevent the ability to use a previously originated message to send to another terminating party
+* either "dtn" claim or "duri" claim is included to prevent the ability to use a previously originated message to send to another destination party
 
 **7.2 Solution Considerations**
 
-It should be recognized that the use of this token should not, in it's own right, be considered a full solution for absolute non-repudiation of the persona being asserted.  This only provides non-repudiation of the signer of PASSporT.  If the signer and the persona are not one in the same, which can and often can be the case in telecommunications networks today, protecting the terminating party for being spoofed may take some interpretation or additional verification of the link between the PASSporT signature and the persona being asserted.  
+It should be recognized that the use of this token should not, in it's own right, be considered a full solution for absolute non-repudiation of the persona being asserted.  This only provides non-repudiation of the signer of PASSporT.  If the signer and the persona are not one in the same, which can and often can be the case in telecommunications networks today, protecting the destination party for being spoofed may take some interpretation or additional verification of the link between the PASSporT signature and the persona being asserted.  
 
 In addition, the telecommunications systems and specifications that use PASSporT should in practice provide mechanisms for:
 
 * Managing X.509 certificates and X.509 certificate chains to an authorized trust anchor that can be a trusted entity to all participants in the telecommunications network
 * Accounting for entities that may route calls from other peer or interconnected telecommunications networks that are not part of the "trusted" communications network or may not be following the usage of PASSporT or the profile of PASSporT appropriate to that network
 * Following best practices around management and security of X.509 certificates
+
+**7.3 Privacy Considerations**
+
+Because PASSporT explicity includes claims of identitifiers of parties involved in communications, times, and potentially other call detail, care should be taken outside of traditional protected or private telephony communications paths where there may be concerns about exposing information to either unintended or illegitimately intented actors.  These identifiers are often exposed through many communications signaling protocols as of today, but appropriate precautions should be taken.
 
 **8. IANA Considerations**
 
@@ -181,13 +200,28 @@ This section registers the "application/passport" media type [RFC2046] in the "M
 
 **8.2.1 Registry Contents Additions Requested**
 
-* Claim Name: "orig"
-* Claim Description: Originating Identity String
+* Claim Name: "otn"
+* Claim Description: Originating Telephone Number String
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
 
-* Claim Name: "term"
-* Claim Description: Terminating Identity String
+* Claim Name: "dtn"
+* Claim Description: Destination Telephone Number String
+* Change Controller: IESG
+* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
+
+* Claim Name: "ouri"
+* Claim Description: Originating URI String
+* Change Controller: IESG
+* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
+
+* Claim Name: "duri"
+* Claim Description: Destination URI String
+* Change Controller: IESG
+* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
+
+* Claim Name: "mky"
+* Claim Description: Fingerprint String
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
 
