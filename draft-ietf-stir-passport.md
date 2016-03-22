@@ -83,7 +83,7 @@ If the destination identity is not a telephone number, the claim "duri" should b
 
 **3.2.2.2. "mky" - Media Key claim**
 
-Some protocols that use PASSporT convey hashes for media security keys within their signaling in order to bind those keys to the identities established in the signaling layers. One example would be the DTLS-SRTP key fingerprints carried in SDP via the "a=fingerprint" attribute; multiple instances of that fingerprint may appear in a single SDP body corresponding to difference media streams offered. The "mky" value of PASSporT contains a hexadecimal key presentation of any hash(es) necessary to establish media security via DTLS-SRTP. Note that per guidance of Section 5 of this document any whitespace and line feeds must be removed, however the exception is that for the space character between the hash algorithm and the hash should remain. If multiple key fingerprints are associated with a sessions establishment, then all non-identical key representations MUST be concatenated, with a comma seperation character, after the values in alphanumeric order, before inserting them into the "mky" value in PASSporT.
+Some protocols that use PASSporT convey hashes for media security keys within their signaling in order to bind those keys to the identities established in the signaling layers. One example would be the DTLS-SRTP key fingerprints carried in SDP via the "a=fingerprint" attribute; multiple instances of that fingerprint may appear in a single SDP body corresponding to difference media streams offered. The "mky" value of PASSporT contains a hexadecimal key presentation of any hash(es) necessary to establish media security via DTLS-SRTP. Note that per guidance of Section 5 of this document any whitespace and line feeds must be removed, however the exception is that a single space (' ') character between the hash algorithm and the hash should remain. If multiple key fingerprints are associated with a sessions establishment, then all non-identical key representations MUST be concatenated, with a semicolon seperation (';') character, after the values in alphanumeric order, before inserting them into the "mky" value in PASSporT.
 
 An example claim with "mky" claim is as follows:
 
@@ -101,7 +101,7 @@ the PASSporT Payload object would be:
     "otn":"12155551212",
 	  "duri":"sip:alice@example.com",
 	  "mky":"sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:2E:7D:
-	  	46:3F:54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2,sha-256 4A:AD:B9:
+	  	46:3F:54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2;sha-256 4A:AD:B9:
 		B1:3F:82:18:3B:54:02:12:DF:3E:5D:49:6B:19:E5:7C:AB:3E:4B:
 		65:2E:7D:46:3F:54:42:CD:54:F1"
   }
@@ -163,7 +163,7 @@ For the example PASSporT Payload shown in Section 3.2.2.3, the following is the 
 
 	{"iat": 1443208345,"otn":"12155551212","duri":"sip:alice@example.com",
 	  "mky":"sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:2E:7D:46:3F:54:
-	  42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2,sha-256 4A:AD:B9:B1:3F:82:
+	  42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2;sha-256 4A:AD:B9:B1:3F:82:
 	  18:3B:54:02:12:DF:3E:5D:49:6B:19:E5:7C:AB:3E:4B:65:2E:7D:46:3F:54:42:
 	  CD:54:F1"}
 
