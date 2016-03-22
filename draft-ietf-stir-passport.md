@@ -59,25 +59,29 @@ The PASSporT defines the use of a number of standard JWT defined headers as well
 
 **3.2.1. JWT defined claims**
 
-**3.2.1.1 "iat" - Issued at claim
+**3.2.1.1 "iat" - Issued at claim**
 
 The JSON claim MUST include the "iat" [RFC7519] defined claim issued at.  As defined this should be set to a date cooresponding to the origination of the personal communications. The time value should be of the format defined in [RFC7519] Section 2 NumericDate.  This is included for securing the token against replay and cut and paste attacks, as explained further in the security considerations in section 7.
 
 **3.2.2. PASSporT specific claims**
 
-**3.2.2.1. "otn" and "dtn" - Originating and Destination Telephone Number claims**
+**3.2.2.1. Originating and Destination Identities**
+
+Baseline PASSporT defines claims that convey the identity of the origination and destination of personal communications represented as either telephone numbers or Uniform Resource Indicators (URIs). Some using protocols may require other identifiers for personae; these may be specified as claims through the PASSporT extensibility mechanisms. But for telephone numbers and URIs, the following claims should be used:
+
+**3.2.2.1.1. "otn" and "dtn" - Originating and Destination Telephone Number claims**
 
 If the originating identity is a telephone number, the claim "otn" should be included as a claim.  If the destination identity is a telephone number, the claim "dtn" should be included as a claim. The format of the telephone number for both "otn" and "dtn" claims should follow the canonicalization defined in Section 3.2.1.
 
 Telephone Number strings for "otn" and "dtn" claims should be canonicalized according to the procedures specified in [ietf-stir-rfc4474bis-07] Section 6.1.1.
 
-**3.2.2.2. "ouri" and "duri" - Originating and Destination URI claims**
+**3.2.2.1.2. "ouri" and "duri" - Originating and Destination URI claims**
 
 If the originating identity is not a telephone number, the claim "ouri" should be included as a claim with the value cooresponding to the URI form of the identity as defined in [RFC3986], alternatively it could also contain an application specific identity string, if URI format is not appropriate.
 
 If the destination identity is not a telephone number, the claim "duri" should be included as a claim.  The same value format rules apply as stated for "ouri".
 
-**3.2.2.3 "mky" - Media Key claim**
+**3.2.2.2. "mky" - Media Key claim**
 
 Some protocols that use PASSporT convey hashes for media security keys within their signaling in order to bind those keys to the identities established in the signaling layers. One example would be the DTLS-SRTP key fingerprints carried in SDP via the "a=fingerprint" attribute; multiple instances of that fingerprint may appear in a single SDP body corresponding to difference media streams offered. The "mky" value of PASSporT contains a hexadecimal key presentation of any hash(es) necessary to establish media security via DTLS-SRTP. Note that per guidance of Section 5 of this document any whitespace and line feeds must be removed, however the exception is that for the space character between the hash algorithm and the hash should remain. If multiple key fingerprints are associated with a sessions establishment, then all non-identical key representations MUST be concatenated, with a comma seperation character, after the values in alphanumeric order, before inserting them into the "mky" value in PASSporT.
 
