@@ -51,41 +51,58 @@ For PASSporT, the "alg" should be defined as RS256 as the recommended algorithm.
 
 As defined in JWS, the "x5u" header parameter is used to provide a URI [RFC3986] referring to the resource for the X.509 public key certificate or certificate chain [RFC5280] corresponding to the key used to digitally sign the JWS.  Note: The definition of what the URI represents in terms of the actor serving the X.509 public key is out of scope of this document.  However, generally this would correspond to an HTTPS or DNSSEC resource with the guidance that it MUST be a TLS protected, per JWS spec.
 
-**3.2. PASSporT Token Claims**
+**3.2. PASSporT Payload**
 
-The token claim should consist of the information which needs to be verified at the destination party.  This claim should correspond to a JWT claim [RFC7519] and be encoded as defined by the JWS Payload [RFC7519]. 
+The token payload claims should consist of the information which needs to be verified at the destination party.  This claim should correspond to a JWT claim [RFC7519] and be encoded as defined by the JWS Payload [RFC7519]. 
 
 The PASSporT defines the use of a number of standard JWT defined headers as well as two new custom headers corresponding to the two parties associated with personal communications, the originator and terminator.  These headers or key value pairs are detailed below. 
 
-JWT defined claim:
+**3.2.1. JWT defined claims**
+
+**3.2.1.1 "iat" - Issued at claim
 
 The JSON claim MUST include the "iat" [RFC7519] defined claim issued at.  As defined this should be set to a date cooresponding to the origination of the personal communications. The time value should be of the format defined in [RFC7519] Section 2 NumericDate.  This is included for securing the token against replay and cut and paste attacks, as explained further in the security considerations in section 7.
 
-PASSporT specific claims:
+**3.2.2. PASSporT specific claims**
+
+**3.2.2.1. "otn" and "dtn" - Originating and Destination Telephone Number claims**
 
 If the originating identity is a telephone number, the claim "otn" should be included as a claim.  If the destination identity is a telephone number, the claim "dtn" should be included as a claim. The format of the telephone number for both "otn" and "dtn" claims should follow the canonicalization defined in Section 3.2.1.
+
+Telephone Number strings for "otn" and "dtn" claims should be canonicalized according to the procedures specified in [ietf-stir-rfc4474bis-07] Section 6.1.1.
+
+**3.2.2.2. "ouri" and "duri" - Originating and Destination URI claims**
 
 If the originating identity is not a telephone number, the claim "ouri" should be included as a claim with the value cooresponding to the URI form of the identity as defined in [RFC3986], alternatively it could also contain an application specific identity string, if URI format is not appropriate.
 
 If the destination identity is not a telephone number, the claim "duri" should be included as a claim.  The same value format rules apply as stated for "ouri".
 
-In the case of personal communication protocols where the request contains an SDP message body, and if that SDP contains one or more "a=fingerprint" attributes, then the claim "mky" should be included.  The value part of the claim should be the quoted value(s) of the fingerprint attributes (if they differ).  Each attribute value consists of all characters following the colon after "a=fingerprint" including the algorithm description and hexadecimal key representation, any whitespace, carriage returns, and "/" line break indicators.  If multiple non-identical "a=fingerprint" attributes appear in an SDP body, then all non-identical attributes values MUST be concatenated, with no separating character, after sorting the values in alphanumeric order.  If the SDP body contains no "a=fingerprint" attribute, then the "mky" claim should not be used.
+**3.2.2.3 "mky" - Media Key claim**
 
-An example claim is as follows,
+Some protocols that use PASSporT convey hashes for media security keys within their signaling in order to bind those keys to the identities established in the signaling layers. One example would be the DTLS-SRTP key fingerprints carried in SDP via the "a=fingerprint" attribute; multiple instances of that fingerprint may appear in a single SDP body corresponding to difference media streams offered. The "mky" value of PASSporT contains a hexadecimal key presentation of any hash(es) necessary to establish media security via DTLS-SRTP. Note that per guidance of Section 5 of this document any whitespace and line feeds must be removed, however the exception is that for the space character between the hash algorithm and the hash should remain. If multiple key fingerprints are associated with a sessions establishment, then all non-identical key representations MUST be concatenated, with a comma seperation character, after the values in alphanumeric order, before inserting them into the "mky" value in PASSporT.
+
+An example claim with "mky" claim is as follows:
+
+For an SDP offer that includes the following fingerprint values,
+
+	a=fingerprint:sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:2E:7D:46:3F:
+	54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2
+	a=fingerprint:sha-256 4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:5D:49:6B:19:
+	E5:7C:AB:3E:4B:65:2E:7D:46:3F:54:42:CD:54:F1
+
+the PASSporT Payload object would be:
 
 	{ 
-    "iat": 1443208345, 
+    "iat":"1443208345", 
     "otn":"12155551212",
-	  "duri":"sip:alice@example.com"
-	  "mky":"SHA-256 \
-          4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:5D:49:6B:19:E5:7C:AB"
+	  "duri":"sip:alice@example.com",
+	  "mky":"sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:2E:7D:
+	  	46:3F:54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2,sha-256 4A:AD:B9:
+		B1:3F:82:18:3B:54:02:12:DF:3E:5D:49:6B:19:E5:7C:AB:3E:4B:
+		65:2E:7D:46:3F:54:42:CD:54:F1"
   }
   
-**3.2.1. Telephone Number Canonicalization**
-
-Telephone Number strings for "otn" and "dtn" claims should be canonicalized according to the procedures specified in [ietf-stir-rfc4474bis-07] Section 6.1.1.
-
-**3.2.2. Multi-party Communications**
+**3.2.3. Multi-party Communications**
 
 Personal communications in the context of PASSporT can certainly extend to multi-party scenerios where there are more than one destination identities.  In the future, it is anticipated that PASSporT will be extended to support these cases.
 
@@ -113,7 +130,7 @@ An example header with an extended PASSporT profile of "foo" is as follows:
       "x5u":"https://tel.example.org/passport.crt"
   }  
 
-**4.2 Extended PASSporT Claims**
+**4.2 Extended PASSporT Payload Claims**
 
 Future specifications that define such extensions to the PASSporT mechanism MUST explicitly designate what claims they include, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST incorporate the baseline JWT elements specified in Section 3; claims may only be appended to the claims object specified in there, they can never be subtracted re-ordered. Specifying new claims follows the baseline JWT procedures ([RFC7519] Section 10.1 <https://tools.ietf.org/html/rfc7519#section-10.1>). Note that understanding an extension as a verifier is always optional for compliance with this specification (though future specifications or
 profiles for deployment environments may make other "ppt" values mandatory). The creator of a PASSporT object cannot assume that verifiers will understand any given extension. Verifiers that do support an extension may then trigger appropriate application-level behavior in the presence of an extension; authors of extensions should provide appropriate extension-specific guidance to application developers on this point.
@@ -136,9 +153,19 @@ The JSON object MUST follow the rules for the construction of the thumbprint of 
 
 In addition, the JSON header and claim members MUST follow the lexicographical ordering and character and string rules defined in [RFC7638] Section 3.3.
 
+**5.1 Example PASSport deterministic JSON form**
+
+For the example PASSporT Payload shown in Section 3.2.2.3, the following is the deterministic JSON object form.
+
+	{"iat": 1443208345,"otn":"12155551212","duri":"sip:alice@example.com",
+	  "mky":"sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:2E:7D:46:3F:54:
+	  42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2,sha-256 4A:AD:B9:B1:3F:82:
+	  18:3B:54:02:12:DF:3E:5D:49:6B:19:E5:7C:AB:3E:4B:65:2E:7D:46:3F:54:42:
+	  CD:54:F1"}
+
 **6. Human Readability**
 
-For many applications, JWT [RFC7519] and JWS [RFC7515] can use Base64 encoding to the Header and Claims sections as specified.  However, many personal communications protocols, such as SIP and XMPP, use a "human readable" format to allow for ease of use and ease of operational debugging and monitoring.  As such, specifications using PASSporT may provide guidance on whether Base64 encoding or plain text will be used for the construction of the PASSporT Header and Claim sections.
+JWT [RFC7519] and JWS [RFC7515] are defined to use Base64 and/or UTF8 encoding to the Header, Payload, and Signature sections.  However, many personal communications protocols, such as SIP and XMPP, use a "human readable" format to allow for ease of use and ease of operational debugging and monitoring.  As such, specifications using PASSporT may provide guidance on whether Base64 encoding or plain text will be used for the construction of the PASSporT Header and Claim sections.
 
 **7. Security Considerations**
 
@@ -225,9 +252,6 @@ This section registers the "application/passport" media type [RFC2046] in the "M
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
 
-**9. Acknowledgements**
-
-Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, and Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, and Richard Barnes for valuable feedback on the technical and security aspects of the document.
 
 **10. References**
 
@@ -254,6 +278,137 @@ Particular thanks to members of the ATIS and SIP Forum NNI Task Group including 
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015, <http://
               www.rfc-editor.org/info/rfc7519>.
               
+			  
+**Appendix A. Example PASSporT JWS Serialization and Signature**
+
+For PASSporT, there will always be a JWS with the following members:
+
+* "protected", with the value BASE64URL(UTF8(JWS Protected Header))
+* "payload", with the value BASE64URL (JWS Payload)
+* "signature", with the value BASE64URL(JWS Signature)
+
+Note: there will never be a JWS Unprotected Header for PASSporT.
+
+First, an example PASSporT Protected Header is as follows:
+
+	  { 
+      "typ":"passport",
+      "alg":"RS256",
+      "x5u":"https://cert.example.org/passport.crt" 
+    }
+	
+This would be serialized to the form:
+
+	{"typ":"passport","alg":"RS256","x5u":"https://cert.example.org/passport.crt"}
+	
+Encoding this with UTF8 and BASE64 encoding produces this value:
+	
+	eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
+	
+Second, an example PASSporT Payload is as follows:
+
+	{ 
+    "iat":"1443208345", 
+    "otn":"12155551212",
+	  "duri":"sip:alice@example.com"
+  }
+  
+This would be serialized to the form:
+
+	{"iat":"1443208345","otn":"12155551212","duri":"sip:alice@example.com"}
+	
+Encodeing this with the UTF8 and BASE64 encoding produces this value:
+
+	eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
+	
+Computing the digital signature of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS Payload))
+
+	dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+	
+The final PASSporT token is produced by concatenating the values in the order Header.Payload.Signature with period (',') characters.  For the above example values this would produce the following:
+
+	eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
+	.
+	eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
+	.
+	dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+	
+
+**Appendix B. X.509 Private Key Certificate for Example in Appendix A**
+
+-----BEGIN RSA PRIVATE KEY-----
+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
+-----END RSA PRIVATE KEY-----
+
+**Appendix C. X.509 Public Key Certificate for Example in Appendix A**
+
+-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAsrKb3NsMgrXTzEcNlg3v
+aBbI12mG3D9QBn61H8PpsVFIh3MAXNXjkV64he/eEQou3STTEgSqUXj5kj+jnnVF
+F0Cd0T6j7SuRvpq5YaiKfXgdUlsvF3LjTRGyoKRNOf16f/zEFiyJBX10vj/LKvnW
+os1vVTSqBeui2dNLynr0+f1n8b0+0FZwACceo3qaVwuSNIJWSQgM1qAINBpPEKnr
+Ipdt5fa7mUorJ5gjITys3gjNJ4eesjqUEu5ZGXDgMshVtH2iMceC1393sK6rJ7z+
+g3jVziSo6vy9lA2wveKMuoqQTwp0V0IrkzExU7vpTzyx0E3mJNmlgmDp7Whp2HCv
+KjeG+iPfsuPMDRggUrdy9qG6QTFqQORzLywTpu78ExYMSfqt94NVhf2Dv+QEPoyt
+T1avN6bwGu/R/84g2z0YMfum5roSTG5PGP4H56vjML8wNTd6v8Ny8SLAgzG/XBaV
+7c8Ll2awLEj4FSeBpNzTyDgnLrth7Tk0LmM8EtO1aozDDEaMFrNy4/L+Uuwxp/wc
+FADawE9N7VdHa9endEo9V/bu1tkqecv1Ma+G4NvJZzD8JTBRVsHNc3zvI0qD0KWC
+jqPvaIMiiVATVAIW9ZEtUZNm5UVuDzhcY7QrXNRpGE6ULIXgim66mbfUQ0LFq4G+
+zUjoRZTA92rFBn4vDKvsPs8CAwEAAQ==
+-----END PUBLIC KEY-----
+	
+	
+**Acknowledgements**
+
+Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, and Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, and Richard Barnes for valuable feedback on the technical and security aspects of the document.
 
 **Author's Address**
 
