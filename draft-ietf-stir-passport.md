@@ -17,7 +17,7 @@ Note: As of the authoring of this document, ietf-stir-rfc4474bis provides detail
 
 **2. Token Overview**
 
-Tokens are a convenient way of encapsulating information with associated digital signatures.  They are used in many applications that require authentication, authorization, encryption, non-repudiation and other use cases.  JSON Web Token (JWT) [RFC7519] and JSON Web Signature (JWS) [RFC7515] are designed to provide a compact form for many of these purposes and define a specific method and syntax for signing a specific set of information or "claims" within the token and therefore providing an extensible set of claims. Additionally, JWS provides extensible mechanisms for specifying the method and cryptographic algorithms used for the associated digital signatures. 
+Tokens are a convenient way of encapsulating information with associated digital signatures. They are used in many applications that require authentication, authorization, encryption, non-repudiation and other use cases.  JSON Web Token (JWT) [RFC7519] and JSON Web Signature (JWS) [RFC7515] are designed to provide a compact form for many of these purposes and define a specific method and syntax for signing a specific set of information or "claims" within the token and therefore providing an extensible set of claims. Additionally, JWS provides extensible mechanisms for specifying the method and cryptographic algorithms used for the associated digital signatures. 
 
 **3. PASSporT Definition**
 
@@ -55,7 +55,7 @@ As defined in JWS, the "x5u" header parameter is used to provide a URI [RFC3986]
 
 The token payload claims should consist of the information which needs to be verified at the destination party.  This claim should correspond to a JWT claim [RFC7519] and be encoded as defined by the JWS Payload [RFC7519]. 
 
-The PASSporT defines the use of a number of standard JWT defined headers as well as two new custom headers corresponding to the two parties associated with personal communications, the originator and terminator.  These headers or key value pairs are detailed below. 
+The PASSporT defines the use of a number of standard JWT defined headers as well as two new custom headers corresponding to the two parties associated with personal communications, the originator and terminator. These headers or key value pairs are detailed below. 
 
 **3.2.1. JWT defined claims**
 
@@ -71,7 +71,7 @@ Baseline PASSporT defines claims that convey the identity of the origination and
 
 **3.2.2.1.1. "otn" and "dtn" - Originating and Destination Telephone Number claims**
 
-If the originating identity is a telephone number, the claim "otn" SHOULD be included.  If the destination identity is a telephone number, the claim "dtn" SHOULD be included. 
+If the originating identity is a telephone number, the claim "otn" SHOULD be included. If the destination identity is a telephone number, the claim "dtn" SHOULD be included. 
 
 Telephone Number strings for "otn" and "dtn" claims MUST be canonicalized according to the procedures specified in [ietf-stir-rfc4474bis-08] Section 6.1.1.
 
@@ -83,7 +83,7 @@ If the destination identity is not a telephone number, the claim "duri" SHOULD b
 
 **3.2.2.2. "mky" - Media Key claim**
 
-Some protocols that use PASSporT convey hashes for media security keys within their signaling in order to bind those keys to the identities established in the signaling layers. One example would be the DTLS-SRTP key fingerprints carried in SDP via the "a=fingerprint" attribute; multiple instances of that fingerprint may appear in a single SDP body corresponding to difference media streams offered. The "mky" value of PASSporT contains a hexadecimal key presentation of any hash(es) necessary to establish media security via DTLS-SRTP. Note that per guidance of Section 5 of this document any whitespace and line feeds must be removed, however the exception is that a single space (' ') character between the hash algorithm and the hash should remain. If multiple key fingerprints are associated with a sessions establishment, then all non-identical key representations MUST be concatenated, with a semicolon seperation (';') character, after the values in alphanumeric order, before inserting them into the "mky" value in PASSporT.
+Some protocols that use PASSporT convey hashes for media security keys within their signaling in order to bind those keys to the identities established in the signaling layers. One example would be the DTLS-SRTP key fingerprints carried in SDP via the "a=fingerprint" attribute; multiple instances of that fingerprint may appear in a single SDP body corresponding to difference media streams offered. The "mky" value of PASSporT contains a hexadecimal key presentation of any hash(es) necessary to establish media security via DTLS-SRTP. Note that per guidance of Section 5 of this document any whitespace and line feeds must be removed, however the exception is that a single space (' ') character between the hash algorithm and the hash should remain. If multiple key fingerprints are associated with a sessions establishment, then all non-identical key representations MUST be concatenated, with a semicolon seperation (';') character, after sorting the values in alphanumeric order, before inserting them into the "mky" value in PASSporT.
 
 An example claim with "mky" claim is as follows:
 
@@ -108,7 +108,7 @@ the PASSporT Payload object would be:
   
 **3.2.3. Multi-party Communications**
 
-Personal communications in the context of PASSporT can certainly extend to multi-party scenerios where there is more than one destination identity.  In the future, it is anticipated that PASSporT will be extended to support these cases.
+Personal communications in the context of PASSporT can certainly extend to multi-party scenerios where there is more than one destination identity. In the future, it is anticipated that PASSporT will be extended to support these cases.
 
  
 **3.3 PASSporT Signature**
@@ -174,8 +174,8 @@ JWT [RFC7519] and JWS [RFC7515] are defined to use Base64 and/or UTF8 encoding t
 
 **7.1  Avoidance of replay and cut and paste attacks**
 
-There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks.
-PASSporT tokens must be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in [RFC3261]).  There should be a link between various information provided in the token and information provided by the application level protocol information.
+There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks. PASSporT tokens must be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in [RFC3261]). There should be a link between various information provided in the token and information provided by the application level protocol information.
+
 These would include:
 
 * "iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the PASSporT token.
@@ -183,7 +183,7 @@ These would include:
 
 **7.2 Solution Considerations**
 
-It should be recognized that the use of this token should not, in it's own right, be considered a full solution for absolute non-repudiation of the persona being asserted.  This only provides non-repudiation of the signer of PASSporT.  If the signer and the persona are not one in the same, which can and often will be the case in telecommunications networks today, protecting the destination party from being spoofed may take some interpretation or additional verification of the link between the PASSporT signature and the persona being asserted.  
+It should be recognized that the use of this token should not, in it's own right, be considered a full solution for absolute non-repudiation of the persona being asserted. This only provides non-repudiation of the signer of PASSporT. If the signer and the persona are not one in the same, which can and often will be the case in telecommunications networks today, protecting the destination party from being spoofed may take some interpretation or additional verification of the link between the PASSporT signature and the persona being asserted.  
 
 In addition, the telecommunications systems and specifications that use PASSporT should in practice provide mechanisms for:
 
@@ -251,10 +251,13 @@ This section registers the "application/passport" media type [RFC2046] in the "M
 * Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
 
 * Claim Name: "mky"
-* Claim Description: Fingerprint String
+* Claim Description: Media Key Fingerprint String
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
 
+**9. Acknowledgements**
+
+Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, and Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, and Richard Barnes for valuable feedback on the technical and security aspects of the document. Additional thanks to Harsha Bellur for assistance in coding the example tokens.
 
 **10. References**
 
@@ -320,7 +323,7 @@ This would be serialized to the form:
 
 	{"iat":"1443208345","otn":"12155551212","duri":"sip:alice@example.com"}
 	
-Encodeing this with the UTF8 and BASE64 encoding produces this value:
+Encoding this with the UTF8 and BASE64 encoding produces this value:
 
 	eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
 	
@@ -408,10 +411,6 @@ The final PASSporT token is produced by concatenating the values in the order He
 	zUjoRZTA92rFBn4vDKvsPs8CAwEAAQ==
 	-----END PUBLIC KEY-----
 	
-	
-**Acknowledgements**
-
-Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, and Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, and Richard Barnes for valuable feedback on the technical and security aspects of the document.
 
 **Author's Address**
 
