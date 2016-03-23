@@ -111,15 +111,15 @@ Table of Contents
    Appendix A. Appendix A. Example PASSporT JWS Serialization and
                Signature  . . . . . . . . . . . . . . . . . . . . . . 13
    Appendix B. Appendix B. X.509 Private Key Certificate for Example in
-               Appendix A . . . . . . . . . . . . . . . . . . . . . . 14
+               Appendix A . . . . . . . . . . . . . . . . . . . . . . 15
 
 Wendt & Peterson        Expires August 02, 2016                 [Page 2]
 
 Internet-Draft                  PASSporT                   February 2016
 
    Appendix C. Appendix C. X.509 Public Key Certificate for Example in
-               Appendix A . . . . . . . . . . . . . . . . . . . . . . 16
-   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 16
+               Appendix A . . . . . . . . . . . . . . . . . . . . . . 17
+   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 17
 
 1.  Introduction
 
@@ -759,10 +759,10 @@ Appendix A.  Appendix A. Example PASSporT JWS Serialization and
 
    Encoding this with UTF8 and BASE64 encoding produces this value:
 
-        eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
+        eyJ0eXAiOiJwYXNzcG9ydCIsImFsZyI6IlJTMjU2IiwieDV1IjoiaHR0cHM6Ly9j
+        ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNydCJ9
 
    Second, an example PASSporT Payload is as follows:
-
 
 Wendt & Peterson        Expires August 02, 2016                [Page 13]
 
@@ -781,23 +781,52 @@ Internet-Draft                  PASSporT                   February 2016
 
    Encoding this with the UTF8 and BASE64 encoding produces this value:
 
-        eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
+        eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3RuIjoiMTIxNTU1NTEyMTIiLCJkdXJpIjoi
+        c2lwOmFsaWNlQGV4YW1wbGUuY29tIn0
 
    Computing the digital signature of the PASSporT Signing Input
    ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS
    Payload))
 
-        dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+        AaeXRqm7kHnkZu2j6cQmDCiomZRiaE55bYWhFgnX8xMqpBFq96M0xgMM5OLa9_LM
+        rkuKv2ivK5GZz8OlFrmAirucRlAh8YdUkj5Cr5xPRr-gg9acD9jqJUnQ-ZxpL1yq
+        -FFVLhvpbsE5NMPHXUp5lpt62rD-S0NlhwHNCeMqZHxt6T5BmZBXITEd1PRRij_6
+        FhE3wxWEhZMthWJuEbcPpRMZDu-R7lTNddn62nUKjn3s00R3gm25Dto5Z0dzfQpA
+        ysJvnbc1QRimfsYqJPUFc57lnglVLf4WrpeZCc8-LcoXeSr_dseDgsrmg2EuHmn5
+        h1nTOmLgF16ZHm121ZVjiXz2sMFvs9RaIxw0AFkM7rnV56OxAFCRuzMNldiEVf8p
+        lRZVvqZ4BfVQlCNXNyyVgPOUtNr3ta6yD2H0oANQvvHtwjuSwB9Kruj4Wsu5N7Ik
+        i4MBs6SWJDmcUV-NW_AHYLaao-IvFVe4oCkJNjsqwwXuLv1TO2sDHdc5sQO5zm21
+        019PPxw1udHVtywsRVNKLo0RzE0TqYUF7XclCDur7MMOx9SnStV2PFIM7Jejyn9x
+        54RtJEjOnchaSalfIFr_UXqXgVmRZVTzLDQIlcmHjlhhLnCnNx3sYsAANen8Y8jt
+        fgJ2ewjGotB4Lq8VYe1FacBKKk0VyCfImXba0u1hB8Q
 
    The final PASSporT token is produced by concatenating the values in
    the order Header.Payload.Signature with period (',') characters.  For
    the above example values this would produce the following:
 
-        eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
+        eyJ0eXAiOiJwYXNzcG9ydCIsImFsZyI6IlJTMjU2IiwieDV1IjoiaHR0cHM6Ly9j
+        ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNydCJ9
         .
-        eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9
+        eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3RuIjoiMTIxNTU1NTEyMTIiLCJkdXJpIjoi
+        c2lwOmFsaWNlQGV4YW1wbGUuY29tIn0
         .
-        dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+        AaeXRqm7kHnkZu2j6cQmDCiomZRiaE55bYWhFgnX8xMqpBFq96M0xgMM5OLa9_LM
+        rkuKv2ivK5GZz8OlFrmAirucRlAh8YdUkj5Cr5xPRr-gg9acD9jqJUnQ-ZxpL1yq
+        -FFVLhvpbsE5NMPHXUp5lpt62rD-S0NlhwHNCeMqZHxt6T5BmZBXITEd1PRRij_6
+        FhE3wxWEhZMthWJuEbcPpRMZDu-R7lTNddn62nUKjn3s00R3gm25Dto5Z0dzfQpA
+        ysJvnbc1QRimfsYqJPUFc57lnglVLf4WrpeZCc8-LcoXeSr_dseDgsrmg2EuHmn5
+        h1nTOmLgF16ZHm121ZVjiXz2sMFvs9RaIxw0AFkM7rnV56OxAFCRuzMNldiEVf8p
+        lRZVvqZ4BfVQlCNXNyyVgPOUtNr3ta6yD2H0oANQvvHtwjuSwB9Kruj4Wsu5N7Ik
+        i4MBs6SWJDmcUV-NW_AHYLaao-IvFVe4oCkJNjsqwwXuLv1TO2sDHdc5sQO5zm21
+        019PPxw1udHVtywsRVNKLo0RzE0TqYUF7XclCDur7MMOx9SnStV2PFIM7Jejyn9x
+        54RtJEjOnchaSalfIFr_UXqXgVmRZVTzLDQIlcmHjlhhLnCnNx3sYsAANen8Y8jt
+        fgJ2ewjGotB4Lq8VYe1FacBKKk0VyCfImXba0u1hB8Q
+
+
+Wendt & Peterson        Expires August 02, 2016                [Page 14]
+
+Internet-Draft                  PASSporT                   February 2016
+
 
 Appendix B.  Appendix B. X.509 Private Key Certificate for Example in
              Appendix A
@@ -823,7 +852,37 @@ Appendix B.  Appendix B. X.509 Private Key Certificate for Example in
 
 
 
-Wendt & Peterson        Expires August 02, 2016                [Page 14]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Wendt & Peterson        Expires August 02, 2016                [Page 15]
 
 Internet-Draft                  PASSporT                   February 2016
 
@@ -882,7 +941,7 @@ Internet-Draft                  PASSporT                   February 2016
 
 
 
-Wendt & Peterson        Expires August 02, 2016                [Page 15]
+Wendt & Peterson        Expires August 02, 2016                [Page 16]
 
 Internet-Draft                  PASSporT                   February 2016
 
@@ -940,4 +999,4 @@ Authors' Addresses
 
 
 
-Wendt & Peterson        Expires August 02, 2016                [Page 16]
+Wendt & Peterson        Expires August 02, 2016                [Page 17]
