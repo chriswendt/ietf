@@ -4,11 +4,11 @@
 STIR                                                            C. Wendt
 Internet-Draft                                                   Comcast
 Intended status: Standards Track                             J. Peterson
-Expires: August 02, 2016                                    Neustar Inc.
-                                                           February 2016
+Expires: August 31, 2016                                    Neustar Inc.
+                                                              March 2016
 
                         Persona Assertion Token
-                      draft-ietf-stir-passport-00
+                      draft-ietf-stir-passport-01
 
 Abstract
 
@@ -42,7 +42,7 @@ Status of this Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 02, 2016.
+   This Internet-Draft will expire on August 31, 2016.
 
 Copyright Notice
 
@@ -54,9 +54,9 @@ Copyright Notice
 
 
 
-Wendt & Peterson        Expires August 02, 2016                 [Page 1]
+Wendt & Peterson        Expires August 31, 2016                 [Page 1]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -113,9 +113,9 @@ Table of Contents
    Appendix B. Appendix B. X.509 Private Key Certificate for Example in
                Appendix A . . . . . . . . . . . . . . . . . . . . . . 15
 
-Wendt & Peterson        Expires August 02, 2016                 [Page 2]
+Wendt & Peterson        Expires August 31, 2016                 [Page 2]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
    Appendix C. Appendix C. X.509 Public Key Certificate for Example in
                Appendix A . . . . . . . . . . . . . . . . . . . . . . 17
@@ -174,9 +174,9 @@ Internet-Draft                  PASSporT                   February 2016
 3.  PASSporT Definition
 
 
-Wendt & Peterson        Expires August 02, 2016                 [Page 3]
+Wendt & Peterson        Expires August 31, 2016                 [Page 3]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
    The PASSporT is constructed based on JWT [RFC7519] and JWS [RFC7515]
@@ -233,9 +233,9 @@ Internet-Draft                  PASSporT                   February 2016
 
 
 
-Wendt & Peterson        Expires August 02, 2016                 [Page 4]
+Wendt & Peterson        Expires August 31, 2016                 [Page 4]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
    The token payload claims should consist of the information which
@@ -292,9 +292,9 @@ Internet-Draft                  PASSporT                   February 2016
    is not appropriate.
 
 
-Wendt & Peterson        Expires August 02, 2016                 [Page 5]
+Wendt & Peterson        Expires August 31, 2016                 [Page 5]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
    If the destination identity is not a telephone number, the claim
@@ -351,9 +351,9 @@ Internet-Draft                  PASSporT                   February 2016
 
 
 
-Wendt & Peterson        Expires August 02, 2016                 [Page 6]
+Wendt & Peterson        Expires August 31, 2016                 [Page 6]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 3.3.  PASSporT Signature
 
@@ -410,9 +410,9 @@ Internet-Draft                  PASSporT                   February 2016
 
 
 
-Wendt & Peterson        Expires August 02, 2016                 [Page 7]
+Wendt & Peterson        Expires August 31, 2016                 [Page 7]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
    Future specifications that define such extensions to the PASSporT
@@ -469,9 +469,9 @@ Internet-Draft                  PASSporT                   February 2016
 
 
 
-Wendt & Peterson        Expires August 02, 2016                 [Page 8]
+Wendt & Peterson        Expires August 31, 2016                 [Page 8]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
    Each JSON object MUST contain no whitespace or line breaks before or
    after any syntactic elements and with the required members ordered
@@ -528,9 +528,9 @@ Internet-Draft                  PASSporT                   February 2016
 
 7.2.  Solution Considerations
 
-Wendt & Peterson        Expires August 02, 2016                 [Page 9]
+Wendt & Peterson        Expires August 31, 2016                 [Page 9]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
    It should be recognized that the use of this token should not, in
@@ -587,9 +587,9 @@ Internet-Draft                  PASSporT                   February 2016
 
 
 
-Wendt & Peterson        Expires August 02, 2016                [Page 10]
+Wendt & Peterson        Expires August 31, 2016                [Page 10]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
    o  Encoding considerations: 8bit; application/passport values are
       encoded as a series of base64url-encoded values (some of which may
@@ -646,9 +646,9 @@ Internet-Draft                  PASSporT                   February 2016
    o  Claim Name: "mky"
    o  Claim Description: Media Key Fingerprint String
 
-Wendt & Peterson        Expires August 02, 2016                [Page 11]
+Wendt & Peterson        Expires August 31, 2016                [Page 11]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
    o  Change Controller: IESG
    o  Specification Document(s): Section 3.2 of draft-ietf-stir-
@@ -705,9 +705,9 @@ Internet-Draft                  PASSporT                   February 2016
               <http://www.rfc-editor.org/info/rfc5280>.
 
 
-Wendt & Peterson        Expires August 02, 2016                [Page 12]
+Wendt & Peterson        Expires August 31, 2016                [Page 12]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
    [RFC6838]  Freed, N., Klensin, J. and T. Hansen, "Media Type
@@ -764,9 +764,9 @@ Appendix A.  Appendix A. Example PASSporT JWS Serialization and
 
    Second, an example PASSporT Payload is as follows:
 
-Wendt & Peterson        Expires August 02, 2016                [Page 13]
+Wendt & Peterson        Expires August 31, 2016                [Page 13]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
         {
@@ -823,9 +823,9 @@ Internet-Draft                  PASSporT                   February 2016
         fgJ2ewjGotB4Lq8VYe1FacBKKk0VyCfImXba0u1hB8Q
 
 
-Wendt & Peterson        Expires August 02, 2016                [Page 14]
+Wendt & Peterson        Expires August 31, 2016                [Page 14]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
 Appendix B.  Appendix B. X.509 Private Key Certificate for Example in
@@ -882,9 +882,9 @@ Appendix B.  Appendix B. X.509 Private Key Certificate for Example in
 
 
 
-Wendt & Peterson        Expires August 02, 2016                [Page 15]
+Wendt & Peterson        Expires August 31, 2016                [Page 15]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
     -----BEGIN RSA PRIVATE KEY-----
@@ -941,9 +941,9 @@ Internet-Draft                  PASSporT                   February 2016
 
 
 
-Wendt & Peterson        Expires August 02, 2016                [Page 16]
+Wendt & Peterson        Expires August 31, 2016                [Page 16]
 
-Internet-Draft                  PASSporT                   February 2016
+Internet-Draft                  PASSporT                      March 2016
 
 
 Appendix C.  Appendix C. X.509 Public Key Certificate for Example in
@@ -999,4 +999,4 @@ Authors' Addresses
 
 
 
-Wendt & Peterson        Expires August 02, 2016                [Page 17]
+Wendt & Peterson        Expires August 31, 2016                [Page 17]
