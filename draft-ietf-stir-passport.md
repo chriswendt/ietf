@@ -32,7 +32,7 @@ An example of the header for the case of an ECDSA P-256 digital signature would 
 	  { 
       "typ":"passport",
       "alg":"ES256",
-      "x5u":"https://cert.example.org/passport.crt" 
+      "x5u":"https://cert.example.org/passport.cer" 
     }
       
 **3.1.1 "typ" (Type) Header Parameter**
@@ -44,12 +44,7 @@ For PASSporT Token the "typ" header MUST minimally include and begin with "passp
 
 **3.1.2 "alg" (Algorithm) Header Parameter**
 
-For PASSporT, the "alg" should be defined as follows, for the creation of PASSporT tokens and the digital signatures, 
-
-* ES256 MUST be implemented. 
-* RS256 SHOULD be implemented.
-
-For the verification of PASSporT tokens, both ES256 and RS256 MUST be supported. 
+For PASSporT, the "alg" should be defined as follows, for the creation and verification of PASSporT tokens and their digital signatures ES256 MUST be implemented. 
 
 Note that JWA [RFC7518] defines other algorithms that may be utilized or updated in the future depending on cryptographic strength requirements guided by current security best practice.
  
@@ -87,9 +82,26 @@ If the originating identity is not a telephone number, the claim "ouri" SHOULD b
 
 If the destination identity is not a telephone number, the claim "duri" SHOULD be included.  The same string format rules apply as stated for "ouri".
 
+**3.2.2.1.2. "dgrp" - Multiple destination identities**
+
+There are multi-party, group, or conference types of calls where there is a single originating identity or alterntively a "moderator" identity and a number of destination identities or participants in the multi-party call.  For these scenerios, the "dgrp" key should be used with a JSON object containing multiple "dtn" or "duri" identities as defined above.
+
+An example PASSporT payload object with multiple destination identities would be as follows:
+
+	{ 
+    	"iat":"1443208345",
+    	"otn":"12155551212",
+    	"dgrp":{	
+    			"duri":"sip:alice@example.com",
+    			"dtn":"12125551212",
+    			"duri":"sip:bob@example.net"
+    	}
+    }
+
 **3.2.2.2. "mky" - Media Key claim**
 
-Some protocols that use PASSporT convey hashes for media security keys within their signaling in order to bind those keys to the identities established in the signaling layers. One example would be the DTLS-SRTP key fingerprints carried in SDP via the "a=fingerprint" attribute; multiple instances of that fingerprint may appear in a single SDP body corresponding to difference media streams offered. The "mky" value of PASSporT contains a hexadecimal key presentation of any hash(es) necessary to establish media security via DTLS-SRTP. This mky value should be formated in a JSON form including the 'algorithm' and 'digest' keys with the corresponding algorithm and hexadecimal values. Note that per guidance of Section 5 of this document any whitespace and line feeds must be removed.  If there is multiple fingerprint values, more than one, the fingerprint values should be constructed as a JSON array denoted by bracket characters.
+Some protocols that use PASSporT convey hashes for media security keys within their signaling in order to bind those keys to the identities established in the signaling layers. One example would be the DTLS-SRTP key fingerprints carried in SDP via the "a=fingerprint" attribute; multiple instances of that fingerprint may appear in a single SDP body corresponding to difference media streams offered. The "mky" value of PASSporT contains a hexadecimal key presentation of any hash(es) necessary to establish media security via DTLS-SRTP. This mky value should be formated in a JSON form including the 'alg' and 'dig' keys with the corresponding algorithm and hexadecimal values. Note that per guidance of Section 5 of this document any whitespace and line feeds must be removed.  If there is multiple fingerprint values, more than one, the fingerprint values should be constructed as a JSON array denoted by bracket characters.
+For the 'dig' key value, the hash value should be the hexadecimal value without any colons, in order to provide a more efficient, compact form to be encoded in PASSporT token claim.
 
 An example claim with "mky" claim is as follows:
 
@@ -106,18 +118,18 @@ the PASSporT Payload object would be:
     "iat":"1443208345", 
     "otn":"12155551212",
 	  "duri":"sip:alice@example.com",
-	  "mky":"[
+	  "mky":[
         {
-           "algorithm":"sha-256",
-           "digest":"02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:2E:7D:46:3F:
-	54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2"
+           "alg":"sha-256",
+           "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
+           	F17A03A27DF9B07F4619B2"
         },
         {
            "algorithm":"sha-256",
-           "digest":"4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:5D:49:6B:19:
-	E5:7C:AB:3E:4B:65:2E:7D:46:3F:54:42:CD:54:F1"
+           "digest":"4AADB9B13F82183B540212DF3E5D496B19E57C
+           	AB3E4B652E7D463F5442CD54F1"
         }
-      ]"
+      ]
     }
   
 **3.2.3. Multi-party Communications**
@@ -146,7 +158,7 @@ An example header with an extended PASSporT profile of "foo" is as follows:
       "ppt":"foo",
       "alg":"ES256",
       "x5u":"https://tel.example.org/passport.crt"
-  }  
+    }  
 
 **4.2 Extended PASSporT Payload Claims**
 
@@ -175,11 +187,10 @@ In addition, the JSON header and claim members MUST follow the lexicographical o
 For the example PASSporT Payload shown in Section 3.2.2.3, the following is the deterministic JSON object form.
 
 	{"iat": 1443208345,"otn":"12155551212","duri":
-	  "sip:alice@example.com","mky":"sha-256 02:1A:CC:54:
-	  27:AB:EB:9C:53:3F:3E:4B:65:2E:7D:46:3F:54:42:CD:54:
-	  F1:7A:03:A2:7D:F9:B0:7F:46:19:B2;sha-256 4A:AD:B9:B1:
-	  3F:82:18:3B:54:02:12:DF:3E:5D:49:6B:19:E5:7C:AB:3E:
-	  4B:65:2E:7D:46:3F:54:42:CD:54:F1"}
+	  "sip:alice@example.com","mky":[{"alg":"sha-256","dig":"021ACC54
+	  27ABEB9C533F3E4B652E7D463F5442CD54F17A03A27DF9B07F4619B2"},
+	  {"alg":"sha-256","dig":"4AADB9B13F82183B540212DF3E5D496B19E57CAB3E
+	  4B652E7D463F5442CD54F1"}]}
 
 **6. Human Readability**
 
@@ -315,17 +326,17 @@ First, an example PASSporT Protected Header is as follows:
 	{ 
       "typ":"passport",
       "alg":"ES256",
-      "x5u":"https://cert.example.org/passport.crt" 
+      "x5u":"https://cert.example.org/passport.cer" 
     }
 	
 This would be serialized to the form:
 
-	{"typ":"passport","alg":"ES256","x5u":"https://cert.example.org/passport.crt"}
+	{"typ":"passport","alg":"ES256","x5u":"https://cert.example.org/passport.cer"}
 	
 Encoding this with UTF8 and BASE64 encoding produces this value:
 	
 	eyJ0eXAiOiJwYXNzcG9ydCIsImFsZyI6IkVTMjU2IiwieDV1IjoiaHR0cHM6Ly9j
-	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNydCJ9
+	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
 	
 Second, an example PASSporT Payload is as follows:
 
@@ -350,15 +361,15 @@ Computing the digital signature of the PASSporT Signing Input ASCII(BASE64URL(UT
 	wH_t7W-bnGlZz4pI-rMjfQ
 	
 The final PASSporT token is produced by concatenating the values in the order Header.Payload.Signature with period (',') characters.  For the above example values this would produce the following:
-
+	
 	eyJ0eXAiOiJwYXNzcG9ydCIsImFsZyI6IkVTMjU2IiwieDV1IjoiaHR0cHM6Ly9j
-	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNydCJ9
+	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
 	.
 	eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3RuIjoiMTIxNTU1NTEyMTIiLCJkdXJpIjoi
 	c2lwOmFsaWNlQGV4YW1wbGUuY29tIn0
 	.
-	KK89q2RFY-BkKQQhiB0z6-fIaFUy6NDyUboKXOix9XnYLxTCjdw1UHjCbw4CefeK
-	wH_t7W-bnGlZz4pI-rMjfQ
+	SQ3r3U9kew2e4Ej-tS4vbWQgs9kSQzHgzqK_xP4TL70al7XwWwF4R2mP9sxQey9n
+	pZQoYTNx_WZslJJpIc_f_A
 	
 
 **Appendix A.1. X.509 Private Key Certificate for ES256 Example**
@@ -375,158 +386,6 @@ The final PASSporT token is produced by concatenating the values in the order He
 	-----BEGIN PUBLIC KEY-----
 	MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE8HNbQd/TmvCKwPKHkMF9fScavGeH
 	78YTU8qLS8I5HLHSSmlATLcslQMhNC/OhlWBYC626nIlo7XeebYS7Sb37g==
-	-----END PUBLIC KEY-----
-	
-              
-			  
-**Appendix B. Example RS256 based PASSporT JWS Serialization and Signature**
-
-For PASSporT, there will always be a JWS with the following members:
-
-* "protected", with the value BASE64URL(UTF8(JWS Protected Header))
-* "payload", with the value BASE64URL (JWS Payload)
-* "signature", with the value BASE64URL(JWS Signature)
-
-Note: there will never be a JWS Unprotected Header for PASSporT.
-
-First, an example PASSporT Protected Header is as follows:
-
-	{ 
-      "typ":"passport",
-      "alg":"RS256",
-      "x5u":"https://cert.example.org/passport.crt"
-    }
-	
-This would be serialized to the form:
-
-	{"typ":"passport","alg":"RS256","x5u":"https://cert.example.org/passport.crt"}
-	
-Encoding this with UTF8 and BASE64 encoding produces this value:
-	
-	eyJ0eXAiOiJwYXNzcG9ydCIsImFsZyI6IlJTMjU2IiwieDV1IjoiaHR0cHM6Ly9j
-	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNydCJ9
-	
-Second, an example PASSporT Payload is as follows:
-
-	{  
-	   "iat":"1443208345",
-	   "otn":"12155551212",
-	   "duri":"sip:alice@example.com"
-	}
-  
-This would be serialized to the form:
-
-	{"iat":"1443208345","otn":"12155551212","duri":"sip:alice@example.com"}
-	
-Encoding this with the UTF8 and BASE64 encoding produces this value:
-
-	eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3RuIjoiMTIxNTU1NTEyMTIiLCJkdXJpIjoi
-	c2lwOmFsaWNlQGV4YW1wbGUuY29tIn0
-	
-Computing the digital signature of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS Payload))
-
-	AaeXRqm7kHnkZu2j6cQmDCiomZRiaE55bYWhFgnX8xMqpBFq96M0xgMM5OLa9_LM
-	rkuKv2ivK5GZz8OlFrmAirucRlAh8YdUkj5Cr5xPRr-gg9acD9jqJUnQ-ZxpL1yq
-	-FFVLhvpbsE5NMPHXUp5lpt62rD-S0NlhwHNCeMqZHxt6T5BmZBXITEd1PRRij_6
-	FhE3wxWEhZMthWJuEbcPpRMZDu-R7lTNddn62nUKjn3s00R3gm25Dto5Z0dzfQpA
-	ysJvnbc1QRimfsYqJPUFc57lnglVLf4WrpeZCc8-LcoXeSr_dseDgsrmg2EuHmn5
-	h1nTOmLgF16ZHm121ZVjiXz2sMFvs9RaIxw0AFkM7rnV56OxAFCRuzMNldiEVf8p
-	lRZVvqZ4BfVQlCNXNyyVgPOUtNr3ta6yD2H0oANQvvHtwjuSwB9Kruj4Wsu5N7Ik
-	i4MBs6SWJDmcUV-NW_AHYLaao-IvFVe4oCkJNjsqwwXuLv1TO2sDHdc5sQO5zm21
-	019PPxw1udHVtywsRVNKLo0RzE0TqYUF7XclCDur7MMOx9SnStV2PFIM7Jejyn9x
-	54RtJEjOnchaSalfIFr_UXqXgVmRZVTzLDQIlcmHjlhhLnCnNx3sYsAANen8Y8jt
-	fgJ2ewjGotB4Lq8VYe1FacBKKk0VyCfImXba0u1hB8Q
-	
-The final PASSporT token is produced by concatenating the values in the order Header.Payload.Signature with period (',') characters.  For the above example values this would produce the following:
-
-	eyJ0eXAiOiJwYXNzcG9ydCIsImFsZyI6IlJTMjU2IiwieDV1IjoiaHR0cHM6Ly9j
-	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNydCJ9
-	.
-	eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3RuIjoiMTIxNTU1NTEyMTIiLCJkdXJpIjoi
-	c2lwOmFsaWNlQGV4YW1wbGUuY29tIn0
-	.
-	AaeXRqm7kHnkZu2j6cQmDCiomZRiaE55bYWhFgnX8xMqpBFq96M0xgMM5OLa9_LM
-	rkuKv2ivK5GZz8OlFrmAirucRlAh8YdUkj5Cr5xPRr-gg9acD9jqJUnQ-ZxpL1yq
-	-FFVLhvpbsE5NMPHXUp5lpt62rD-S0NlhwHNCeMqZHxt6T5BmZBXITEd1PRRij_6
-	FhE3wxWEhZMthWJuEbcPpRMZDu-R7lTNddn62nUKjn3s00R3gm25Dto5Z0dzfQpA
-	ysJvnbc1QRimfsYqJPUFc57lnglVLf4WrpeZCc8-LcoXeSr_dseDgsrmg2EuHmn5
-	h1nTOmLgF16ZHm121ZVjiXz2sMFvs9RaIxw0AFkM7rnV56OxAFCRuzMNldiEVf8p
-	lRZVvqZ4BfVQlCNXNyyVgPOUtNr3ta6yD2H0oANQvvHtwjuSwB9Kruj4Wsu5N7Ik
-	i4MBs6SWJDmcUV-NW_AHYLaao-IvFVe4oCkJNjsqwwXuLv1TO2sDHdc5sQO5zm21
-	019PPxw1udHVtywsRVNKLo0RzE0TqYUF7XclCDur7MMOx9SnStV2PFIM7Jejyn9x
-	54RtJEjOnchaSalfIFr_UXqXgVmRZVTzLDQIlcmHjlhhLnCnNx3sYsAANen8Y8jt
-	fgJ2ewjGotB4Lq8VYe1FacBKKk0VyCfImXba0u1hB8Q
-	
-
-**Appendix B.1. X.509 Private Key Certificate for RS256 Example**
-
-	-----BEGIN RSA PRIVATE KEY-----
-	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
-	-----END RSA PRIVATE KEY-----
-
-**Appendix B.2. X.509 Public Key Certificate for RS256 Example**
-
-	-----BEGIN PUBLIC KEY-----
-	MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAsrKb3NsMgrXTzEcNlg3v
-	aBbI12mG3D9QBn61H8PpsVFIh3MAXNXjkV64he/eEQou3STTEgSqUXj5kj+jnnVF
-	F0Cd0T6j7SuRvpq5YaiKfXgdUlsvF3LjTRGyoKRNOf16f/zEFiyJBX10vj/LKvnW
-	os1vVTSqBeui2dNLynr0+f1n8b0+0FZwACceo3qaVwuSNIJWSQgM1qAINBpPEKnr
-	Ipdt5fa7mUorJ5gjITys3gjNJ4eesjqUEu5ZGXDgMshVtH2iMceC1393sK6rJ7z+
-	g3jVziSo6vy9lA2wveKMuoqQTwp0V0IrkzExU7vpTzyx0E3mJNmlgmDp7Whp2HCv
-	KjeG+iPfsuPMDRggUrdy9qG6QTFqQORzLywTpu78ExYMSfqt94NVhf2Dv+QEPoyt
-	T1avN6bwGu/R/84g2z0YMfum5roSTG5PGP4H56vjML8wNTd6v8Ny8SLAgzG/XBaV
-	7c8Ll2awLEj4FSeBpNzTyDgnLrth7Tk0LmM8EtO1aozDDEaMFrNy4/L+Uuwxp/wc
-	FADawE9N7VdHa9endEo9V/bu1tkqecv1Ma+G4NvJZzD8JTBRVsHNc3zvI0qD0KWC
-	jqPvaIMiiVATVAIW9ZEtUZNm5UVuDzhcY7QrXNRpGE6ULIXgim66mbfUQ0LFq4G+
-	zUjoRZTA92rFBn4vDKvsPs8CAwEAAQ==
 	-----END PUBLIC KEY-----
 	
 
