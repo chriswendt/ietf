@@ -125,18 +125,13 @@ the PASSporT Payload object would be:
            	F17A03A27DF9B07F4619B2"
         },
         {
-           "algorithm":"sha-256",
-           "digest":"4AADB9B13F82183B540212DF3E5D496B19E57C
+           "alg":"sha-256",
+           "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
            	AB3E4B652E7D463F5442CD54F1"
         }
       ]
     }
   
-**3.2.3. Multi-party Communications**
-
-Personal communications in the context of PASSporT can certainly extend to multi-party scenerios where there is more than one destination identity. In the future, it is anticipated that PASSporT will be extended to support these cases.
-
- 
 **3.3 PASSporT Signature**
 
 The signature of the PASSporT is created as specified by JWS using the private key corresponding to the X.509 public key certificate referenced by the "x5u" header parameter. 
