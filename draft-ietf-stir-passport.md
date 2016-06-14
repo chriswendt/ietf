@@ -152,7 +152,7 @@ An example header with an extended PASSporT profile of "foo" is as follows:
       "typ":"passport",
       "ppt":"foo",
       "alg":"ES256",
-      "x5u":"https://tel.example.org/passport.crt"
+      "x5u":"https://tel.example.org/passport.cer"
     }  
 
 **4.2 Extended PASSporT Payload Claims**
@@ -352,8 +352,8 @@ Encoding this with the UTF8 and BASE64 encoding produces this value:
 	
 Computing the digital signature of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS Payload))
 
-	KK89q2RFY-BkKQQhiB0z6-fIaFUy6NDyUboKXOix9XnYLxTCjdw1UHjCbw4CefeK
-	wH_t7W-bnGlZz4pI-rMjfQ
+	SQ3r3U9kew2e4Ej-tS4vbWQgs9kSQzHgzqK_xP4TL70al7XwWwF4R2mP9sxQey9n
+	pZQoYTNx_WZslJJpIc_f_A
 	
 The final PASSporT token is produced by concatenating the values in the order Header.Payload.Signature with period (',') characters.  For the above example values this would produce the following:
 	
