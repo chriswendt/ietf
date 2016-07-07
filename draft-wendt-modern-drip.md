@@ -397,7 +397,7 @@ All nodes MUST perform HTTP transactions using TLS.
 
 #### 5.2 Authorization
 
-All nodes will digitally sign the APIs by adding a JSON Web Token (JWT) value in the Authorization request-header field. The creation and verification of the JWT could be based on shared key or public/private key cryptography.
+All nodes MUST digitally sign the APIs by adding a JSON Web Token (JWT) value in the Authorization request-header field. The creation and verification of the JWT could be based on shared key or public/private key cryptography. The claims set MUST contain atleast the "iss", "exp" claims. The "iss" claim contains unique ID of the node that initiated the request.
 
 #### 6. Acknowledgements
 
