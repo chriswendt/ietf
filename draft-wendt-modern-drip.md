@@ -368,9 +368,20 @@ TBD
 
 #### 4.7 Heartbeat
 
-TBD - definition of heartbeat
+A node sends periodic heartbeat requests to its peer nodes, to indicate its state. These heartbeat requests are not propagated beyond the peer nodes.
+- If all peer nodes cannot be reached or do not respond with 200 OK, then the node that sent the heartbeat request will set its own state to "inactive". In this case, the assumption is that none of the peer nodes cannot reach this node as well. While in this state, the node 
+	- will not propagate any incoming key-value data
+	- will not update any incoming key-value data
+	- will continue to send the periodic heartbeat requests to its peer nodes. If any one responds with 200 OK, then the node will reinstate its state to "synchronizing" and will synchronize its data as mentioned in section 4.6
+- If any peer node (not all) cannot be reached or do not respond with 200 OK, then key-value data will not be propagated to that peer node until it responds (with 200 OK) to the watchdog request.
 
-TBD - determination of the need to sync after heartbeat fails
+Request:
+
+PUT /heartbeat/node/:nodeid
+
+Description: 
+
+API call for sending a heartbeat request from node to peer-node.
 
 
 #### 4.8 Key-Value Data Update Entitlement Verification
@@ -384,9 +395,9 @@ When a node owner would like to create or modify particular key-value data, gene
 
 All nodes MUST perform HTTP transactions using TLS.
 
-#### 5.2 Authentication
+#### 5.2 Authorization
 
-Secure authentication of node to node communication is beyond the scope of this document, however best practices in terms of protecting the node API interface should be followed.
+All nodes will digitally sign the APIs by adding a JSON Web Token (JWT) value in the Authorization request-header field. The creation and verification of the JWT could be based on shared key or public/private key cryptography.
 
 #### 6. Acknowledgements
 
