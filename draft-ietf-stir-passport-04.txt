@@ -378,20 +378,20 @@ Internet-Draft                  PASSporT                       July 2016
 
     {
         "iat":"1443208345",
-        "otn":"12155551212",
-        "duri":"sip:alice@example.com",
+        "orig":{"otn":"12155551212"},
+        "dest":{"uri":"sip:alice@example.com"},
         "mky":[
-            {
-                "alg":"sha-256",
-                "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
-                    F17A03A27DF9B07F4619B2"
-            },
-            {
-                "alg":"sha-256",
-                "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
-                    AB3E4B652E7D463F5442CD54F1"
-            }
-        ]
+        {
+           "alg":"sha-256",
+           "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
+            F17A03A27DF9B07F4619B2"
+        },
+        {
+           "alg":"sha-256",
+           "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
+            AB3E4B652E7D463F5442CD54F1"
+        }
+      ]
     }
 
 3.3.  PASSporT Signature
