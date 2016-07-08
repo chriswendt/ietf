@@ -66,35 +66,47 @@ The JSON claim MUST include the "iat" [RFC7519] defined claim issued at.  As def
 
 **3.2.2. PASSporT specific claims**
 
-**3.2.2.1. Originating and Destination Identities**
+**3.2.2.1. Originating and Destination Identity claims**
 
-Baseline PASSporT defines claims that convey the identity of the origination and destination of personal communications represented as either telephone numbers or Uniform Resource Indicators (URIs). Some using protocols may require other identifiers for personae; these may be specified as claims through the PASSporT extensibility mechanisms. But for telephone numbers and URIs, the following claims should be used:
+Baseline PASSporT defines claims that convey the identity of the origination and destination of personal communications. There are two claims that are required for PASSporT, the "orig" and "dest" claims. Both "orig" and "dest" should have values that are JSON objects that include identities represented by key value pairs, where the key represents an identity type and the value is the identity string.  Currently, these identities can be represented as either telephone numbers or Uniform Resource Indicators (URIs).  The definition of how telephone numbers or URIs and examples are provided below.
 
-**3.2.2.1.1. "otn" and "dtn" - Originating and Destination Telephone Number claims**
+The "orig" JSON object MUST only have one key value pair representing the asserted identity of any type (currently either "tn" or "uri") of the originator of the personal communications signaling.
 
-If the originating identity is a telephone number, the claim "otn" SHOULD be included. If the destination identity is a telephone number, the claim "dtn" SHOULD be included. 
+The "dest" JSON object MUST at least have one key value pair, but could have an arbitrary number of destination identities of any type.
 
-Telephone Number strings for "otn" and "dtn" claims MUST be canonicalized according to the procedures specified in [ietf-stir-rfc4474bis-08] Section 6.1.1.
+**3.2.2.1.1. "tn" - Telephone Number identity**
 
-**3.2.2.1.2. "ouri" and "duri" - Originating and Destination URI claims**
+If the originating or destination identity is a telephone number, the key representing the identity should be "tn". 
 
-If the originating identity is not a telephone number, the claim "ouri" SHOULD be included with the string cooresponding to the URI form of the identity as defined in [RFC3986], alternatively it could also contain an application specific identity string, if URI format is not appropriate.
+Telephone Number strings for "tn" MUST be canonicalized according to the procedures specified in [ietf-stir-rfc4474bis-10] Section 6.1.1.
 
-If the destination identity is not a telephone number, the claim "duri" SHOULD be included.  The same string format rules apply as stated for "ouri".
+**3.2.2.1.2. "uri" - URI identity**
 
-**3.2.2.1.2. "dgrp" - Multiple destination identities**
+If any of the originating or destination identities is of the form URI, as defined in [RFC3986], the key representing the identity should be "uri"  URI form of the identity.
 
-There are multi-party, group, or conference types of calls where there is a single originating identity or alterntively a "moderator" identity and a number of destination identities or participants in the multi-party call.  For these scenerios, the "dgrp" key should be used with a JSON object containing multiple "dtn" or "duri" identities as defined above.
+**3.2.2.1.3. Future identity forms**
 
-An example PASSporT payload object with multiple destination identities would be as follows:
+We recognize that in the future there may be other standard mechanisms for representing identities.  The "orig" and "dest" JSON objects with "tn" and "uri" allow for other identity types with unique keys to represent these forms.
+
+**3.2.2.1.4. Examples**
+
+Single Originator to Single Destination example:
 
 	{ 
     	"iat":"1443208345",
-    	"otn":"12155551212",
-    	"dgrp":{	
-    			"duri":"sip:alice@example.com",
-    			"dtn":"12125551212",
-    			"duri":"sip:bob@example.net"
+    	"orig":{"tn":"12155551212"},
+    	"dest":{"uri":"sip:alice@example.com"}
+    }
+    
+Single Originator to Multiple Destination Identities example:
+
+	{ 
+    	"iat":"1443208345",
+    	"orig":{"tn":"12155551212"},    	
+    	"dest":{	
+    			"uri":"sip:alice@example.com",
+    			"tn":"12125551212",
+    			"uri":"sip:bob@example.net"
     	}
     }
 
@@ -116,8 +128,8 @@ the PASSporT Payload object would be:
 
 	{ 
     "iat":"1443208345", 
-    "otn":"12155551212",
-	  "duri":"sip:alice@example.com",
+    "orig":{"otn":"12155551212"},
+	  "dest":{"uri":"sip:alice@example.com"},
 	  "mky":[
         {
            "alg":"sha-256",
@@ -181,9 +193,9 @@ In addition, the JSON header and claim members MUST follow the lexicographical o
 
 For the example PASSporT Payload shown in Section 3.2.2.3, the following is the deterministic JSON object form.
 
-	{"iat": 1443208345,"otn":"12155551212","duri":
-	  "sip:alice@example.com","mky":[{"alg":"sha-256","dig":"021ACC54
-	  27ABEB9C533F3E4B652E7D463F5442CD54F17A03A27DF9B07F4619B2"},
+	{"iat": 1443208345,"orig":{"tn":"12155551212"},"dest":
+	  {"uri":"sip:alice@example.com","mky":[{"alg":"sha-256","dig":
+	  "021ACC5427ABEB9C533F3E4B652E7D463F5442CD54F17A03A27DF9B07F4619B2"},
 	  {"alg":"sha-256","dig":"4AADB9B13F82183B540212DF3E5D496B19E57CAB3E
 	  4B652E7D463F5442CD54F1"}]}
 
@@ -200,7 +212,7 @@ There are a number of security considerations for use of the token for avoidance
 These would include:
 
 * "iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the PASSporT token.
-* either "dtn" claim or "duri" claim is included to prevent the ability to use a previously originated message to send to another destination party
+* "dest" claim is included to prevent the ability to use a previously originated message to send to another destination party
 
 **7.2 Solution Considerations**
 
@@ -251,23 +263,13 @@ This section registers the "application/passport" media type [RFC2046] in the "M
 
 **8.2.1 Registry Contents Additions Requested**
 
-* Claim Name: "otn"
-* Claim Description: Originating Telephone Number String
+* Claim Name: "orig"
+* Claim Description: Originating Identity String
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
 
-* Claim Name: "dtn"
-* Claim Description: Destination Telephone Number String
-* Change Controller: IESG
-* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
-
-* Claim Name: "ouri"
-* Claim Description: Originating URI String
-* Change Controller: IESG
-* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
-
-* Claim Name: "duri"
-* Claim Description: Destination URI String
+* Claim Name: "dest"
+* Claim Description: Destination Identity String
 * Change Controller: IESG
 * Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
 
@@ -337,34 +339,35 @@ Second, an example PASSporT Payload is as follows:
 
 	{ 
     	"iat":"1443208345",
-    	"otn":"12155551212",
-    	"duri":"sip:alice@example.com"
+    	"orig":{"tn":"12155551212"},
+    	"dest":{"uri":"sip:alice@example.com"}
     }
   
 This would be serialized to the form:
 
-	{"iat":"1443208345","otn":"12155551212","duri":"sip:alice@example.com"}
+	{"iat":"1443208345","orig":{"tn":"12155551212"},"dest":
+	{"uri":"sip:alice@example.com"}}
 	
 Encoding this with the UTF8 and BASE64 encoding produces this value:
 
-	eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3RuIjoiMTIxNTU1NTEyMTIiLCJkdXJpIjoi
-	c2lwOmFsaWNlQGV4YW1wbGUuY29tIn0
+	eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3JpZyI6eyJ0biI6IjEyMTU1NTUxMjEyIn0s
+	ImRlc3QiOnsidXJpIjoic2lwOmFsaWNlQGV4YW1wbGUuY29tIn19
 	
 Computing the digital signature of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS Payload))
 
-	SQ3r3U9kew2e4Ej-tS4vbWQgs9kSQzHgzqK_xP4TL70al7XwWwF4R2mP9sxQey9n
-	pZQoYTNx_WZslJJpIc_f_A
+	2bbTbLeDIf52Vv0yESUqebUBYrKIuouOfKQME6MD9kfgZ59dMAvvrIC94XsKdzV0
+	3evDS8wd6CubUqSalM7Dpg
 	
 The final PASSporT token is produced by concatenating the values in the order Header.Payload.Signature with period (',') characters.  For the above example values this would produce the following:
 	
 	eyJ0eXAiOiJwYXNzcG9ydCIsImFsZyI6IkVTMjU2IiwieDV1IjoiaHR0cHM6Ly9j
 	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
 	.
-	eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3RuIjoiMTIxNTU1NTEyMTIiLCJkdXJpIjoi
-	c2lwOmFsaWNlQGV4YW1wbGUuY29tIn0
+	eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3JpZyI6eyJ0biI6IjEyMTU1NTUxMjEyIn0s
+	ImRlc3QiOnsidXJpIjoic2lwOmFsaWNlQGV4YW1wbGUuY29tIn19
 	.
-	SQ3r3U9kew2e4Ej-tS4vbWQgs9kSQzHgzqK_xP4TL70al7XwWwF4R2mP9sxQey9n
-	pZQoYTNx_WZslJJpIc_f_A
+	2bbTbLeDIf52Vv0yESUqebUBYrKIuouOfKQME6MD9kfgZ59dMAvvrIC94XsKdzV0
+	3evDS8wd6CubUqSalM7Dpg
 	
 
 **Appendix A.1. X.509 Private Key Certificate for ES256 Example**
