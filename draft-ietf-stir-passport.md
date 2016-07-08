@@ -9,7 +9,7 @@ This document defines a token format for verifying with non-repudiation the send
 
 **1. Introduction**
 
-In today's IP-enabled telecommunications world, there is a growing concern about the ability to trust incoming invitations for communications sessions, including video, voice and messaging. As an example, modern telephone networks provide the ability to spoof the calling party telephone number for many legitimate purposes including providing network features and services on the behalf of a legitimate telephone number.  However, as we have seen, bad actors have taken advantage of this ability for illegitimate and fraudulent purposes meant to trick telephone users to believe they are someone they are not. This problem can be extended to many emerging forms of personal communications.
+In today's IP-enabled telecommunications world, there is a growing concern about the ability to trust incoming invitations for communications sessions, including video, voice and messaging [RFC 7340]. As an example, modern telephone networks provide the ability to spoof the calling party telephone number for many legitimate purposes including providing network features and services on the behalf of a legitimate telephone number.  However, as we have seen, bad actors have taken advantage of this ability for illegitimate and fraudulent purposes meant to trick telephone users to believe they are someone they are not. This problem can be extended to many emerging forms of personal communications.
 
 This document defines a common method for creating and validating a token that cryptographically verifies an originating identity, or more generally a URI or application specific identity string representing the originator of personal communications. Through extended profiles other information relevant to the personal communications can also be attached to the token.  The primary goal of PASSporT is to provide a common framework for signing persona related information in an extensible way.  A secondary goal is to provide this functionality independent of any specific personal communications signaling call logic, so that creation and verification of persona information can be implemented in a flexible way and can be used in many personal communications applications including end-to-end applications that require different signaling protocols.  It is anticipated that signaling protocol specific guidance will be provided in other related documents and specifications to specify how to use and transport PASSporT tokens, however this is intentionally out of scope for this document.  
 
@@ -39,7 +39,7 @@ An example of the header for the case of an ECDSA P-256 digital signature would 
       
 JWS defines the "typ" (Type) Header Parameter to declare the media type [IANA.MediaTypes] of the JWS. 
 
-For PASSporT Token the "typ" header MUST minimally include and begin with "passport". This represents that the encoded token is a JWT of type passport. Note with extensions explained later in this document, the typ may be another value if defined as a passport extension.
+For PASSporT Token the "typ" header MUST minimally include and begin with "passport". This represents that the encoded token is a JWT of type passport. 
 
 
 **3.1.2 "alg" (Algorithm) Header Parameter**
@@ -66,7 +66,7 @@ The JSON claim MUST include the "iat" [RFC7519] defined claim issued at.  As def
 
 **3.2.2. PASSporT specific claims**
 
-**3.2.2.1. Originating and Destination Identity claims**
+**3.2.2.1. Originating and Destination Identity Claims**
 
 Baseline PASSporT defines claims that convey the identity of the origination and destination of personal communications. There are two claims that are required for PASSporT, the "orig" and "dest" claims. Both "orig" and "dest" should have values that are JSON objects that include identities represented by key value pairs, where the key represents an identity type and the value is the identity string.  Currently, these identities can be represented as either telephone numbers or Uniform Resource Indicators (URIs).  The definition of how telephone numbers or URIs and examples are provided below.
 
@@ -78,7 +78,7 @@ The "dest" JSON object MUST at least have one key value pair, but could have an 
 
 If the originating or destination identity is a telephone number, the key representing the identity should be "tn". 
 
-Telephone Number strings for "tn" MUST be canonicalized according to the procedures specified in [ietf-stir-rfc4474bis-10] Section 6.1.1.
+Telephone Number strings for "tn" MUST be canonicalized according to the procedures specified in [ietf-stir-rfc4474bis-10] Section 7.2.
 
 **3.2.2.1.2. "uri" - URI identity**
 
@@ -150,13 +150,11 @@ The signature of the PASSporT is created as specified by JWS using the private k
 
 **4. Extending PASSporT**
 
-PASSporT represents the bare minimum set of claims needed to assert the originating identity, however there will certainly be new and extended applications and usage of PASSPorT that will need to extend the claims to represent other information specific to the origination identities beyond the identity itself.
-
-There are two mechanisms defined to extend PASSporT. The first includes an extension of the base passport claims to include additional claims.  An alternative method of extending PASSporT is for applications of PASSporT unrelated to the base set of claims, that will define it's own set of claims.  Both are described below.
+PASSporT represents the bare minimum set of claims needed to assert the originating identity and support the secure propoerties discussed in various parts of this document, however there will certainly be both new uses and ways of extending the application and usage of PASSPorT that requires the ability to extend the defined base set of claims to represent other information requiring assertion or validation beyond the identity itself.
 
 **4.1 "ppt" (PASSporT) header parameter**
 
-For extended profiles of PASSporT, a new JWS header parameter "ppt" MUST be used with a string that uniquely identifies the profile specification that defines any new claims that would extend the base set of claims of PASSporT.
+For the extension of the base set of claims defined in this document, a new JWS header parameter "ppt" MUST be used with a string that uniquely identifies and points to a profile specification that defines any new claims that would extend the base set of claims of PASSporT.
 
 An example header with an extended PASSporT profile of "foo" is as follows:
 
@@ -169,17 +167,7 @@ An example header with an extended PASSporT profile of "foo" is as follows:
 
 **4.2 Extended PASSporT Payload Claims**
 
-Future specifications that define such extensions to the PASSporT mechanism MUST explicitly designate what claims they include, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST incorporate the baseline JWT elements specified in Section 3; claims may only be appended to the claims object specified; they can never be subtracted or re-ordered. Specifying new claims follows the baseline JWT procedures ([RFC7519] Section 10.1 <https://tools.ietf.org/html/rfc7519#section-10.1>). Note that understanding an extension as a verifier is always optional for compliance with this specification (though future specifications or profiles for deployment environments may make other "ppt" values mandatory). The creator of a PASSporT object cannot assume that verifiers will understand any given extension. Verifiers that do support an extension may then trigger appropriate application-level behavior in the presence of an extension; authors of extensions should provide appropriate extension-specific guidance to application developers on this point.
-
-**4.3 Alternate PASSporT Extension**
-
-Some applications may want to use the mechanism of the PASSporT digital signature that is not a superset of the base set of claims of the PASSporT token as defined in Section 3.  Rather, a specification may use PASSporT with its own defined set of claims.
-
-In this case, the specification SHOULD define its own MIME media type [RFC2046] in the "Media Types" registry [IANA.MediaTypes].  The MIME subtype SHOULD start with the string "passport-" to signify that it is related to the PASSporT token.  For example, for the "foo" application the MIME type/sub-type could be defined as "application/passport-foo".
-
-**4.4 Registering PASSporT Extensions**
-
-Toward interoperability and to maintain uniqueness of the extended PASSporT profile header parameter string, there SHOULD be an industry registry that tracks the definition of the profile strings.
+Future specifications that define such extensions to the PASSporT mechanism MUST explicitly designate what claims they include beyond the base set of claims from this document, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST incorporate the baseline JWT elements specified in Section 3; claims may only be appended to the claims object specified; they can never be subtracted or re-ordered. Specifying new claims follows the baseline JWT procedures ([RFC7519] Section 10.1 <https://tools.ietf.org/html/rfc7519#section-10.1>). Note that understanding an extension as a verifier is always optional for compliance with this specification (though future specifications or profiles for deployment environments may make other "ppt" values mandatory). The creator of a PASSporT object cannot assume that verifiers will understand any given extension. Verifiers that do support an extension may then trigger appropriate application-level behavior in the presence of an extension; authors of extensions should provide appropriate extension-specific guidance to application developers on this point.
 
 **5. Deterministic JSON Serialization**
 
