@@ -387,7 +387,7 @@ Periodic heartbeats are required for a node to determine it's visibility to the 
 	- not propagate any incoming key-value data
 	- not update any incoming key-value data
 	- continue to send the periodic heartbeat requests to its peer nodes. If any one responds with 200 OK, then the node will move its state to "synchronizing" and will re-synchronize its data with any active peer node as detailed in section 4.6
-- In addition, any one or more peer nodes that cannot be reached or did not respond with 200 OK should not be used to propagate key-value data until it responds (with 200 OK) to the watchdog request.
+- In addition, any one or more peer nodes that cannot be reached or did not respond with 200 OK should not be used to propagate key-value data until it responds (with 200 OK) to the heartbeat request.
 
 #### 4.7.1 API - POST /heartbeat/node/:nodeid
 
@@ -418,7 +418,7 @@ All nodes MUST perform HTTP transactions using TLS.
 
 All nodes MUST validate their authority to consume the HTTP APIs of a peer node by adding a JSON Web Token (JWT) value [RFC7519] in the Authorization request-header field. 
 
-The creation and verification of the JWT should be based on a X.509 based digital signature. For most distributed registry scenerios where the owner of a node may not have a direct relationship with another node owner, a PKI based certificate approach is highly suggested. For protection against replay attacks, the claim set SHOULD contain an "iat" claim and the signature should be verified to be signed by the expected owner of the peer node. The "iat" claim identifies the time at which the JWT was issued and can be used to validate when the time of the transaction occurred.
+The creation and verification of the JWT should be based on a digital signature. For most distributed registry scenerios where the owner of a node may not have a direct relationship with another node owner, a PKI based certificate approach is highly suggested. For protection against replay attacks, the claim set SHOULD contain an "iat" claim and the signature should be verified to be signed by the expected owner of the peer node. The "iat" claim identifies the time at which the JWT was issued and can be used to validate when the time of the transaction occurred.
 
 #### 5.3 Payload validation
 
