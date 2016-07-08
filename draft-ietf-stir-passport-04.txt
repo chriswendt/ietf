@@ -201,7 +201,7 @@ Internet-Draft                  PASSporT                       July 2016
 3.1.1.  "typ" (Type) Header Parameter
 
    JWS defines the "typ" (Type) Header Parameter to declare the media
-   type [IANA.MediaTypes] of the JWS.
+   type  of the JWS.
 
    For PASSporT Token the "typ" header MUST minimally include and begin
    with "passport".  This represents that the encoded token is a JWT of
@@ -560,9 +560,9 @@ Internet-Draft                  PASSporT                       July 2016
 8.1.1.  Media Type Registry Contents Additions Requested
 
    This section registers the "application/passport" media type
-   [RFC2046] in the "Media Types" registry [IANA.MediaTypes] in the
-   manner described in [RFC6838], which can be used to indicate that the
-   content is a PASSporT defined JWT and JWS.
+   [RFC2046] in the "Media Types" registry in the manner described in
+   [RFC6838], which can be used to indicate that the content is a
+   PASSporT defined JWT and JWS.
 
    o  Type name: application
    o  Subtype name: passport
@@ -640,8 +640,8 @@ Internet-Draft                  PASSporT                       July 2016
               Initiation Protocol (SIP) ", Internet-Draft draft-ietf-
               stir-rfc4474bis-10, July 2016.
 
-   [IANA.MediaTypes]
-              "IANA, "Media Types"", , <Media Types>.
+
+
 
 
 Wendt & Peterson       Expires December 31, 2016               [Page 11]
