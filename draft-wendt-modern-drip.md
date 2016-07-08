@@ -85,31 +85,29 @@ The node should proactively tell it's peer nodes its state by sending the follow
 
 #### 4.2.1 API - POST /node/:nodeid/active
 
-Request: 
+**Example (using cURL)**
 
-POST /node/:nodeid/active
+Request
 
-Description:
+	$ curl -i -H "DRiP-Node-ID: nodeA" -H "Authorization: eyJ0e..."
+  	-X POST https://nodearegistry.com/node/nodeA/active
+	
+Response:
 
-TBD
-
-Example:
-
-TBD
-
+	HTTP/1.1 200 OK
+	
 #### 4.2.2 API - POST /node/:nodeid/inactive
 
-Request: 
+**Example (using cURL)**
 
-POST /node/:nodeid/inactive
+Request
 
-Description:
+	$ curl -i -H "DRiP-Node-ID: nodeA" -H "Authorization: eyJ0e..."
+  	-X POST https://nodearegistry.com/node/nodeA/inactive
+	
+Response:
 
-TBD
-
-Example: 
-
-TBD
+	HTTP/1.1 200 OK
 
 #### 4.2.3 API - GET /state
 
@@ -122,9 +120,23 @@ Description:
 A node should query the state of its peer node before it initiates a sync operation.
 This request responds with either "active" or "sync" or no response, if in "inactive" state.
 
-Example:
+**Example (using cURL)**
 
-TBD
+Request
+
+	$ curl -i -H "DRiP-Node-ID: nodeA" -H "Authorization: eyJ0e..."
+  	-X GET https://nodearegistry.com/state
+	
+Response
+
+200 OK and the following JSON object.
+
+```sh
+	----------------------------------------------------------------------------------------------
+	Property        Type          Description
+	----------------------------------------------------------------------------------------------
+	state           string        "active" or "inactive" or "sync"
+```
 
 #### 4.3 Custom HTTP header fields
 
@@ -254,8 +266,8 @@ Request:
 
     $ curl -i  -H "Content-Type: application/json" -H 
     	"DRiP-Node-ID: nodeA" -H "DRiP-Node-Counter: 1234" 
-    	-H "DRiP-Node-Counter-reset: false" -X POST -d '<data>' 
-    	https://peernode.com/voting
+    	-H "DRiP-Node-Counter-reset: false" -H "Authorization: eyJ0e..."
+    	-X POST -d '<data>' https://peernode.com/voting
 
 Response:
 
@@ -275,7 +287,8 @@ A POST from peer node back to node with response of vote.
 
 Request
 
-	$ curl -i -X POST http://nodearegistry.com/node/nodeA/response/yes
+	$ curl -i -H "DRiP-Node-ID: nodeA" -H "Authorization: eyJ0e..."
+  	-X POST https://nodearegistry.com/node/nodeA/response/yes
 
 Response
 
@@ -338,8 +351,8 @@ Request:
 
 	$ curl -i  -H "Content-Type: application/json" -H 
 		"DRiP-Node-ID: nodeA" -H "DRiP-Node-Counter: 1234" 
-		-H "DRiP-Node-Counter-reset: false" -X POST 
-		-d '<key-value data>' https://peernode.com/commit
+		-H "DRiP-Node-Counter-reset: false" -H "Authorization: eyJ0e..."
+		-X POST -d '<key-value data>' https://peernode.com/commit
 
 Response:
 
@@ -354,17 +367,16 @@ The two phase commit does NOT apply here as the contents of the initiating node'
 
 #### 4.6.1 API - PUT /sync/node/:nodeid
 
+**Example (using cURL)**
+
 Request:
 
-PUT /sync/node/:nodeid
+	$ curl -i  -H "DRiP-Node-ID: nodeA" -H "Authorization: eyJ0e..."
+		-X POST https://peernode.com/sync/node/nodeA
 
-Description: 
+Response:
 
-API call for initiating a full registry synchronization from node to peer-node.
-
-Example:
-
-TBD
+	HTTP/1.1 200 OK
 
 #### 4.7 Heartbeat
 
@@ -375,14 +387,17 @@ A node sends periodic heartbeat requests to its peer nodes, to indicate its stat
 	- will continue to send the periodic heartbeat requests to its peer nodes. If any one responds with 200 OK, then the node will reinstate its state to "synchronizing" and will synchronize its data as mentioned in section 4.6
 - If any peer node (not all) cannot be reached or do not respond with 200 OK, then key-value data will not be propagated to that peer node until it responds (with 200 OK) to the watchdog request.
 
+**Example (using cURL)**
+
 Request:
 
-PUT /heartbeat/node/:nodeid
+	$ curl -i  -H "DRiP-Node-ID: nodeA" -H "Authorization: eyJ0e..."
+		-X POST -d '<key-value data>' https://peernode.com/heartbeat/node/nodeA
 
-Description: 
+Response:
 
-API call for sending a heartbeat request from node to peer-node.
-
+	HTTP/1.1 200 OK
+	
 
 #### 4.8 Key-Value Data Update Entitlement Verification
 
@@ -397,7 +412,7 @@ All nodes MUST perform HTTP transactions using TLS.
 
 #### 5.2 Authorization
 
-All nodes MUST digitally sign the APIs by adding a JSON Web Token (JWT) value in the Authorization request-header field. The creation and verification of the JWT could be based on shared key or public/private key cryptography. The claims set MUST contain atleast the "iss", "exp" claims. The "iss" claim contains unique ID of the node that initiated the request.
+All nodes MUST digitally sign the APIs by adding a JSON Web Token (JWT) value in the Authorization request-header field. The creation and verification of the JWT could be based on shared key or public/private key cryptography. The claims set MUST contain atleast the "iss", "iat" claims. The "iss" claim MUST contain unique ID of the node that initiated the request. The "iat" claim identifies the time at which the JWT was issued.
 
 #### 6. Acknowledgements
 
