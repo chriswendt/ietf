@@ -89,35 +89,34 @@ Table of Contents
          3.2.2.2.  "mky" - Media Key claim  . . . . . . . . . . . . .  6
      3.3.  PASSporT Signature . . . . . . . . . . . . . . . . . . . .  7
    4.  Extending PASSporT . . . . . . . . . . . . . . . . . . . . . .  7
-     4.1.  "ppt" (PASSporT) header parameter  . . . . . . . . . . . .  8
+     4.1.  "ppt" (PASSporT) header parameter  . . . . . . . . . . . .  7
      4.2.  Extended PASSporT Claims . . . . . . . . . . . . . . . . .  8
-     4.3.  Alternate PASSporT Extension . . . . . . . . . . . . . . .  8
-     4.4.  Registering PASSporT Extensions  . . . . . . . . . . . . .  8
-   5.  Deterministic JSON Serialization . . . . . . . . . . . . . . .  9
-     5.1.  Example PASSport deterministic JSON form . . . . . . . . .  9
+   5.  Deterministic JSON Serialization . . . . . . . . . . . . . . .  8
+     5.1.  Example PASSport deterministic JSON form . . . . . . . . .  8
    6.  Human Readability  . . . . . . . . . . . . . . . . . . . . . .  9
    7.  Security Considerations  . . . . . . . . . . . . . . . . . . .  9
      7.1.  Avoidance of replay and cut and paste attacks  . . . . . .  9
-     7.2.  Solution Considerations  . . . . . . . . . . . . . . . . . 10
+     7.2.  Solution Considerations  . . . . . . . . . . . . . . . . .  9
      7.3.  Privacy Considerations . . . . . . . . . . . . . . . . . . 10
-   8.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 11
-     8.1.  Media Type Registration  . . . . . . . . . . . . . . . . . 11
-       8.1.1.  Media Type Registry Contents Additions Requested . . . 11
+   8.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 10
+     8.1.  Media Type Registration  . . . . . . . . . . . . . . . . . 10
+       8.1.1.  Media Type Registry Contents Additions Requested . . . 10
      8.2.  JSON Web Token Claims Registration . . . . . . . . . . . . 11
        8.2.1.  Registry Contents Additions Requested  . . . . . . . . 11
-   9.  Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 12
-   10. References . . . . . . . . . . . . . . . . . . . . . . . . . . 12
-     10.1.  Normative References  . . . . . . . . . . . . . . . . . . 12
-     10.2.  Informative References  . . . . . . . . . . . . . . . . . 13
+   9.  Acknowledgements . . . . . . . . . . . . . . . . . . . . . . . 11
+   10. References . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+     10.1.  Normative References  . . . . . . . . . . . . . . . . . . 11
+     10.2.  Informative References  . . . . . . . . . . . . . . . . . 12
    Appendix A. Example PASSporT JWS Serialization and Signature . . . 13
      Appendix A.1.  X.509 Private Key Certificate for Example . . . . 14
-     Appendix A.2.  X.509 Public Key Certificate for Example  . . . . 15
+     Appendix A.2.  X.509 Public Key Certificate for Example  . . . . 14
+   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 14
+
 
 Wendt & Peterson       Expires December 31, 2016                [Page 2]
 
 Internet-Draft                  PASSporT                       July 2016
 
-   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 15
 
 1.  Introduction
 
@@ -170,7 +169,6 @@ Internet-Draft                  PASSporT                       July 2016
    signatures.
 
 3.  PASSporT Definition
-
 
 
 
@@ -341,20 +339,6 @@ Internet-Draft                  PASSporT                       July 2016
    single SDP body corresponding to difference media streams offered.
    The "mky" value of PASSporT contains a hexadecimal key presentation
    of any hash(es) necessary to establish media security via DTLS-SRTP.
-
-
-
-
-
-
-
-
-
-
-Wendt & Peterson       Expires December 31, 2016                [Page 6]
-
-Internet-Draft                  PASSporT                       July 2016
-
    This mky value should be formated in a JSON form including the 'alg'
    and 'dig' keys with the corresponding algorithm and hexadecimal
    values.  Note that per guidance of Section 5 of this document any
@@ -363,6 +347,12 @@ Internet-Draft                  PASSporT                       July 2016
    constructed as a JSON array denoted by bracket characters.  For the
    'dig' key value, the hash value should be the hexadecimal value
    without any colons, in order to provide a more efficient, compact
+
+
+Wendt & Peterson       Expires December 31, 2016                [Page 6]
+
+Internet-Draft                  PASSporT                       July 2016
+
    form to be encoded in PASSporT token claim.
 
    An example claim with "mky" claim is as follows:
@@ -410,11 +400,6 @@ Internet-Draft                  PASSporT                       July 2016
    claims to represent other information requiring assertion or
    validation beyond the identity itself.
 
-Wendt & Peterson       Expires December 31, 2016                [Page 7]
-
-Internet-Draft                  PASSporT                       July 2016
-
-
 4.1.  "ppt" (PASSporT) header parameter
 
    For the extension of the base set of claims defined in this document,
@@ -422,6 +407,11 @@ Internet-Draft                  PASSporT                       July 2016
    uniquely identifies and points to a profile specification that
    defines any new claims that would extend the base set of claims of
    PASSporT.
+
+Wendt & Peterson       Expires December 31, 2016                [Page 7]
+
+Internet-Draft                  PASSporT                       July 2016
+
 
    An example header with an extended PASSporT profile of "foo" is as
    follows:
@@ -453,32 +443,6 @@ Internet-Draft                  PASSporT                       July 2016
    of extensions should provide appropriate extension-specific guidance
    to application developers on this point.
 
-4.3.  Alternate PASSporT Extension
-
-   Some applications may want to use the mechanism of the PASSporT
-   digital signature that is not a superset of the base set of claims of
-   the PASSporT token as defined in Section 3.  Rather, a specification
-   may use PASSporT with its own defined set of claims.
-
-   In this case, the specification SHOULD define its own MIME media type
-   [RFC2046] in the "Media Types" registry [IANA.MediaTypes].  The MIME
-   subtype SHOULD start with the string "passport-" to signify that it
-   is related to the PASSporT token.  For example, for the "foo"
-   application the MIME type/sub-type could be defined as "application/
-   passport-foo".
-
-
-
-Wendt & Peterson       Expires December 31, 2016                [Page 8]
-
-Internet-Draft                  PASSporT                       July 2016
-
-4.4.  Registering PASSporT Extensions
-
-   Toward interoperability and to maintain uniqueness of the extended
-   PASSporT profile header parameter string, there SHOULD be an industry
-   registry that tracks the definition of the profile strings.
-
 5.  Deterministic JSON Serialization
 
    In order to provide a deterministic representation of the PASSporT
@@ -502,6 +466,12 @@ Internet-Draft                  PASSporT                       July 2016
    For the example PASSporT Payload shown in Section 3.2.2.2, the
    following is the deterministic JSON object form.
 
+
+Wendt & Peterson       Expires December 31, 2016                [Page 8]
+
+Internet-Draft                  PASSporT                       July 2016
+
+
     {"iat": 1443208345,"orig":{"tn":"12155551212"},"dest":
       {"uri":"sip:alice@example.com","mky":[{"alg":"sha-256","dig":
       "021ACC5427ABEB9C533F3E4B652E7D463F5442CD54F17A03A27DF9B07F4619
@@ -522,16 +492,6 @@ Internet-Draft                  PASSporT                       July 2016
 7.  Security Considerations
 
 7.1.  Avoidance of replay and cut and paste attacks
-
-
-
-
-
-
-Wendt & Peterson       Expires December 31, 2016                [Page 9]
-
-Internet-Draft                  PASSporT                       July 2016
-
 
    There are a number of security considerations for use of the token
    for avoidance of replay and cut and paste attacks.  PASSporT tokens
@@ -565,6 +525,12 @@ Internet-Draft                  PASSporT                       July 2016
    In addition, the telecommunications systems and specifications that
    use PASSporT should in practice provide mechanisms for:
 
+
+Wendt & Peterson       Expires December 31, 2016                [Page 9]
+
+Internet-Draft                  PASSporT                       July 2016
+
+
    o  Managing X.509 certificates and X.509 certificate chains to an
       authorized trust anchor that can be a trusted entity to all
       participants in the telecommunications network
@@ -586,11 +552,6 @@ Internet-Draft                  PASSporT                       July 2016
    intented actors.  These identifiers are often exposed through many
    communications signaling protocols as of today, but appropriate
    precautions should be taken.
-
-Wendt & Peterson       Expires December 31, 2016               [Page 10]
-
-Internet-Draft                  PASSporT                       July 2016
-
 
 8.  IANA Considerations
 
@@ -623,6 +584,11 @@ Internet-Draft                  PASSporT                       July 2016
       *  Magic number(s): n/a
       *  File extension(s): n/a
       *  Macintosh file type code(s): n/a
+
+Wendt & Peterson       Expires December 31, 2016               [Page 10]
+
+Internet-Draft                  PASSporT                       July 2016
+
    o  Person and email address to contact for further information: Chris
       Wendt, chris-ietf@chriswendt.net
    o  Intended usage: COMMON
@@ -644,12 +610,6 @@ Internet-Draft                  PASSporT                       July 2016
    o  Claim Name: "dest"
    o  Claim Description: Destination Identity String
    o  Change Controller: IESG
-
-
-Wendt & Peterson       Expires December 31, 2016               [Page 11]
-
-Internet-Draft                  PASSporT                       July 2016
-
    o  Specification Document(s): Section 3.2 of draft-ietf-stir-
       passport-00
 
@@ -683,6 +643,12 @@ Internet-Draft                  PASSporT                       July 2016
    [IANA.MediaTypes]
               "IANA, "Media Types"", , <Media Types>.
 
+
+Wendt & Peterson       Expires December 31, 2016               [Page 11]
+
+Internet-Draft                  PASSporT                       July 2016
+
+
    [RFC2046]  Freed, N. and N. Borenstein, "Multipurpose Internet Mail
               Extensions (MIME) Part Two: Media Types", RFC 2046, DOI
               10.17487/RFC2046, November 1996, <http://www.rfc-
@@ -701,14 +667,6 @@ Internet-Draft                  PASSporT                       July 2016
    [RFC7515]  Jones, M., Bradley, J. and N. Sakimura, "JSON Web
               Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
               2015, <http://www.rfc-editor.org/info/rfc7515>.
-
-
-
-
-Wendt & Peterson       Expires December 31, 2016               [Page 12]
-
-Internet-Draft                  PASSporT                       July 2016
-
 
    [RFC7518]  Jones, M., "JSON Web Algorithms (JWA)", RFC 7518, DOI
               10.17487/RFC7518, May 2015, <http://www.rfc-editor.org/
@@ -744,6 +702,12 @@ Internet-Draft                  PASSporT                       July 2016
               RFC 7340, DOI 10.17487/RFC7340, September 2014, <http://
               www.rfc-editor.org/info/rfc7340>.
 
+
+Wendt & Peterson       Expires December 31, 2016               [Page 12]
+
+Internet-Draft                  PASSporT                       July 2016
+
+
 Appendix A.  Example PASSporT JWS Serialization and Signature
 
    For PASSporT, there will always be a JWS with the following members:
@@ -763,11 +727,6 @@ Appendix A.  Example PASSporT JWS Serialization and Signature
     }
 
    This would be serialized to the form:
-
-Wendt & Peterson       Expires December 31, 2016               [Page 13]
-
-Internet-Draft                  PASSporT                       July 2016
-
 
     {"typ":"passport","alg":"ES256","x5u":"https://cert.example.org/
     passport.cer"}
@@ -802,6 +761,12 @@ Internet-Draft                  PASSporT                       July 2016
     2bbTbLeDIf52Vv0yESUqebUBYrKIuouOfKQME6MD9kfgZ59dMAvvrIC94XsKdzV0
     3evDS8wd6CubUqSalM7Dpg
 
+
+Wendt & Peterson       Expires December 31, 2016               [Page 13]
+
+Internet-Draft                  PASSporT                       July 2016
+
+
    The final PASSporT token is produced by concatenating the values in
    the order Header.Payload.Signature with period (',') characters.  For
    the above example values this would produce the following:
@@ -822,11 +787,6 @@ Appendix A.1.  X.509 Private Key Certificate for Example
     AwEHoUQDQgAE8HNbQd/TmvCKwPKHkMF9fScavGeH78YTU8qLS8I5HLHSSmlATLcs
     lQMhNC/OhlWBYC626nIlo7XeebYS7Sb37g==
     -----END EC PRIVATE KEY-----
-
-Wendt & Peterson       Expires December 31, 2016               [Page 14]
-
-Internet-Draft                  PASSporT                       July 2016
-
 
 Appendix A.2.  X.509 Public Key Certificate for Example
 
@@ -860,25 +820,4 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Wendt & Peterson       Expires December 31, 2016               [Page 15]
+Wendt & Peterson       Expires December 31, 2016               [Page 14]

@@ -262,21 +262,7 @@
             <t>Future specifications that define such extensions to the PASSporT mechanism MUST explicitly designate what claims they include beyond the base set of claims from this document, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST incorporate the baseline JWT elements specified in Section 3; claims may only be appended to the claims object specified; they can never be subtracted or re-ordered. Specifying new claims follows the baseline JWT procedures (<xref target="RFC7519"></xref> Section 10.1). Note that understanding an extension as a verifier is always optional for compliance with this specification (though future specifications or profiles for deployment environments may make other "ppt" values mandatory). The creator of a PASSporT object cannot assume that verifiers will understand any given extension. Verifiers that do support an extension may then trigger appropriate application-level behavior in the presence of an extension; authors of extensions should provide appropriate extension-specific guidance to application developers on this point.</t>
       
         </section>
-      
-        <section title="Alternate PASSporT Extension" anchor="sec.alternate_passport_extension">
-      
-            <t>Some applications may want to use the mechanism of the PASSporT digital signature that is not a superset of the base set of claims of the PASSporT token as defined in Section 3.  Rather, a specification may use PASSporT with its own defined set of claims.</t>
-        
-            <t>In this case, the specification SHOULD define its own MIME media type <xref target="RFC2046"></xref> in the "Media Types" registry <xref target="IANA.MediaTypes"></xref>.  The MIME subtype SHOULD start with the string "passport-" to signify that it is related to the PASSporT token.  For example, for the "foo" application the MIME type/sub-type could be defined as "application/passport-foo".</t>
-      
-        </section>
-      
-        <section title="Registering PASSporT Extensions" anchor="sec.registering_passport_extensions">
-      
-            <t>Toward interoperability and to maintain uniqueness of the extended PASSporT profile header parameter string, there SHOULD be an industry registry that tracks the definition of the profile strings.</t>
-      
-        </section>
-      
+            
     </section>
     
     <section title="Deterministic JSON Serialization" anchor="sec.deterministic_json_serialization">
