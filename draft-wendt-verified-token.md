@@ -1,7 +1,7 @@
 
-### Verified Token
+### Persona Assertion Token (PASSporT)
 
-**draft-wendt-verified-token-00**
+**draft-wendt-stir-passport-00**
 
 **Abstract**
 
