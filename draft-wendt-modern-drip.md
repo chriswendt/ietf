@@ -380,19 +380,23 @@ Response:
 
 #### 4.7 Heartbeat
 
-A node sends periodic heartbeat requests to its peer nodes, to indicate its state. These heartbeat requests are not propagated beyond the peer nodes.
-- If all peer nodes cannot be reached or do not respond with 200 OK, then the node that sent the heartbeat request will set its own state to "inactive". In this case, the assumption is that none of the peer nodes cannot reach this node as well. While in this state, the node 
-	- will not propagate any incoming key-value data
-	- will not update any incoming key-value data
-	- will continue to send the periodic heartbeat requests to its peer nodes. If any one responds with 200 OK, then the node will reinstate its state to "synchronizing" and will synchronize its data as mentioned in section 4.6
-- If any peer node (not all) cannot be reached or do not respond with 200 OK, then key-value data will not be propagated to that peer node until it responds (with 200 OK) to the watchdog request.
+Periodic heartbeats are required for a node to determine it's visibility to the rest of it's peer nodes and whether it should put itself in "inactive" mode.  The proceedure for heartbeats is as follows.
+
+- A node sends periodic heartbeat requests to its peer nodes with an indication of its state. These heartbeat requests are not to be propagated beyond the peer nodes.
+- If all of its peer nodes cannot be reached or do not respond with 200 OK, then the node that sent the heartbeat request will set its own state to "inactive". This is based on the reasonable assumption that none of the peer nodes are able to communicate with this node until a new heartbeat request is sucessful. Once in the inactive state, the node will
+	- not propagate any incoming key-value data
+	- not update any incoming key-value data
+	- continue to send the periodic heartbeat requests to its peer nodes. If any one responds with 200 OK, then the node will move its state to "synchronizing" and will re-synchronize its data with any active peer node as detailed in section 4.6
+- In addition, any one or more peer nodes that cannot be reached or did not respond with 200 OK should not be used to propagate key-value data until it responds (with 200 OK) to the watchdog request.
+
+#### 4.7.1 API - POST /heartbeat/node/:nodeid
 
 **Example (using cURL)**
 
 Request:
 
 	$ curl -i  -H "DRiP-Node-ID: nodeA" -H "Authorization: eyJ0e..."
-		-X POST -d '<key-value data>' https://peernode.com/heartbeat/node/nodeA
+		-X POST -d '<state>' https://peernode.com/heartbeat/node/nodeA
 
 Response:
 
@@ -412,7 +416,14 @@ All nodes MUST perform HTTP transactions using TLS.
 
 #### 5.2 Authorization
 
-All nodes MUST digitally sign the APIs by adding a JSON Web Token (JWT) value in the Authorization request-header field. The creation and verification of the JWT could be based on shared key or public/private key cryptography. The claims set MUST contain atleast the "iss", "iat" claims. The "iss" claim MUST contain unique ID of the node that initiated the request. The "iat" claim identifies the time at which the JWT was issued.
+All nodes MUST validate their authority to consume the HTTP APIs of a peer node by adding a JSON Web Token (JWT) value [RFC7519] in the Authorization request-header field. 
+
+The creation and verification of the JWT should be based on a X.509 based digital signature. For most distributed registry scenerios where the owner of a node may not have a direct relationship with another node owner, a PKI based certificate approach is highly suggested. For protection against replay attacks, the claim set SHOULD contain an "iat" claim and the signature should be verified to be signed by the expected owner of the peer node. The "iat" claim identifies the time at which the JWT was issued and can be used to validate when the time of the transaction occurred.
+
+#### 5.3 Payload validation
+
+In addition to the DRiP level protocol protection, it is highly suggested to sign and validate part or all of the JSON update payloads to the originator of the update.
+DRiP does not define anything regarding the contents of the payload, so this document does not address this in any way.
 
 #### 6. Acknowledgements
 
