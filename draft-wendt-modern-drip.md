@@ -412,7 +412,7 @@ When a node owner would like to create or modify particular key-value data, gene
 
 #### 5.1 HTTPS
 
-All nodes MUST perform HTTP transactions using TLS.
+All nodes MUST perform HTTP transactions using TLS as defined in [RFC7230].
 
 #### 5.2 Authorization
 

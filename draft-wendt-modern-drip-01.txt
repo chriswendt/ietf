@@ -4,10 +4,10 @@
 Internet Engineering Task Force                                H. Bellur
 Internet-Draft                                             C. Wendt, Ed.
 Intended status: Standards Track                                 Comcast
-Expires: April 01, 2016                                     October 2015
+Expires: December 31, 2016                                     July 2016
 
                      Distributed Registry Protocol
-                       draft-wendt-modern-drip-00
+                       draft-wendt-modern-drip-01
 
 Abstract
 
@@ -33,11 +33,11 @@ Status of this Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on April 01, 2016.
+   This Internet-Draft will expire on December 31, 2016.
 
 Copyright Notice
 
-   Copyright (c) 2015 IETF Trust and the persons identified as the
+   Copyright (c) 2016 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -54,9 +54,9 @@ Table of Contents
    1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  2
      1.1.  Terminology  . . . . . . . . . . . . . . . . . . . . . . .  2
 
-Bellur & Wendt           Expires April 01, 2016                 [Page 1]
+Bellur & Wendt         Expires December 31, 2016                [Page 1]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
    2.  DRiP Overview  . . . . . . . . . . . . . . . . . . . . . . . .  2
    3.  Distributed MESH Architecture  . . . . . . . . . . . . . . . .  2
@@ -115,9 +115,9 @@ Internet-Draft                    DRiP                      October 2015
 
 
 
-Bellur & Wendt           Expires April 01, 2016                 [Page 2]
+Bellur & Wendt         Expires December 31, 2016                [Page 2]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
    The DRiP architecture is based on a peer-to-peer communication model
@@ -174,9 +174,9 @@ Internet-Draft                    DRiP                      October 2015
 
 
 
-Bellur & Wendt           Expires April 01, 2016                 [Page 3]
+Bellur & Wendt         Expires December 31, 2016                [Page 3]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
    All nodes MUST be configured with at least one peer node before
@@ -233,9 +233,9 @@ Internet-Draft                    DRiP                      October 2015
    or no response, if in "inactive" state.
 
 
-Bellur & Wendt           Expires April 01, 2016                 [Page 4]
+Bellur & Wendt         Expires December 31, 2016                [Page 4]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
    Example (using cURL)
@@ -292,9 +292,9 @@ Internet-Draft                    DRiP                      October 2015
 
 
 
-Bellur & Wendt           Expires April 01, 2016                 [Page 5]
+Bellur & Wendt         Expires December 31, 2016                [Page 5]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
    +-------------------------+-----------------------------------------+
@@ -351,9 +351,9 @@ Internet-Draft                    DRiP                      October 2015
 
 
 
-Bellur & Wendt           Expires April 01, 2016                 [Page 6]
+Bellur & Wendt         Expires December 31, 2016                [Page 6]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 4.4.  Key-Value Data Propagation Rules
 
@@ -410,9 +410,9 @@ Internet-Draft                    DRiP                      October 2015
 
 
 
-Bellur & Wendt           Expires April 01, 2016                 [Page 7]
+Bellur & Wendt         Expires December 31, 2016                [Page 7]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
                              _________
@@ -469,9 +469,9 @@ Internet-Draft                    DRiP                      October 2015
 
 
 
-Bellur & Wendt           Expires April 01, 2016                 [Page 8]
+Bellur & Wendt         Expires December 31, 2016                [Page 8]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
    If all peer nodes vote "yes", then the second phase or commit phase
@@ -528,9 +528,9 @@ Internet-Draft                    DRiP                      October 2015
      HTTP/1.1 200 OK
 
 
-Bellur & Wendt           Expires April 01, 2016                 [Page 9]
+Bellur & Wendt         Expires December 31, 2016                [Page 9]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
 4.5.1.2.  POST /votingphase/node/:nodeid/response/:response
@@ -587,9 +587,9 @@ Internet-Draft                    DRiP                      October 2015
 
 
 
-Bellur & Wendt           Expires April 01, 2016                [Page 10]
+Bellur & Wendt         Expires December 31, 2016               [Page 10]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
        ___           ___                         ___           ___
@@ -646,9 +646,9 @@ Internet-Draft                    DRiP                      October 2015
 
 
 
-Bellur & Wendt           Expires April 01, 2016                [Page 11]
+Bellur & Wendt         Expires December 31, 2016               [Page 11]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
    $ curl -i -H "Content-Type: application/json" -H "DRiP-Node-ID:
@@ -705,9 +705,9 @@ Internet-Draft                    DRiP                      October 2015
 
 
 
-Bellur & Wendt           Expires April 01, 2016                [Page 12]
+Bellur & Wendt         Expires December 31, 2016               [Page 12]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
    Periodic heartbeats are required for a node to determine it's
@@ -764,9 +764,9 @@ Internet-Draft                    DRiP                      October 2015
 5.  Security Considerations
 
 
-Bellur & Wendt           Expires April 01, 2016                [Page 13]
+Bellur & Wendt         Expires December 31, 2016               [Page 13]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
 5.1.  HTTPS
@@ -823,9 +823,9 @@ Authors' Addresses
 
 
 
-Bellur & Wendt           Expires April 01, 2016                [Page 14]
+Bellur & Wendt         Expires December 31, 2016               [Page 14]
 
-Internet-Draft                    DRiP                      October 2015
+Internet-Draft                    DRiP                         July 2016
 
 
    Harsha Bellur
@@ -881,4 +881,4 @@ Internet-Draft                    DRiP                      October 2015
 
 
 
-Bellur & Wendt           Expires April 01, 2016                [Page 15]
+Bellur & Wendt         Expires December 31, 2016               [Page 15]
