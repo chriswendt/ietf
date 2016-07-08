@@ -278,7 +278,7 @@
                 <figure>
                     <artwork><![CDATA[
 	{"iat": 1443208345,"orig":{"tn":"12155551212"},"dest":
-	  {"uri":"sip:alice@example.com","mky":[{"alg":"sha-256","dig":
+	  {"uri":"sip:alice@example.com"},"mky":[{"alg":"sha-256","dig":
 	  "021ACC5427ABEB9C533F3E4B652E7D463F5442CD54F17A03A27DF9B07F4619
 	  B2"},{"alg":"sha-256","dig":"4AADB9B13F82183B540212DF3E5D496B19
 	  E57CAB3E4B652E7D463F5442CD54F1"}]}
