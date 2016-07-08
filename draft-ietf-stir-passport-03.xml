@@ -85,113 +85,109 @@
     
     <section title="PASSporT Definition" anchor="sec.passport_definition">
       
-      <t>The PASSporT is constructed based on JWT <xref target="RFC7519"></xref> and JWS <xref target="RFC7515"></xref> specifications.  JWS defines the use of JSON data structures in a specified canonical format for signing data corresponding to JOSE header, JWS Payload, and JWS Signature.  JWT defines specific set of claims that are represented by specified key value pairs which can be extended with custom keys for specific applications. </t>
+        <t>The PASSporT is constructed based on JWT <xref target="RFC7519"></xref> and JWS <xref target="RFC7515"></xref> specifications.  JWS defines the use of JSON data structures in a specified canonical format for signing data corresponding to JOSE header, JWS Payload, and JWS Signature.  JWT defines specific set of claims that are represented by specified key value pairs which can be extended with custom keys for specific applications. </t>
       
-      <section title="PASSporT Header" anchor="sec.passport_header">
-        <t>The JWS token header is a JOSE header <xref target="RFC7515"></xref> that defines the type and encryption algorithm used in the token.</t>
-        <t>An example of the header for the case of an ECDSA P-256 digital signature would be the following,
-          <figure>
-            <artwork><![CDATA[
+        <section title="PASSporT Header" anchor="sec.passport_header">
+            <t>The JWS token header is a JOSE header <xref target="RFC7515"></xref> that defines the type and encryption algorithm used in the token.</t>
+            <t>An example of the header for the case of an ECDSA P-256 digital signature would be the following,
+                <figure>
+                    <artwork><![CDATA[
     { 
         "typ":"passport",
         "alg":"ES256",
         "x5u":"https://cert.example.org/passport.cer" 
     }
-            ]]></artwork>
-          </figure>
-        </t>
+                    ]]></artwork>
+                </figure>
+            </t>
         
-        <section title='"typ" (Type) Header Parameter' anchor="sec.typ_header_parameter">
+            <section title='"typ" (Type) Header Parameter' anchor="sec.typ_header_parameter">
           
-          <t>JWS defines the "typ" (Type) Header Parameter to declare the media type <xref target="IANA.MediaTypes"></xref> of the JWS. </t>
+                <t>JWS defines the "typ" (Type) Header Parameter to declare the media type <xref target="IANA.MediaTypes"></xref> of the JWS. </t>
         
-          <t>For PASSporT Token the "typ" header MUST minimally include and begin with "passport". This represents that the encoded token is a JWT of type passport. Note with extensions explained later in this document, the typ may be another value if defined as a passport extension.</t>
-        </section>
+                <t>For PASSporT Token the "typ" header MUST minimally include and begin with "passport". This represents that the encoded token is a JWT of type passport. Note with extensions explained later in this document, the typ may be another value if defined as a passport extension.</t>
+            </section>
         
-        <section title='"alg" (Algorithm) Header Parameter' anchor="sec.alg_header_parameter">
+            <section title='"alg" (Algorithm) Header Parameter' anchor="sec.alg_header_parameter">
         
-          <t>For PASSporT, the "alg" should be defined as follows, for the creation and verification of PASSporT tokens and their digital signatures ES256 MUST be implemented. 
-          </t>
-          <t>Note that JWA <xref target="RFC7518"></xref> defines other algorithms that may be utilized or updated in the future depending on cryptographic strength requirements guided by current security best practice.</t>
+                <t>For PASSporT, the "alg" should be defined as follows, for the creation and verification of PASSporT tokens and their digital signatures ES256 MUST be implemented.</t>
+                <t>Note that JWA <xref target="RFC7518"></xref> defines other algorithms that may be utilized or updated in the future depending on cryptographic strength requirements guided by current security best practice.</t>
         
-        </section>
+            </section>
         
-        <section title='"x5u" (X.509 URL) Header Parameter' anchor="sec.x5u_header_parameter">
+            <section title='"x5u" (X.509 URL) Header Parameter' anchor="sec.x5u_header_parameter">
         
-          <t>As defined in JWS, the "x5u" header parameter is used to provide a URI <xref target="RFC3986"></xref> referring to the resource for the X.509 public key certificate or certificate chain <xref target="RFC5280"></xref> corresponding to the key used to digitally sign the JWS.  Note: The definition of what the URI represents in terms of the actor serving the X.509 public key is out of scope of this document.  However, generally this would correspond to an HTTPS or DNSSEC resource with the guidance that it MUST be a TLS protected, per JWS spec.</t>
+                <t>As defined in JWS, the "x5u" header parameter is used to provide a URI <xref target="RFC3986"></xref> referring to the resource for the X.509 public key certificate or certificate chain <xref target="RFC5280"></xref> corresponding to the key used to digitally sign the JWS.  Note: The definition of what the URI represents in terms of the actor serving the X.509 public key is out of scope of this document.  However, generally this would correspond to an HTTPS or DNSSEC resource with the guidance that it MUST be a TLS protected, per JWS spec.</t>
         
-        </section>
-        
-      </section>
-      
-      <section title="PASSporT Payload" anchor="sec.passport_payload">
-        <t>The token payload claims should consist of the information which needs to be verified at the destination party. This claim should correspond to a JWT claim <xref target="RFC7519"></xref> and be encoded as defined by the JWS Payload <xref target="RFC7515"></xref> </t>
-
-        <t>The PASSporT defines the use of a number of standard JWT defined headers as well as two new custom headers corresponding to the two parties associated with personal communications, the originator and terminator. These headers or key value pairs are detailed below. </t>
-
-        <section title="JWT defined claims" anchor="sec.jwt_defined_claims">
-            <section title='"iat" - Issued at claim' anchor='sec.iat_issued_at_claims'>
-
-                <t>The JSON claim MUST include the "iat" <xref target="RFC7519"></xref> defined claim issued at.  As defined this should be set to a date cooresponding to the origination of the personal communications. The time value should be of the format defined in <xref target="RFC7519"></xref> Section 2 NumericDate.  This is included for securing the token against replay and cut and paste attacks, as explained further in the security considerations in section 7.
-                </t>
             </section>
         </section>
-        <section title="PASSporT specific claims" anchor="sec.passprt_specific_claims">
-            <section title='Originating and Destination Identities' anchor='sec.orig_dest_identities'>
+        
+        <section title="PASSporT Payload" anchor="sec.passport_payload">
+            <t>The token payload claims should consist of the information which needs to be verified at the destination party. This claim should correspond to a JWT claim <xref target="RFC7519"></xref> and be encoded as defined by the JWS Payload <xref target="RFC7515"></xref> </t>
 
-                <t>Baseline PASSporT defines claims that convey the identity of the origination and destination of personal communications represented as either telephone numbers or Uniform Resource Indicators (URIs). Some using protocols may require other identifiers for personae; these may be specified as claims through the PASSporT extensibility mechanisms. But for telephone numbers and URIs, the following claims should be used:</t>
+            <t>The PASSporT defines the use of a number of standard JWT defined headers as well as two new custom headers corresponding to the two parties associated with personal communications, the originator and terminator. These headers or key value pairs are detailed below. </t>
 
-                <section title='"otn" and "dtn" - Originating and Destination Telephone Number claim' anchor='sec.otn_dtn'>
-                    <t>If the originating identity is a telephone number, the claim "otn" SHOULD be included. If the destination identity is a telephone number, the claim "dtn" SHOULD be included.</t>
-                    <t>Telephone Number strings for "otn" and "dtn" claims MUST be canonicalized according to the procedures specified in <xref target="I-D.ietf-stir-rfc4474bis"></xref> Section 6.1.1.</t>
-
+            <section title="JWT defined claims" anchor="sec.jwt_defined_claims">
+                <section title='"iat" - Issued at claim' anchor='sec.iat_issued_at_claims'>
+                    <t>The JSON claim MUST include the "iat" <xref target="RFC7519"></xref> defined claim issued at.  As defined this should be set to a date cooresponding to the origination of the personal communications. The time value should be of the format defined in <xref target="RFC7519"></xref> Section 2 NumericDate.  This is included for securing the token against replay and cut and paste attacks, as explained further in the security considerations in section 7.</t>
                 </section>
+            </section>
+            <section title="PASSporT specific claims" anchor="sec.passprt_specific_claims">
+                <section title='Originating and Destination Identities' anchor='sec.orig_dest_identities'>
 
-                <section title='"ouri" and "duri" - Originating and Destination URI claims' anchor='sec.ouri_duri'>
-                    <t>If the originating identity is not a telephone number, the claim "ouri" SHOULD be included with the string cooresponding to the URI form of the identity as defined in <xref target="RFC3986"></xref>, alternatively it could also contain an application specific identity string, if URI format is not appropriate.</t>
-                    <t>If the destination identity is not a telephone number, the claim "duri" SHOULD be included.  The same string format rules apply as stated for "ouri".</t>
+                    <t>Baseline PASSporT defines claims that convey the identity of the origination and destination of personal communications represented as either telephone numbers or Uniform Resource Indicators (URIs). Some using protocols may require other identifiers for personae; these may be specified as claims through the PASSporT extensibility mechanisms. But for telephone numbers and URIs, the following claims should be used:</t>
 
-                </section>
-                <section title='"dgrp" - Multiple destination identities' anchor='sec.dgrp'>
-                    <t>There are multi-party, group, or conference types of calls where there is a single originating identity or alterntively a "moderator" identity and a number of destination identities or participants in the multi-party call.  For these scenerios, the "dgrp" key should be used with a JSON object containing multiple "dtn" or "duri" identities as defined above.</t>
-                    <t>An example PASSporT payload object with multiple destination identities would be as follows:
-                        <figure>
-                            <artwork><![CDATA[
-    { 
+                    <section title='"otn" and "dtn" - Originating and Destination Telephone Number claim' anchor='sec.otn_dtn'>
+                        <t>If the originating identity is a telephone number, the claim "otn" SHOULD be included. If the destination identity is a telephone number, the claim "dtn" SHOULD be included.</t>
+                        <t>Telephone Number strings for "otn" and "dtn" claims MUST be canonicalized according to the procedures specified in <xref target="I-D.ietf-stir-rfc4474bis"></xref> Section 6.1.1.</t>
+
+                    </section>
+
+                    <section title='"ouri" and "duri" - Originating and Destination URI claims' anchor='sec.ouri_duri'>
+                        <t>If the originating identity is not a telephone number, the claim "ouri" SHOULD be included with the string cooresponding to the URI form of the identity as defined in <xref target="RFC3986"></xref>, alternatively it could also contain an application specific identity string, if URI format is not appropriate.</t>
+                        <t>If the destination identity is not a telephone number, the claim "duri" SHOULD be included.  The same string format rules apply as stated for "ouri".</t>
+
+                    </section>
+                    <section title='"dgrp" - Multiple destination identities' anchor='sec.dgrp'>
+                        <t>There are multi-party, group, or conference types of calls where there is a single originating identity or alterntively a "moderator" identity and a number of destination identities or participants in the multi-party call.  For these scenerios, the "dgrp" key should be used with a JSON object containing multiple "dtn" or "duri" identities as defined above.</t>
+                        <t>An example PASSporT payload object with multiple destination identities would be as follows:
+                            <figure>
+                                  <artwork><![CDATA[
+    {
         "iat":"1443208345",
         "otn":"12155551212",
-        "dgrp":{	
+        "dgrp":{
             "duri":"sip:alice@example.com",
             "dtn":"12125551212",
             "duri":"sip:bob@example.net"
         }
     }
-                            ]]></artwork>
-                        </figure>
-                    </t>
+                                ]]></artwork>
+                            </figure>
+                        </t>
+                    </section>
                 </section>
-            </section>
 
-            <section title='"mky" - Media Key claim' anchor='sec.mky_media_key_claim'>
+                <section title='"mky" - Media Key claim' anchor='sec.mky_media_key_claim'>
 
-                <t>Some protocols that use PASSporT convey hashes for media security keys within their signaling in order to bind those keys to the identities established in the signaling layers. One example would be the DTLS-SRTP key fingerprints carried in SDP via the "a=fingerprint" attribute; multiple instances of that fingerprint may appear in a single SDP body corresponding to difference media streams offered. The "mky" value of PASSporT contains a hexadecimal key presentation of any hash(es) necessary to establish media security via DTLS-SRTP. This mky value should be formated in a JSON form including the 'alg' and 'dig' keys with the corresponding algorithm and hexadecimal values. Note that per guidance of Section 5 of this document any whitespace and line feeds must be removed.  If there is multiple fingerprint values, more than one, the fingerprint values should be constructed as a JSON array denoted by bracket characters. For the 'dig' key value, the hash value should be the hexadecimal value without any colons, in order to provide a more efficient, compact form to be encoded in PASSporT token claim.</t>
+                    <t>Some protocols that use PASSporT convey hashes for media security keys within their signaling in order to bind those keys to the identities established in the signaling layers. One example would be the DTLS-SRTP key fingerprints carried in SDP via the "a=fingerprint" attribute; multiple instances of that fingerprint may appear in a single SDP body corresponding to difference media streams offered. The "mky" value of PASSporT contains a hexadecimal key presentation of any hash(es) necessary to establish media security via DTLS-SRTP. This mky value should be formated in a JSON form including the 'alg' and 'dig' keys with the corresponding algorithm and hexadecimal values. Note that per guidance of Section 5 of this document any whitespace and line feeds must be removed.  If there is multiple fingerprint values, more than one, the fingerprint values should be constructed as a JSON array denoted by bracket characters. For the 'dig' key value, the hash value should be the hexadecimal value without any colons, in order to provide a more efficient, compact form to be encoded in PASSporT token claim.</t>
 
-                <t>An example claim with "mky" claim is as follows:</t>
+                    <t>An example claim with "mky" claim is as follows:</t>
 
-                <t>For an SDP offer that includes the following fingerprint values,
-                    <figure>
-                        <artwork><![CDATA[
+                    <t>For an SDP offer that includes the following fingerprint values,
+                        <figure>
+                            <artwork><![CDATA[
     a=fingerprint:sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:
     2E:7D:46:3F:54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2
     a=fingerprint:sha-256 4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:
     5D:49:6B:19:E5:7C:AB:3E:4B:65:2E:7D:46:3F:54:42:CD:54:F1
-                        ]]></artwork>
-                    </figure>
-                </t>
+                            ]]></artwork>
+                        </figure>
+                    </t>
 
-		        <t>the PASSporT Payload object would be:
-                    <figure>
-		                <artwork><![CDATA[
+                    <t>the PASSporT Payload object would be:
+                        <figure>
+                            <artwork><![CDATA[
     { 
         "iat":"1443208345", 
         "otn":"12155551212",
@@ -209,144 +205,136 @@
             }
         ]
     }
-                        ]]></artwork>
-                    </figure>
-		        </t>
-			</section>
-		</section>
-		
-		
-      </section>
+                            ]]></artwork>
+                        </figure>
+                    </t>
+                </section>
+            </section>
+        </section>
       
-      <section title="PASSporT Signature" anchor="sec.passport_signature">
-        <t>The signature of the PASSporT is created as specified by JWS using the private key corresponding to the X.509 public key certificate referenced by the "x5u" header parameter. </t>
-      </section>
-      
+        <section title="PASSporT Signature" anchor="sec.passport_signature">
+            <t>The signature of the PASSporT is created as specified by JWS using the private key corresponding to the X.509 public key certificate referenced by the "x5u" header parameter. </t>
+        </section>
     </section>
     
     <section title="Extending PASSporT" anchor="sec.extending_passport">
       
-      <t>PASSporT represents the bare minimum set of claims needed to assert the originating identity, however there will certainly be new and extended applications and usage of PASSPorT that will need to extend the claims to represent other information specific to the origination identities beyond the identity itself.</t>
+        <t>PASSporT represents the bare minimum set of claims needed to assert the originating identity, however there will certainly be new and extended applications and usage of PASSPorT that will need to extend the claims to represent other information specific to the origination identities beyond the identity itself.</t>
       
-      <t>There are two mechanisms defined to extend PASSporT. The first includes an extension of the base passport claims to include additional claims.  An alternative method of extending PASSporT is for applications of PASSporT unrelated to the base set of claims, that will define it's own set of claims.  Both are described below.</t>
+        <t>There are two mechanisms defined to extend PASSporT. The first includes an extension of the base passport claims to include additional claims.  An alternative method of extending PASSporT is for applications of PASSporT unrelated to the base set of claims, that will define it's own set of claims.  Both are described below.</t>
       
-      <section title='"ppt" (PASSporT) header parameter' anchor="sec.passport_header_parameter">
+        <section title='"ppt" (PASSporT) header parameter' anchor="sec.passport_header_parameter">
         
-        <t>For extended profiles of PASSporT, a new JWS header parameter "ppt" MUST be used with a string that uniquely identifies the profile specification that defines any new claims that would extend the base set of claims of PASSporT.</t>
+            <t>For extended profiles of PASSporT, a new JWS header parameter "ppt" MUST be used with a string that uniquely identifies the profile specification that defines any new claims that would extend the base set of claims of PASSporT.</t>
         
-        <t>An example header with an extended PASSporT profile of "foo" is as follows:
-          <figure>
-            <artwork><![CDATA[
+            <t>An example header with an extended PASSporT profile of "foo" is as follows:
+                <figure>
+                    <artwork><![CDATA[
     { 
         "typ":"passport",
         "ppt":"foo",
         "alg":"ES256",
         "x5u":"https://tel.example.org/passport.cer" 
     }
-            ]]></artwork>
-          </figure>
-        </t>
+                    ]]></artwork>
+                </figure>
+            </t>
         
-      </section>
+        </section>
       
-      <section title="Extended PASSporT Claims" anchor="sec.extended_passport_claims">
+        <section title="Extended PASSporT Claims" anchor="sec.extended_passport_claims">
         
-        <t>Future specifications that define such extensions to the PASSporT mechanism MUST explicitly designate what claims they include, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST incorporate the baseline JWT elements specified in Section 3; claims may only be appended to the claims object specified; they can never be subtracted or re-ordered. Specifying new claims follows the baseline JWT procedures (<xref target="RFC7519"></xref> Section 10.1). Note that understanding an extension as a verifier is always optional for compliance with this specification (though future specifications or profiles for deployment environments may make other "ppt" values mandatory). The creator of a PASSporT object cannot assume that verifiers will understand any given extension. Verifiers that do support an extension may then trigger appropriate application-level behavior in the presence of an extension; authors of extensions should provide appropriate extension-specific guidance to application developers on this point.</t>
+            <t>Future specifications that define such extensions to the PASSporT mechanism MUST explicitly designate what claims they include, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST incorporate the baseline JWT elements specified in Section 3; claims may only be appended to the claims object specified; they can never be subtracted or re-ordered. Specifying new claims follows the baseline JWT procedures (<xref target="RFC7519"></xref> Section 10.1). Note that understanding an extension as a verifier is always optional for compliance with this specification (though future specifications or profiles for deployment environments may make other "ppt" values mandatory). The creator of a PASSporT object cannot assume that verifiers will understand any given extension. Verifiers that do support an extension may then trigger appropriate application-level behavior in the presence of an extension; authors of extensions should provide appropriate extension-specific guidance to application developers on this point.</t>
       
-      </section>
+        </section>
       
-      <section title="Alternate PASSporT Extension" anchor="sec.alternate_passport_extension">
+        <section title="Alternate PASSporT Extension" anchor="sec.alternate_passport_extension">
       
-        <t>Some applications may want to use the mechanism of the PASSporT digital signature that is not a superset of the base set of claims of the PASSporT token as defined in Section 3.  Rather, a specification may use PASSporT with its own defined set of claims.</t>
+            <t>Some applications may want to use the mechanism of the PASSporT digital signature that is not a superset of the base set of claims of the PASSporT token as defined in Section 3.  Rather, a specification may use PASSporT with its own defined set of claims.</t>
         
-        <t>In this case, the specification SHOULD define its own MIME media type <xref target="RFC2046"></xref> in the "Media Types" registry <xref target="IANA.MediaTypes"></xref>.  The MIME subtype SHOULD start with the string "passport-" to signify that it is related to the PASSporT token.  For example, for the "foo" application the MIME type/sub-type could be defined as "application/passport-foo".</t>
+            <t>In this case, the specification SHOULD define its own MIME media type <xref target="RFC2046"></xref> in the "Media Types" registry <xref target="IANA.MediaTypes"></xref>.  The MIME subtype SHOULD start with the string "passport-" to signify that it is related to the PASSporT token.  For example, for the "foo" application the MIME type/sub-type could be defined as "application/passport-foo".</t>
       
-      </section>
+        </section>
       
-      <section title="Registering PASSporT Extensions" anchor="sec.registering_passport_extensions">
+        <section title="Registering PASSporT Extensions" anchor="sec.registering_passport_extensions">
       
-        <t>Toward interoperability and to maintain uniqueness of the extended PASSporT profile header parameter string, there SHOULD be an industry registry that tracks the definition of the profile strings.</t>
+            <t>Toward interoperability and to maintain uniqueness of the extended PASSporT profile header parameter string, there SHOULD be an industry registry that tracks the definition of the profile strings.</t>
       
-      </section>
+        </section>
       
     </section>
     
     <section title="Deterministic JSON Serialization" anchor="sec.deterministic_json_serialization">
       
-      <t>In order to provide a deterministic representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, the JSON header object and JSON Claim object MUST be computed as follows.</t>
+        <t>In order to provide a deterministic representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, the JSON header object and JSON Claim object MUST be computed as follows.</t>
       
-      <t>The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in <xref target="RFC7638"></xref> Section 3.  Each JSON object MUST contain no whitespace or line breaks before or after any syntactic elements and with the required members ordered lexicographically by the Unicode <xref target="UNICODE"></xref> code points of the member names.</t>
+        <t>The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in <xref target="RFC7638"></xref> Section 3.  Each JSON object MUST contain no whitespace or line breaks before or after any syntactic elements and with the required members ordered lexicographically by the Unicode <xref target="UNICODE"></xref> code points of the member names.</t>
       
-      <t>In addition, the JSON header and claim members MUST follow the lexicographical ordering and character and string rules defined in <xref target="RFC7638"></xref> Section 3.3.</t>
+        <t>In addition, the JSON header and claim members MUST follow the lexicographical ordering and character and string rules defined in <xref target="RFC7638"></xref> Section 3.3.</t>
 	  
-	  <section title="Example PASSport deterministic JSON form" anchor="sec.example_passport_json_form">
-		  
-          <t>For the example PASSporT Payload shown in Section 3.2.2.2, the following is the deterministic JSON object form.
-            <figure>
-              <artwork><![CDATA[
+        <section title="Example PASSport deterministic JSON form" anchor="sec.example_passport_json_form">
+            
+            <t>For the example PASSporT Payload shown in Section 3.2.2.2, the following is the deterministic JSON object form.
+                <figure>
+                    <artwork><![CDATA[
     {"iat": 1443208345,"otn":"12155551212","duri":
-        "sip:alice@example.com","mky":[{"alg":"sha-256","dig":"021ACC54
-        27ABEB9C533F3E4B652E7D463F5442CD54F17A03A27DF9B07F4619B2"},
-        {"alg":"sha-256","dig":"4AADB9B13F82183B540212DF3E5D496B19E57CAB3E
-        4B652E7D463F5442CD54F1"}]}
-              ]]></artwork>
-            </figure>
-          </t>
-	  
-	  </section>
+        "sip:alice@example.com","mky":[{"alg":"sha-256","dig":"021ACC
+        5427ABEB9C533F3E4B652E7D463F5442CD54F17A03A27DF9B07F4619B2"},
+        {"alg":"sha-256","dig":"4AADB9B13F82183B540212DF3E5D496B19E5
+        7CAB3E4B652E7D463F5442CD54F1"}]}
+                    ]]></artwork>
+                </figure>
+            </t>
+        </section>
       
     </section>
     
     <section title="Human Readability" anchor="sec.human_readability">
-      
-      <t>JWT <xref target="RFC7519"></xref> and JWS <xref target="RFC7515"></xref> are defined to use Base64 and/or UTF8 encoding to the Header, Payload, and Signature sections.  However, many personal communications protocols, such as SIP and XMPP, use a "human readable" format to allow for ease of use and ease of operational debugging and monitoring.  As such, specifications using PASSporT may provide guidance on whether Base64 encoding or plain text will be used for the construction of the PASSporT Header and Claim sections.</t>
+        
+        <t>JWT <xref target="RFC7519"></xref> and JWS <xref target="RFC7515"></xref> are defined to use Base64 and/or UTF8 encoding to the Header, Payload, and Signature sections.  However, many personal communications protocols, such as SIP and XMPP, use a "human readable" format to allow for ease of use and ease of operational debugging and monitoring.  As such, specifications using PASSporT may provide guidance on whether Base64 encoding or plain text will be used for the construction of the PASSporT Header and Claim sections.</t>
       
     </section>
       
     <section title="Security Considerations" anchor="sec.security_considerations">
+        <section title="Avoidance of replay and cut and paste attacks" anchor="sec.avoidance_of_attacks">
+        
+            <t>There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks. PASSporT tokens must be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in <xref target="RFC3261"></xref>). There should be a link between various information provided in the token and information provided by the application level protocol information.</t>
+        
+            <t>These would include:
+                <list style="symbols">
+                    <t>"iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the PASSporT token.</t>
+                    <t>either "dtn" claim or "duri" claim is included to prevent the ability to use a previously originated message to send to another destination party</t>
+                </list> 
+            </t>
+        </section>
       
-      <section title="Avoidance of replay and cut and paste attacks" anchor="sec.avoidance_of_attacks">
+        <section title="Solution Considerations" anchor="sec.solution_considerations">
         
-        <t>There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks. PASSporT tokens must be sent along with other application level protocol information (e.g. for SIP an INVITE as defined in <xref target="RFC3261"></xref>). There should be a link between various information provided in the token and information provided by the application level protocol information.</t>
+            <t>It should be recognized that the use of this token should not, in it's own right, be considered a full solution for absolute non-repudiation of the persona being asserted. This only provides non-repudiation of the signer of PASSporT. If the signer and the persona are not one in the same, which can and often will be the case in telecommunications networks today, protecting the destination party from being spoofed may take some interpretation or additional verification of the link between the PASSporT signature and the persona being asserted.</t>
         
-        <t>These would include:
-          <list style="symbols">
-            <t>"iat" claim should closely correspond to a date/time the message was originated.  It should also be within a relative delta time that is reasonable for clock drift and transmission time characteristics associated with the application using the PASSporT token.</t>
-            <t>either "dtn" claim or "duri" claim is included to prevent the ability to use a previously originated message to send to another destination party</t>
-          </list> 
-        </t>
-        
-      </section>
-      
-      <section title="Solution Considerations" anchor="sec.solution_considerations">
-        
-        <t>It should be recognized that the use of this token should not, in it's own right, be considered a full solution for absolute non-repudiation of the persona being asserted. This only provides non-repudiation of the signer of PASSporT. If the signer and the persona are not one in the same, which can and often will be the case in telecommunications networks today, protecting the destination party from being spoofed may take some interpretation or additional verification of the link between the PASSporT signature and the persona being asserted.</t>
-        
-        <t>In addition, the telecommunications systems and specifications that use PASSporT should in practice provide mechanisms for:
-          <list style="symbols">
-            <t>Managing X.509 certificates and X.509 certificate chains to an authorized trust anchor that can be a trusted entity to all participants in the telecommunications network</t>
-            <t>Accounting for entities that may route calls from other peer or interconnected telecommunications networks that are not part of the "trusted" communications network or may not be following the usage of PASSporT or the profile of PASSporT appropriate to that network</t>
-            <t>Following best practices around management and security of X.509 certificates</t>
-          </list> 
-        </t>
-        
-      </section>
+            <t>In addition, the telecommunications systems and specifications that use PASSporT should in practice provide mechanisms for:
+                <list style="symbols">
+                    <t>Managing X.509 certificates and X.509 certificate chains to an authorized trust anchor that can be a trusted entity to all participants in the telecommunications network</t>
+                    <t>Accounting for entities that may route calls from other peer or interconnected telecommunications networks that are not part of the "trusted" communications network or may not be following the usage of PASSporT or the profile of PASSporT appropriate to that network</t>
+                    <t>Following best practices around management and security of X.509 certificates</t>
+                </list> 
+            </t>
+        </section>
 	  
-      <section title="Privacy Considerations" anchor="sec.privacy_considerations">
+        <section title="Privacy Considerations" anchor="sec.privacy_considerations">
         
-        <t>Because PASSporT explicity includes claims of identitifiers of parties involved in communications, times, and potentially other call detail, care should be taken outside of traditional protected or private telephony communications paths where there may be concerns about exposing information to either unintended or illegitimately intented actors.  These identifiers are often exposed through many communications signaling protocols as of today, but appropriate precautions should be taken.</t>
+            <t>Because PASSporT explicity includes claims of identitifiers of parties involved in communications, times, and potentially other call detail, care should be taken outside of traditional protected or private telephony communications paths where there may be concerns about exposing information to either unintended or illegitimately intented actors.  These identifiers are often exposed through many communications signaling protocols as of today, but appropriate precautions should be taken.</t>
         
-      </section>
-    
+        </section>
     </section>
     
     <section title="IANA Considerations" anchor="sec.iana_considerations">
       
-      <section title="Media Type Registration" anchor="sec.media_type_registration">
+        <section title="Media Type Registration" anchor="sec.media_type_registration">
         
-        <section title="Media Type Registry Contents Additions Requested" anchor="sec.media_type_request">
+            <section title="Media Type Registry Contents Additions Requested" anchor="sec.media_type_request">
         
-          <t>This section registers the "application/passport" media type <xref target="RFC2046"></xref> in the "Media Types" registry <xref target="IANA.MediaTypes"></xref> in the manner described in <xref target="RFC6838"></xref>, which can be used to indicate that the content is a PASSporT defined JWT and JWS.</t>
+                <t>This section registers the "application/passport" media type <xref target="RFC2046"></xref> in the "Media Types" registry <xref target="IANA.MediaTypes"></xref> in the manner described in <xref target="RFC6838"></xref>, which can be used to indicate that the content is a PASSporT defined JWT and JWS.</t>
         
           <t>
             <list style="symbols">
@@ -435,11 +423,11 @@
     
     </section>
 
-    <section title="Acknowledgements" anchor="sec.acknowledgements">
-      <t>Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, and Eric Burger for their review, ideas, and contributions. Also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, and Richard Barnes for valuable feedback on the technical and security aspects of the document. Additional thanks to Harsha Bellur for assistance in coding the example tokens.</t>
-    </section>
+        <section title="Acknowledgements" anchor="sec.acknowledgements">
+            <t>Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, and Eric Burger for their review, ideas, and contributions. Also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, and Richard Barnes for valuable feedback on the technical and security aspects of the document. Additional thanks to Harsha Bellur for assistance in coding the example tokens.</t>
+        </section>
     
-  </middle>
+    </middle>
   
   <back>
     <references title="References">
