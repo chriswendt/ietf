@@ -396,7 +396,7 @@ Periodic heartbeats are required for a node to determine it's visibility to the 
 Request:
 
 	$ curl -i  -H "DRiP-Node-ID: nodeA" -H "Authorization: eyJ0e..."
-		-X POST -d '<state>' https://peernode.com/heartbeat/node/nodeA
+       -X POST https://peernode.com/heartbeat/node/nodeA
 
 Response:
 
