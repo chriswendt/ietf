@@ -1,7 +1,7 @@
 
 ### Persona Assertion Token (PASSporT)
 
-**draft-ietf-stir-passport-00**
+**draft-ietf-stir-passport-05**
 
 **Abstract**
 
@@ -13,7 +13,7 @@ In today's IP-enabled telecommunications world, there is a growing concern about
 
 This document defines a common method for creating and validating a token that cryptographically verifies an originating identity, or more generally a URI or application specific identity string representing the originator of personal communications. Through extended profiles other information relevant to the personal communications can also be attached to the token.  The primary goal of PASSporT is to provide a common framework for signing persona related information in an extensible way.  A secondary goal is to provide this functionality independent of any specific personal communications signaling call logic, so that creation and verification of persona information can be implemented in a flexible way and can be used in many personal communications applications including end-to-end applications that require different signaling protocols.  It is anticipated that signaling protocol specific guidance will be provided in other related documents and specifications to specify how to use and transport PASSporT tokens, however this is intentionally out of scope for this document.  
 
-Note: As of the authoring of this document, ietf-stir-rfc4474bis provides details of how to use PASSporT within SIP signaling for the signing and verification of telephone numbers.
+Note: As of the authoring of this document, [I-D.ietf-stir-rfc4474bis] provides details of how to use PASSporT within SIP signaling for the signing and verification of telephone numbers.
 
 **2. Token Overview**
 
@@ -37,7 +37,7 @@ An example of the header for the case of an ECDSA P-256 digital signature would 
       
 **3.1.1 "typ" (Type) Header Parameter**
       
-JWS defines the "typ" (Type) Header Parameter to declare the media type [IANA.MediaTypes] of the JWS. 
+JWS defines the "typ" (Type) Header Parameter to declare the media type of the JWS. 
 
 For PASSporT Token the "typ" header MUST minimally include and begin with "passport". This represents that the encoded token is a JWT of type passport. 
 
@@ -58,6 +58,8 @@ The token payload claims should consist of the information which needs to be ver
 
 The PASSporT defines the use of a number of standard JWT defined headers as well as two new custom headers corresponding to the two parties associated with personal communications, the originator and terminator. These headers or key value pairs are detailed below. 
 
+Key values outside the US-ASCII range should be encoded using percent encoding as described in section 2.1 of RFC 3986, case normalized as described in 6.2.2.1 of RFC 3986. Matching of these values should use string exact match.
+
 **3.2.1. JWT defined claims**
 
 **3.2.1.1 "iat" - Issued at claim**
@@ -72,7 +74,7 @@ Baseline PASSporT defines claims that convey the identity of the origination and
 
 The "orig" JSON object MUST only have one key value pair representing the asserted identity of any type (currently either "tn" or "uri") of the originator of the personal communications signaling.
 
-The "dest" JSON object MUST at least have one key value pair, but could have an arbitrary number of destination identities of any type.
+The "dest" JSON object MUST have at least have one key value pair, but could have multiple identity types (i.e. "tn" and/or "uri") but only one of each.  Additionaly, in the case of "dest" only, the identity type key value MUST be an array signaled by standard JSON brackets, even when there is a single identity value in the identity type key value. 
 
 **3.2.2.1.1. "tn" - Telephone Number identity**
 
@@ -93,21 +95,22 @@ We recognize that in the future there may be other standard mechanisms for repre
 Single Originator to Single Destination example:
 
 	{ 
+    	"dest":{"uri":["sip:alice@example.com"]},    		
     	"iat":"1443208345",
-    	"orig":{"tn":"12155551212"},
-    	"dest":{"uri":"sip:alice@example.com"}
+    	"orig":{"tn":"12155551212"}
+
     }
     
 Single Originator to Multiple Destination Identities example:
 
 	{ 
+    	"dest":{
+    			"tn":["12125551212"],
+    		    "uri":["sip:alice@example.com",
+    		        "sip:bob@example.net"]
+    	},
     	"iat":"1443208345",
-    	"orig":{"tn":"12155551212"},    	
-    	"dest":{	
-    			"uri":"sip:alice@example.com",
-    			"tn":"12125551212",
-    			"uri":"sip:bob@example.net"
-    	}
+    	"orig":{"tn":"12155551212"}
     }
 
 **3.2.2.2. "mky" - Media Key claim**
@@ -119,18 +122,17 @@ An example claim with "mky" claim is as follows:
 
 For an SDP offer that includes the following fingerprint values,
 
-	a=fingerprint:sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:2E:7D:46:3F:
-	54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2
-	a=fingerprint:sha-256 4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:5D:49:6B:19:
-	E5:7C:AB:3E:4B:65:2E:7D:46:3F:54:42:CD:54:F1
+	a=fingerprint:sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65
+	:2E:7D:46:3F:54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2
+	a=fingerprint:sha-256 4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:
+	5D:49:6B:19:E5:7C:AB:3E:4B:65:2E:7D:46:3F:54:42:CD:54:F1
 
 the PASSporT Payload object would be:
 
 	{ 
-    "iat":"1443208345", 
-    "orig":{"otn":"12155551212"},
-	  "dest":{"uri":"sip:alice@example.com"},
-	  "mky":[
+	  	"dest":{"uri":["sip:alice@example.com"]},
+	  	"iat":"1443208345", 
+	  	"mky":[
         {
            "alg":"sha-256",
            "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
@@ -141,7 +143,8 @@ the PASSporT Payload object would be:
            "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
            	AB3E4B652E7D463F5442CD54F1"
         }
-      ]
+      ],
+    	"orig":{"tn":"12155551212"}
     }
   
 **3.3 PASSporT Signature**
@@ -159,15 +162,15 @@ For the extension of the base set of claims defined in this document, a new JWS 
 An example header with an extended PASSporT profile of "foo" is as follows:
 
 	{ 
-      "typ":"passport",
-      "ppt":"foo",
       "alg":"ES256",
+      "ppt":"foo",
+      "typ":"passport",
       "x5u":"https://tel.example.org/passport.cer"
     }  
 
-**4.2 Extended PASSporT Payload Claims**
+**4.2 Extended PASSporT Claims**
 
-Future specifications that define such extensions to the PASSporT mechanism MUST explicitly designate what claims they include beyond the base set of claims from this document, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST incorporate the baseline JWT elements specified in Section 3; claims may only be appended to the claims object specified; they can never be subtracted or re-ordered. Specifying new claims follows the baseline JWT procedures ([RFC7519] Section 10.1 <https://tools.ietf.org/html/rfc7519#section-10.1>). Note that understanding an extension as a verifier is always optional for compliance with this specification (though future specifications or profiles for deployment environments may make other "ppt" values mandatory). The creator of a PASSporT object cannot assume that verifiers will understand any given extension. Verifiers that do support an extension may then trigger appropriate application-level behavior in the presence of an extension; authors of extensions should provide appropriate extension-specific guidance to application developers on this point.
+Future specifications that define such extensions to the PASSporT mechanism MUST explicitly designate what claims they include beyond the base set of claims from this document, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST incorporate the baseline JWT elements specified in Section 3; claims may only be appended to the claims object specified; they can never be subtracted or re-ordered. Specifying new claims follows the baseline JWT procedures ([RFC7519] Section 10.1). Note that understanding an extension as a verifier is always optional for compliance with this specification (though future specifications or profiles for deployment environments may make other "ppt" values mandatory). The creator of a PASSporT object cannot assume that verifiers will understand any given extension. Verifiers that do support an extension may then trigger appropriate application-level behavior in the presence of an extension; authors of extensions should provide appropriate extension-specific guidance to application developers on this point.
 
 **5. Deterministic JSON Serialization**
 
@@ -181,11 +184,11 @@ In addition, the JSON header and claim members MUST follow the lexicographical o
 
 For the example PASSporT Payload shown in Section 3.2.2.3, the following is the deterministic JSON object form.
 
-	{"iat": 1443208345,"orig":{"tn":"12155551212"},"dest":
-	  {"uri":"sip:alice@example.com","mky":[{"alg":"sha-256","dig":
-	  "021ACC5427ABEB9C533F3E4B652E7D463F5442CD54F17A03A27DF9B07F4619B2"},
-	  {"alg":"sha-256","dig":"4AADB9B13F82183B540212DF3E5D496B19E57CAB3E
-	  4B652E7D463F5442CD54F1"}]}
+	{"dest":{"uri":["sip:alice@example.com"],"iat": 1443208345,"mky":
+	  [{"alg":"sha-256","dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD5
+	  4F17A03A27DF9B07F4619B2"},{"alg":"sha-256","dig":"4AADB9B13F82183B5
+	  40212DF3E5D496B19E57CAB3E4B652E7D463F5442CD54F1"}],
+	  "orig":{"tn":"12155551212"}}
 
 **6. Human Readability**
 
@@ -222,16 +225,16 @@ Because PASSporT explicity includes claims of identitifiers of parties involved 
 
 **8.1.1  Media Type Registry Contents Additions Requested**
 
-This section registers the "application/passport" media type [RFC2046] in the "Media Types" registry [IANA.MediaTypes] in the manner described in RFC 6838 [RFC6838], which can be used to indicate that the content is a PASSporT defined JWT and JWS.
+This section registers the "application/passport" media type [RFC2046] in the "Media Types" registry in the manner described in RFC 6838 [RFC6838], which can be used to indicate that the content is a PASSporT defined JWT and JWS.
 
 * Type name: application
 * Subtype name: passport
 * Required parameters: n/a
 * Optional parameters: n/a
-* Encoding considerations: 8bit; application/passport values are encoded as a series of base64url-encoded values (some of which may be the empty string), each separated from the next by a single period ('.') character.
+* Encoding considerations: 8bit; application/passport values outside the US-ASCII range are encoded using percent encoding as described in section 2.1 of RFC 3986 (some values may be the empty string), each separated from the next by a single period ('.') character.
 * Security considerations: See the Security Considerations section of RFC 7515.
 * Interoperability considerations: n/a
-* Published specification: draft-ietf-stir-passport-00
+* Published specification: draft-ietf-stir-passport-05
 * Applications that use this media type: STIR and other applications that require identity related assertion
 * Fragment identifier considerations: n/a
 * Additional information:
@@ -254,21 +257,21 @@ This section registers the "application/passport" media type [RFC2046] in the "M
 * Claim Name: "orig"
 * Claim Description: Originating Identity String
 * Change Controller: IESG
-* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
+* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-05
 
 * Claim Name: "dest"
 * Claim Description: Destination Identity String
 * Change Controller: IESG
-* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
+* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-05
 
 * Claim Name: "mky"
 * Claim Description: Media Key Fingerprint String
 * Change Controller: IESG
-* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-00
+* Specification Document(s): Section 3.2 of draft-ietf-stir-passport-05
 
 **9. Acknowledgements**
 
-Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, and Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, and Richard Barnes for valuable feedback on the technical and security aspects of the document. Additional thanks to Harsha Bellur for assistance in coding the example tokens.
+Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, Richard Barnes, Mark Miller, and Ted Hardie for valuable feedback on the technical and security aspects of the document. Additional thanks to Harsha Bellur for assistance in coding the example tokens.
 
 **10. References**
 
@@ -316,46 +319,47 @@ First, an example PASSporT Protected Header is as follows:
 	
 This would be serialized to the form:
 
-	{"typ":"passport","alg":"ES256","x5u":"https://cert.example.org/passport.cer"}
+	{"alg":"ES256","typ":"passport","x5u":"https://cert.example
+		.org/passport.cer"}
 	
 Encoding this with UTF8 and BASE64 encoding produces this value:
 	
-	eyJ0eXAiOiJwYXNzcG9ydCIsImFsZyI6IkVTMjU2IiwieDV1IjoiaHR0cHM6Ly9j
+	eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
 	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
 	
 Second, an example PASSporT Payload is as follows:
 
 	{ 
+    	"dest":{"uri":["sip:alice@example.com"]}
     	"iat":"1443208345",
-    	"orig":{"tn":"12155551212"},
-    	"dest":{"uri":"sip:alice@example.com"}
+    	"orig":{"tn":"12155551212"}
     }
   
 This would be serialized to the form:
 
-	{"iat":"1443208345","orig":{"tn":"12155551212"},"dest":
-	{"uri":"sip:alice@example.com"}}
+	{"dest":{"uri":["sip:alice@example.com"]},"iat":"1443208345",
+	    "orig":{"tn":"12155551212"}}
 	
 Encoding this with the UTF8 and BASE64 encoding produces this value:
 
-	eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3JpZyI6eyJ0biI6IjEyMTU1NTUxMjEyIn0s
-	ImRlc3QiOnsidXJpIjoic2lwOmFsaWNlQGV4YW1wbGUuY29tIn19
+	eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhdCI
+	6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
 	
 Computing the digital signature of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS Payload))
 
-	2bbTbLeDIf52Vv0yESUqebUBYrKIuouOfKQME6MD9kfgZ59dMAvvrIC94XsKdzV0
-	3evDS8wd6CubUqSalM7Dpg
+	rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
+	CpTzO3QfPOlckGaS6hEck7w
 	
 The final PASSporT token is produced by concatenating the values in the order Header.Payload.Signature with period (',') characters.  For the above example values this would produce the following:
-	
-	eyJ0eXAiOiJwYXNzcG9ydCIsImFsZyI6IkVTMjU2IiwieDV1IjoiaHR0cHM6Ly9j
+		
+	eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
 	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
 	.
-	eyJpYXQiOiIxNDQzMjA4MzQ1Iiwib3JpZyI6eyJ0biI6IjEyMTU1NTUxMjEyIn0s
-	ImRlc3QiOnsidXJpIjoic2lwOmFsaWNlQGV4YW1wbGUuY29tIn19
+	eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhdCI
+	6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
 	.
-	2bbTbLeDIf52Vv0yESUqebUBYrKIuouOfKQME6MD9kfgZ59dMAvvrIC94XsKdzV0
-	3evDS8wd6CubUqSalM7Dpg
+	rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
+	CpTzO3QfPOlckGaS6hEck7w
 	
 
 **Appendix A.1. X.509 Private Key Certificate for ES256 Example**
