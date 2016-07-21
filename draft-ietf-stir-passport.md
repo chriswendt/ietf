@@ -312,15 +312,15 @@ Note: there will never be a JWS Unprotected Header for PASSporT.
 First, an example PASSporT Protected Header is as follows:
 
 	{ 
-      "typ":"passport",
-      "alg":"ES256",
-      "x5u":"https://cert.example.org/passport.cer" 
+        "alg":"ES256",
+    	"typ":"passport",
+        "x5u":"https://cert.example.org/passport.cer" 
     }
 	
 This would be serialized to the form:
 
-	{"alg":"ES256","typ":"passport","x5u":"https://cert.example
-		.org/passport.cer"}
+	{"alg":"ES256","typ":"passport","x5u":"https://cert.example.org
+		/passport.cer"}
 	
 Encoding this with UTF8 and BASE64 encoding produces this value:
 	
