@@ -21,7 +21,7 @@ JSON Web Token (JWT) [RFC7519] and JSON Web Signature (JWS) [RFC7515] and relate
 
 **3. PASSporT Components**
 
-The PASSporT is constructed based on JWT [RFC7519] and JWS [RFC7515] specifications.  JWS defines the use of JSON data structures in a specified canonical format for signing data corresponding to JOSE header, JWS Payload, and JWS Signature.  JWT defines a set of claims that are represented by specified key value pairs which can be extended with custom keys for specific applications. 
+The PASSporT is constructed based on JWT [RFC7519] and JWS [RFC7515] specifications.  JWS defines the use of JSON data structures in a specified canonical format for signing data corresponding to JOSE header, JWS Payload, and JWS Signature. JWT defines a set of claims that are represented by specified key value pairs which can be extended with custom keys for specific applications. 
 
 **3.1. PASSporT Header**
 
@@ -58,7 +58,7 @@ An example of the header, would be the following,
 
 The token claims consist of the information which needs to be verified at the destination party.  These claims follow the definition of a JWT claim [RFC7519] and be encoded as defined by the JWS Payload [RFC7515]. 
 
-PASSporT defines the use of a standard JWT defined claim as well as custom claims corresponding to the two parties associated with personal communications, the originator and desitination as detailed below. 
+PASSporT defines the use of a standard JWT defined claim as well as custom claims corresponding to the two parties associated with personal communications, the originator and destination as detailed below. 
 
 Key values outside the US-ASCII range should be encoded using percent encoding as described in section 2.1 of RFC 3986, case normalized as described in 6.2.2.1 of RFC 3986. Matching of these values should use string exact match.
 
@@ -66,7 +66,7 @@ Key values outside the US-ASCII range should be encoded using percent encoding a
 
 **3.2.1.1 "iat" - Issued At claim**
 
-The JSON claim MUST include the "iat" [RFC7519] Section 4.1.6 defined claim Issued At.  As defined this should be set to the date and time of the origination of the personal communications. The time value should be of the format defined in [RFC7519] Section 2 NumericDate.  This is included for securing the token against replay and cut and paste attacks, as explained further in the security considerations in section 7.
+The JSON claim MUST include the "iat" [RFC7519] Section 4.1.6 defined claim Issued At.  As defined this should be set to the date and time of the origination of the personal communications. The time value should be of the format defined in [RFC7519] Section 2 NumericDate.  This is included for securing the token against replay and cut and paste attacks, as explained further in the security considerations in section 6.
 
 **3.2.2. PASSporT specific claims**
 
@@ -162,7 +162,7 @@ PASSporT includes the bare minimum set of claims needed to securely assert the o
 
 For extension of the base set of claims defined in this document, a new JWS header parameter "ppt" MUST be used with a unique string.  Any PASSporT extension should be defined in a specification describing the PASSporT extension and the string used in the "ppt" hedaer string that defines any new claims that would extend the base set of claims of PASSporT.
 
-An example header with a PASSporT extension of "foo" is as follows:
+An example header with a PASSporT extension type of "foo" is as follows:
 
 	{ 
       "alg":"ES256",
@@ -200,7 +200,7 @@ For the example PASSporT Payload shown in Section 3.2.2.3, the following is the 
 There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks. PASSporT tokens should be sent with other application level protocol information (e.g. for SIP an INVITE as defined in [RFC3261]). In order to make the token signature unique to a specific origination of personal communications there should be a link between various information provided in the token and information provided by the application level protocol information.  This uniqueness specified using the following two claims:
 
 * 'iat' claim should correspond to a date/time the message was originated.  It should also be within a relative  time that is reasonable for clock drift and transmission time characteristics associated with the application using the PASSporT token.  Therefore, validation of the token should consider date and time correlation, which could be influenced by signaling protocol specific use and network time differences.
-* 'dest' claim is included to prevent the valid re-use of a previously originated message to send to another destination party
+* 'dest' claim is included to prevent the valid re-use of a previously originated message to send to another destination party.
 
 **6.2 Solution Considerations**
 
@@ -214,7 +214,7 @@ In addition, the telecommunications systems and specifications that use PASSporT
 
 **6.3 Privacy Considerations**
 
-Because PASSporT explicitly includes claims of identifiers of parties involved in communications, date and times, and potentially other call detail, care should be taken outside of traditional protected or private telephony communications paths where there may be concerns about exposing information to either unintended or illegitimate actors.  These identifiers are often exposed through many communications signaling protocols as of today, but appropriate precautions should be taken.
+Because PASSporT explicitly includes claims of identifiers of parties involved in communications, date and times, and potentially other call detail, care should be taken outside of traditional protected or private telephony communications paths where there may be concerns about exposing information to either unintended or illegitimate actors. These identifiers are often exposed through many communications signaling protocols as of today, but appropriate precautions should be taken.
 
 **7. IANA Considerations**
 
