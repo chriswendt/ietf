@@ -1,0 +1,830 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!ENTITY ietf-stir-rfc4474bis SYSTEM "http://xml.resource.org/public/rfc/bibxml3/reference.I-D.ietf-stir-rfc4474bis.xml">
+<!ENTITY RFC2046 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2046.xml">
+<!ENTITY RFC3261 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3261.xml">
+<!ENTITY RFC3986 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3986.xml">
+<!ENTITY RFC4566 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4566.xml">
+<!ENTITY RFC4572 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4572.xml">
+<!ENTITY RFC5280 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5280.xml">
+<!ENTITY RFC6838 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6838.xml">
+<!ENTITY RFC7340 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7340.xml">
+<!ENTITY RFC7515 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml">
+<!ENTITY RFC7518 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7518.xml">
+<!ENTITY RFC7519 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml">
+<!ENTITY RFC7638 SYSTEM "https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7638.xml">
+]>
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt" ?>
+<?rfc strict="yes" ?>
+<?rfc toc="yes" ?>
+<?rfc tocdepth="4"?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="yes" ?>
+<?rfc rfcedstyle="no" ?>
+<?rfc iprnotified="no" ?>
+<?rfc colonspace="yes" ?>
+<rfc category="std" docName="draft-ietf-stir-passport-07" ipr="trust200902">
+
+  <front>
+    <title abbrev="PASSporT">Persona Assertion Token</title>
+
+    <author fullname="Chris Wendt" initials="C." surname="Wendt">
+      <organization>Comcast</organization>
+
+      <address>
+        <postal>
+          <street>One Comcast Center</street>
+          <city>Philadelphia</city>
+          <region>PA</region>
+          <code>19103</code>
+          <country>USA</country>
+        </postal>
+        <email>chris-ietf@chriswendt.net</email>
+      </address>
+    </author>
+    
+    <author fullname="Jon Peterson" initials="J." surname="Peterson">
+      <organization>Neustar Inc.</organization>
+
+      <address>
+        <postal>
+          <street>1800 Sutter St Suite 570</street>
+          <city>Concord</city>
+          <region>CA</region>
+          <code>94520</code>
+          <country>US</country>
+        </postal>
+        <email>jon.peterson@neustar.biz</email>
+      </address>
+    </author>
+    
+    <date month="September" year="2016" />
+    
+    <area>ART</area>
+    
+    <workgroup>STIR</workgroup>
+    
+    <abstract>
+      <t>This document defines a canonical string object or 'token' including a digitial signature for verifying the author of the token, their authority to author the token and the information asserted in the token, minimally, the  originating identity or 'persona' corresponding specifically to the originator of 'personal communications', or signalled communications between a set of parties with identities. The PASSporT token is cryptographically signed to protect the integrity of the identify the originator of a personal communications session (e.g. the telephone number or URI) and verify the assertion of the identity information at the destination. The cryptographic signature is defined with the intention that it can confidently verify the originating persona even when the signature is sent to the destination party over an insecure channel. PASSporT is particularly useful for many personal communications applications over IP networks and other multi-hop interconnection scenarios where the originating and destination parties may not have a direct trusted relationship.</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section title="Introduction" anchor="sec.introduction">
+      <t>In today's IP-enabled telecommunications world, there is a growing concern about the ability to trust incoming invitations for communications sessions, including video, voice and messaging. <xref target="RFC7340"></xref> As an example, modern telephone networks provide the ability to spoof the calling party telephone number for many legitimate purposes including providing network features and services on the behalf of a legitimate telephone number.  However, as we have seen, bad actors have taken advantage of this ability for illegitimate and fraudulent purposes meant to trick telephone users to believe they are someone they are not. This problem can be extended to many emerging forms of personal communications.</t>
+      <t>This document defines a method for creating and validating a token that cryptographically verifies an originating identity, or more generally a URI or telephone number representing the originator of personal communications. Through extensions defined in this document, in Section 5.2, other information relevant to the personal communications can also be added to the token.  The goal of PASSporT is to provide a common framework for signing originating identity related information in an extensible way.  Additionally, this functionality is independent of any specific personal communications signaling call logic, so that the assertion of originating identity related information can be implemented in a flexible way and can be used in applications including end-to-end applications that require different signaling protocols or gateways between different communications systems.  It is anticipated that signaling protocol specific guidance will be provided in other related documents and specifications to specify how to use and transport PASSporT tokens, however this is intentionally out of scope for this document.</t>
+      <t><xref target="I-D.ietf-stir-rfc4474bis"></xref> provides details of the use of PASSporT within the SIP <xref target="RFC3261"></xref> signaling protocol for the signing and verification of telephone numbers.</t>
+      
+    </section>
+    
+    <section title="PASSporT Token Overview" anchor="sec.passport_token_overview">
+      
+      <t>JSON Web Token (JWT) <xref target="RFC7519"></xref> and JSON Web Signature (JWS) <xref target="RFC7515"></xref> and related specifications define a standard token format that can be used as a way of encapsulating claimed or asserted information with an associated digital signature using X.509 based certificates. JWT provides a set of claims in JSON format that can conveniently accomidate asserted originating identity information and is easily extensible for extension mechanisms defined below. Additionally, JWS provides a path for updating methods and cryptographic algorithms used for the associated digital signatures. </t>
+      <t>JWS defines the use of JSON data structures in a specified canonical format for signing data corresponding to JOSE header, JWS Payload, and JWS Signature. JWT defines a set of claims that are represented by specified key value pairs which can be extended with custom keys for specific applications. The next sections define the header and claims that MUST be minimally used with JWT and JWS for PASSporT. </t>
+    </section>
+    
+    <section title="PASSporT Header" anchor="sec.passport_header">
+        <t>The JWS token header is a JOSE header <xref target="RFC7515"></xref> Section 4, that defines the type and encryption algorithm used in the token.</t>
+        <t>PASSporT header should include, at a minimum, the following header parameters defined the the next three subsections.</t>
+    
+        <section title='"typ" (Type) Header Parameter' anchor="sec.typ_header_parameter">
+      
+            <t>The "typ" (Type) Header Parameter is defined in JWS Section 4.1.9. to declare the media type of the complete JWS. </t>
+    
+            <t>For PASSporT Token the "typ" header MUST be the string "passport". This represents that the encoded token is a JWT of type passport.</t>
+        </section>
+    
+        <section title='"alg" (Algorithm) Header Parameter' anchor="sec.alg_header_parameter">
+    
+            <t>The "alg" (Algorithm) Header Parameter is defined in JWS Section 4.1.1. This definition includes the ability to specify the use of a cryptographic algorithm for the signature part of the JWS.  It also refers to a list of defined "alg" values as part of a registry established by JSON Web Algorithms (JWA) <xref target="RFC7518"></xref> and defined in Section 3.1.</t>
+            <t>For the creation and verification of PASSporT tokens and their digital signatures ES256 MUST be implemented as defined in JWA Section 3.4</t>
+            <t>Note that JWA defines other algorithms that may be utilized or updated in the future depending on cryptographic strength requirements guided by current security best practice.</t>
+    
+        </section>
+    
+        <section title='"x5u" (X.509 URL) Header Parameter' anchor="sec.x5u_header_parameter">
+
+            <t>As defined in JWS Section 4.1.5., the "x5u" header parameter defines a URI <xref target="RFC3986"></xref> referring to the resource for the X.509 public key certificate or certificate chain <xref target="RFC5280"></xref> corresponding to the key used to digitally sign the JWS. Generally, as defined in JWS section 4.1.5, this would correspond to an HTTPS or DNSSEC resource using integrity protection.</t>
+        </section>
+        <section title='Example PASSporT header' anchor="sec.example_passport_header">
+            <t>An example of the header, would be the following, including the specified passport type, ES256 algorithm, and a URI referencing the network location of the certificate needed to validate the PASSporT signature.
+                <figure>
+                    <artwork><![CDATA[
+    { 
+        "typ":"passport",
+        "alg":"ES256",
+        "x5u":"https://cert.example.org/passport.cer" 
+    }
+                    ]]></artwork>
+                </figure>
+            </t>
+        </section>
+    </section>
+    
+    <section title="PASSporT Payload" anchor="sec.passport_payload">
+        <t>The token claims consist of the information which needs to be verified at the destination party.  These claims follow the definition of a JWT claim <xref target="RFC7519"></xref> Section 4 and be encoded as defined by the JWS Payload <xref target="RFC7515"></xref> Section 3.</t>
+
+        <t>PASSporT defines the use of a standard JWT defined claim as well as custom claims corresponding to the two parties associated with personal communications, the originator and destination as detailed below.</t>
+        <t>Any claim key values outside the US-ASCII range should be encoded using percent encoding as described in section 2.1 of <xref target="RFC3986"></xref>, case normalized as described in 6.2.2.1 of <xref target="RFC3986"></xref>. </t>
+
+        <section title="JWT defined claims" anchor="sec.jwt_defined_claims">
+            <section title='"iat" - Issued At claim' anchor='sec.iat_issued_at_claims'>
+                <t>The JSON claim MUST include the "iat" <xref target="RFC7519"></xref> Section 4.1.6 defined claim Issued At.  As defined this should be set to the date and time of the origination of the personal communications. The time value should be of the format defined in <xref target="RFC7519"></xref> Section 2 NumericDate.  This is included for securing the token against replay and cut and paste attacks, as explained further in the security considerations in section 6.</t>
+            </section>
+        </section>
+        <section title="PASSporT specific claims" anchor="sec.passprt_specific_claims">
+            <section title='Originating and Destination Identity Claims' anchor='sec.orig_dest_identities'>
+                <t>PASSporT defines claims that convey the identity of the origination and destination of personal communications.  Origination in the context of PASSporT and for a given application's use of PASSporT is the point in the network that has the authority to assert the callers identity. This authority is represented in PASSporT by the certificate holder and is signed at the applications choice of authoritative point(s) in the network, for example, at a device that has authenticated with a user, or at a network entity with an authenticated trust relationship with that device and its user.  Destination represents the intended destination of the personal communications, i.e. the identity(s) being called by the caller, The destination point(s) determined by the application must have the capability to verify the PASSporT token and the digital signature. The PASSporT associated certificate is used to validate the authority of the originating signer, generally via a certificate chain to the trust anchor for that application. </t>
+                <t>The origination and destination identities are represented by two claims that are required for PASSporT, the "orig" and "dest" claims. Both "orig" and "dest" MUST have claims where the key represents an identity type and the value is the identity string, both defined in subsecquent subsections.  Currently, these identities can be represented as either telephone numbers or Uniform Resource Indicators (URIs).</t>
+                <t>The "orig" JSON object MUST only have one key value pair representing the asserted identity of any type (currently either "tn" or "uri") of the originator of the personal communications signaling.</t>
+                
+                <t>The "dest" JSON object MUST have at least have one key value pair, but could have multiple identity types (i.e. "tn" and/or "uri") but only one of each.  If both "tn" and "uri" are included, the JSON object should list the "tn" array first and the "uri" array second.  Within the "tn" and "uri" arrays, the identity strings should be put in lexiographical order including the scheme-specific portion of the URI characters.  Additionaly, in the case of "dest" only, the identity type key value MUST be an array signaled by standard JSON brackets, even when there is a single identity value in the identity type key value. </t>
+
+                <section title='"tn" - Telephone Number identity' anchor='sec.tn_identity'>
+                    <t>If the originating or destination identity is a telephone number, the key representing the identity MUST be "tn".</t>
+                    <t>Telephone Number strings for "tn" MUST be canonicalized according to the procedures specified in <xref target="I-D.ietf-stir-rfc4474bis"></xref> Section 8.3.</t>
+
+                </section>
+
+                <section title='"uri" - URI identity' anchor='sec.uri_identity'>
+                    <t>If any of the originating or destination identities is of the form URI, as defined in <xref target="RFC3986"></xref>, the key representing the identity MUST be "uri"  URI form of the identity.</t>
+
+                </section>
+                <section title='Future identity forms' anchor='sec.future_identity'>
+                    <t>We recognize that in the future there may be other standard mechanisms for representing identities.  The "orig" and "dest" claims currently support "tn" and "uri" but could be extended in the future to allow for other identity types with new IANA registered unique types to represent these forms.</t>
+                    
+                </section>
+                <section title='Examples' anchor='sec.identity_examples'>
+                    <t>Single Originator, with telephone number identity +12155551212, to Single Destination, with URI identity 'sip:alice@example.com', example:
+                        <figure>
+                              <artwork><![CDATA[
+{ 
+    "dest":{"uri":["sip:alice@example.com"]},
+    "iat":"1443208345",
+    "orig":{"tn":"12155551212"}
+}
+                            ]]></artwork>
+                        </figure>
+                    </t>
+                    <t>Single Originator, with telephone number identity +12155551212, to Multiple Destination Identities, with telephone number identity +12125551212 and two URI identities, sip:alice@example.com and sip:bob@example.com, example:
+                        <figure>
+                              <artwork><![CDATA[
+{ 
+    "dest":{
+            "tn":["12125551212"],
+            "uri":["sip:alice@example.com",
+                "sip:bob@example.net"]
+    },
+    "iat":"1443208345",
+    "orig":{"tn":"12155551212"}
+}
+                            ]]></artwork>
+                        </figure>
+                    </t>
+                </section>
+            </section>
+
+            <section title='"mky" - Media Key claim' anchor='sec.mky_media_key_claim'>
+
+                <t>Some protocols that use PASSporT may also want to protect media security keys delivered within their signaling in order to bind those keys to the identities established in the signaling layers. The "mky" is an optional PASSporT claim defining the assertion of media key fingerprints carried in SDP <xref target="RFC4566"></xref> via the "a=fingerprint" attribute <xref target="RFC4572"></xref> Section 5. This claim can support either a single or multiple fingerprints appearing in a single SDP body corresponding to one or more media streams offered. </t>
+                <t>The "mky" claim MUST be formated in a JSON form including the "alg" and "dig" keys with the corresponding algorithm and hexadecimal values. If there are more that one fingerprint values associated with different media streams in SDP, the fingerprint values MUST be constructed as a JSON array denoted by bracket characters.</t> 
+                <t>For the "dig" key value, the hash value MUST be the hexadecimal value without any colons. The "mky" array should order the JSON objects containing both "alg" and "dig" key values in lexiographic order of the "dig" string values and within each of those objects the JSON keys should have "alg" first and "dig" second.</t>
+
+                <t>An example claim with "mky" claim is as follows:</t>
+
+                <t>For an SDP offer that includes the following fingerprint values,
+                    <figure>
+                        <artwork><![CDATA[
+a=fingerprint:sha-256 4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:
+5D:49:6B:19:E5:7C:AB:3E:4B:65:2E:7D:46:3F:54:42:CD:54:F1
+a=fingerprint:sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:
+2E:7D:46:3F:54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2
+                        ]]></artwork>
+                    </figure>
+                </t>
+
+                <t>the PASSporT Payload object would be:
+                    <figure>
+                        <artwork><![CDATA[
+{ 
+    "dest":{"uri":["sip:alice@example.com"]},
+    "iat":"1443208345", 
+    "mky":[
+    {
+       "alg":"sha-256",
+       "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
+        F17A03A27DF9B07F4619B2"
+    },
+    {
+       "alg":"sha-256",
+       "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
+        AB3E4B652E7D463F5442CD54F1"
+    }
+    ],
+    "orig":{"tn":"12155551212"}
+}
+                        ]]></artwork>
+                    </figure>
+                </t>
+            </section>
+        </section>
+    </section>
+  
+    <section title="PASSporT Signature" anchor="sec.passport_signature">
+        <t>The signature of the PASSporT is created as specified by JWS using the private key corresponding to the X.509 public key certificate referenced by the "x5u" header parameter. </t>
+    </section>
+
+    <section title="Extending PASSporT" anchor="sec.extending_passport">
+  
+        <t>PASSporT includes the bare minimum set of claims needed to securely assert the originating identity and support the secure propoerties discussed in various parts of this document. JWT supports a straight forward way to add additional claims by simply adding new claim key pairs. PASSporT can be extended beyond the defined base set of claims to represent other information requiring assertion or validation beyond the originating identity itself as needed.</t>
+  
+        <section title='"ppt" (PASSporT) header parameter' anchor="sec.passport_header_parameter">
+    
+            <t>For extension of the base set of claims defined in this document, a new JWS header parameter "ppt" MUST be used with a unique string.  Any PASSporT extension should be defined in a specification describing the PASSporT extension and the string used in the "ppt" hedaer string that defines any new claims that would extend the base set of claims of PASSporT.</t>
+    
+            <t>An example header with a PASSporT extension type of "foo" is as follows:
+                <figure>
+                    <artwork><![CDATA[
+    { 
+        "alg":"ES256",
+        "ppt":"foo",
+        "typ":"passport",
+        "x5u":"https://tel.example.org/passport.cer"
+    }
+                    ]]></artwork>
+                </figure>
+            </t>
+    
+        </section>
+  
+        <section title="Extended PASSporT Claims" anchor="sec.extended_passport_claims">
+    
+            <t>Specifications that define extensions to the PASSporT mechanism MUST explicitly specify what claims they include beyond the base set of claims from this document, the order in which they will appear, and any further information necessary to implement the extension. All extensions MUST include the baseline JWT elements specified in Section 3; claims may only be appended to the claims object specified; they can never be removed or re-ordered. Specifying new claims follows the baseline JWT procedures (<xref target="RFC7519"></xref> Section 10.1). Understanding an extension or new claims defined by the extension on the destination verification of the PASSporT token is optional. The creator of a PASSporT object cannot assume that destination systems will understand any given extension. Verification of PASSporT tokens by destination systems that do support an extension may then trigger appropriate application-level behavior in the presence of an extension; authors of extensions should provide appropriate extension-specific guidance to application developers on this point.</t>
+                <t>An example set of extended claims, extending the first example in Section 4.1.2.4. using "bar" as the newly defined claim would be as follows:
+                    <figure>
+                        <artwork><![CDATA[
+{ 
+    "bar":"beyond all recognition"
+    "dest":{"uri":["sip:alice@example.com"]},
+    "iat":"1443208345",
+    "orig":{"tn":"12155551212"}
+}
+                        ]]></artwork>
+                    </figure>
+                </t>
+  
+        </section>
+    </section>
+
+    
+    <section title="Deterministic JSON Serialization" anchor="sec.deterministic_json_serialization">
+      
+        <t>JSON, as a canonical format, can include spaces, line breaks and key value pairs can occur in any order and therefore makes it, from a string format, non-deterministic. In order to make the digitial signature verification work deterministically, the JSON representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, specifically the JSON header object and JSON Claim object MUST be computed as follows.</t>
+      
+        <t>The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in <xref target="RFC7638"></xref> Section 3 Step 1 only. Step 2 should not be performed and as noted this is still a legal JWK. The PASSporT header and claim members MUST only follow the lexicographical ordering rules.  Any members that themselves contain JSON objects or arrays, such as "dest" or "mky" MUST follow their own lexiographical ordering and whitespace and line break rules.  This includes any header or claims defined in future specifications using PASSporT.</t>
+      
+        <section title="Example PASSport deterministic JSON form" anchor="sec.example_passport_json_form">
+            
+            <t>This section demonstrate the deterministic JSON serialization for the example PASSporT Payload shown in Section 4.2.2.</t>
+            <t>The initial JSON object is shown here:
+                <figure>
+                    <artwork><![CDATA[
+{ 
+    "dest":{"uri":["sip:alice@example.com"]},
+    "orig":{"tn":"12155551212"}
+    "iat":"1443208345", 
+    "mky":[
+    {
+       "alg":"sha-256",
+       "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
+           F17A03A27DF9B07F4619B2"
+    },
+    {
+       "alg":"sha-256",
+       "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
+           AB3E4B652E7D463F5442CD54F1"
+    }
+  ],
+}
+                    ]]></artwork>
+                </figure>
+            </t>
+            
+            <t>The parent members of the JSON object are as follows:
+                <list style="symbols">
+                    <t>"dest"</t>
+                    <t>"orig"</t>
+                    <t>"iat"</t>
+                    <t>"mky"</t>
+                </list> 
+            </t>
+            
+            <t>Their lexicographic order is:
+                <list style="symbols">
+                    <t>"dest"</t>
+                    <t>"iat"</t>
+                    <t>"mky"</t>
+                    <t>"orig"</t>
+                </list> 
+            </t>
+            
+            <t>The final constructed deterministic JSON serialization representation, with whitespace and line breaks removed, (with line breaks used for display purposes only) is:
+                <figure>
+                    <artwork><![CDATA[
+{"dest":{"uri":["sip:alice@example.com"],"iat":1443208345,"mky":
+  [{"alg":"sha-256","dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD5
+  4F17A03A27DF9B07F4619B2"},{"alg":"sha-256","dig":"4AADB9B13F82183B5
+  40212DF3E5D496B19E57CAB3E4B652E7D463F5442CD54F1"}],
+  "orig":{"tn":"12155551212"}}
+                    ]]></artwork>
+                </figure>
+            </t>
+        </section>
+      
+    </section>
+      
+    <section title="Security Considerations" anchor="sec.security_considerations">
+        <section title="Avoidance of replay and cut and paste attacks" anchor="sec.avoidance_of_attacks">
+
+            <t>There are a number of security considerations for use of the token for avoidance of replay and cut and paste attacks. PASSporT tokens should be sent with other application level protocol information (e.g. for SIP an INVITE as defined in <xref target="RFC3261"></xref>). In order to make the token signature unique to a specific origination of personal communications there should be a link between various information provided in the token and information provided by the application level protocol information.  This uniqueness specified using the following two claims:
+                <list style="symbols">
+                    <t>'iat' claim should correspond to a date/time the message was originated.  It should also be within a relative  time that is reasonable for clock drift and transmission time characteristics associated with the application using the PASSporT token.  Therefore, validation of the token should consider date and time correlation, which could be influenced by signaling protocol specific use and network time differences.</t>
+                    <t>'dest' claim is included to prevent the valid re-use of a previously originated message to send to another destination party.</t>
+                </list> 
+            </t>
+        </section>
+      
+        <section title="Solution Considerations" anchor="sec.solution_considerations">
+        
+            <t>The use of PASSporT tokens based on the validation of the digital signature and the associated certificate requires consideration of the authentication and authority or reputation of the signer to attest to the identity being asserted.  It should be recognized that the use of this token should not, in it's own right, be considered a full solution for absolute non-repudiation of the identity being asserted. It can and often is the case that the end user that the identity represents and signer are not one in the same.  However, applications that use PASSporT should ensure the signer is in an authoritative position to represent the user and authenticate the user onto the communications network and should be the responsible party for protecting the destination party from potential identity spoofing in addition to other abuse of the communications network outside of PASSporT.</t>
+        
+        </section>
+  
+        <section title="Privacy Considerations" anchor="sec.privacy_considerations">
+        
+            <t>Because PASSporT explicitly includes claims of identifiers of parties involved in communications, date and times, and potentially other call detail, care should be taken outside of traditional protected or private telephony communications paths where there may be concerns about exposing information to either unintended or illegitimate actors. These identifiers are often exposed through many communications signaling protocols as of today, but appropriate precautions should be taken.</t>
+        
+        </section>
+    </section>
+    
+    <section title="IANA Considerations" anchor="sec.iana_considerations">
+      
+        <section title="Media Type Registration" anchor="sec.media_type_registration">
+        
+            <section title="Media Type Registry Contents Additions Requested" anchor="sec.media_type_request">
+        
+                <t>This section registers the "application/passport" media type <xref target="RFC2046"></xref> in the "Media Types" registry in the manner described in <xref target="RFC6838"></xref>, which can be used to indicate that the content is a PASSporT defined JWT and JWS.</t>
+        
+          <t>
+            <list style="symbols">
+              <t>Type name: application</t>
+              <t>Subtype name: passport</t>
+              <t>Required parameters: n/a</t>
+              <t>Optional parameters: n/a</t>
+              <t>Encoding considerations: 8bit; application/passport values outside the US-ASCII range are encoded using percent encoding as described in section 2.1 of RFC 3986 (some values may be the empty string), each separated from the next by a single period ('.') character.</t>
+              <t>Security considerations: See the Security Considerations section of RFC 7515.</t>
+              <t>Interoperability considerations: n/a</t>
+              <t>Published specification: draft-ietf-stir-passport-05</t>
+              <t>Applications that use this media type: STIR and other applications that require identity related assertion</t>
+              <t>Fragment identifier considerations: n/a</t>
+              <t>Additional information:
+                <list style="symbols">
+                  <t>Magic number(s): n/a</t>
+                  <t>File extension(s): n/a</t>
+                  <t>Macintosh file type code(s): n/a</t>
+                </list>
+              </t>
+              <t>Person and email address to contact for further information: Chris Wendt, chris-ietf@chriswendt.net</t>
+              <t>Intended usage: COMMON</t>
+              <t>Restrictions on usage: none</t>
+              <t>Author: Chris Wendt, chris-ietf@chriswendt.net</t>
+              <t>Change Controller: IESG</t>
+              <t>Provisional registration?  No</t>
+            </list> 
+          </t>
+          
+        </section>
+        
+      </section>
+      
+      <section title="JSON Web Token Claims Registration" anchor="sec.json_web_token_claims_registration">
+        
+        <section title="Registry Contents Additions Requested" anchor="sec.registry_contents_additions_request">
+      
+          <t>
+            <list style="symbols">
+              <t>Claim Name: "orig"</t>
+              <t>Claim Description: Originating Identity String</t>
+              <t>Change Controller: IESG</t>
+              <t>Specification Document(s): Section 3.2 of draft-ietf-stir-passport-05</t>
+            </list> 
+          </t>
+
+          <t>
+            <list style="symbols">
+              <t>Claim Name: "dest"</t>
+              <t>Claim Description: Destination Identity String</t>
+              <t>Change Controller: IESG</t>
+              <t>Specification Document(s): Section 3.2 of draft-ietf-stir-passport-05</t>
+            </list> 
+          </t>
+
+          <t>
+            <list style="symbols">
+              <t>Claim Name: "mky"</t>
+              <t>Claim Description: Media Key Fingerprint String</t>
+              <t>Change Controller: IESG</t>
+              <t>Specification Document(s): Section 3.2 of draft-ietf-stir-passport-05</t>
+            </list> 
+          </t>
+                
+        </section>
+        
+      </section>
+    
+    </section>
+
+        <section title="Acknowledgements" anchor="sec.acknowledgements">
+            <t>Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, Richard Barnes, Mark Miller, Ted Hardie, Dave Crocker, Robert Sparks for valuable feedback on the technical and security aspects of the document. Additional thanks to Harsha Bellur for assistance in coding the example tokens.</t>
+        </section>
+    
+    </middle>
+  
+    <back>
+        <references title="Normative References">
+            <reference anchor="I-D.ietf-stir-rfc4474bis">
+                <front>
+                    <title>Authenticated Identity Management in the Session Initiation Protocol (SIP)</title>
+                    <author initials="J" surname="Peterson" fullname="Jon Peterson">
+                        <organization/>
+                    </author>
+                    <author initials="C" surname="Jennings" fullname="Cullen Jennings">
+                        <organization/>
+                    </author>
+                    <author initials="E" surname="Rescorla" fullname="Eric Rescorla">
+                        <organization/>
+                    </author>
+                    <author initials="C" surname="Wendt" fullname="Chris Wendt">
+                        <organization/>
+                    </author>
+                    <date month="July" year="2016"/>
+                </front>
+                <seriesInfo name="Internet-Draft" value="draft-ietf-stir-rfc4474bis-10"/>
+                <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-stir-rfc4474bis-10.txt"/>
+            </reference>
+
+            <reference anchor="RFC2046" target="http://www.rfc-editor.org/info/rfc2046">
+                <front>
+                    <title>Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types</title>
+                    <author initials="N." surname="Freed" fullname="N. Freed">
+                        <organization/>
+                    </author>
+                    <author initials="N." surname="Borenstein" fullname="N. Borenstein">
+                        <organization/>
+                    </author>
+                    <date year="1996" month="November"/>
+                </front>
+                <seriesInfo name="RFC" value="2046"/>
+                <seriesInfo name="DOI" value="10.17487/RFC2046"/>
+            </reference>
+                  
+            <reference anchor="RFC3986" target="http://www.rfc-editor.org/info/rfc3986">
+                <front>
+                    <title>Uniform Resource Identifier (URI): Generic Syntax</title>
+                    <author initials="T." surname="Berners-Lee" fullname="T. Berners-Lee">
+                        <organization/>
+                    </author>
+                    <author initials="R." surname="Fielding" fullname="R. Fielding">
+                        <organization/>
+                    </author>
+                    <author initials="L." surname="Masinter" fullname="L. Masinter">
+                        <organization/>
+                    </author>
+                    <date year="2005" month="January"/>
+                </front>
+                <seriesInfo name="STD" value="66"/>
+                <seriesInfo name="RFC" value="3986"/>
+                <seriesInfo name="DOI" value="10.17487/RFC3986"/>
+            </reference>
+            <reference anchor="RFC4572" target="http://www.rfc-editor.org/info/rfc4572">
+                <front>
+                    <title>Connection-Oriented Media Transport over the Transport Layer Security (TLS) Protocol in the Session Description Protocol (SDP)</title>
+                    <author initials="J." surname="Lennox" fullname="J. Lennox">
+                        <organization/>
+                    </author>
+                    <date year="2006" month="July"/>
+                </front>
+                <seriesInfo name="RFC" value="4572"/>
+                <seriesInfo name="DOI" value="10.17487/RFC4572"/>
+            </reference>
+
+            <reference anchor="RFC6838" target="http://www.rfc-editor.org/info/rfc6838">
+                <front>
+                    <title>Media Type Specifications and Registration Procedures</title>
+                      <author initials="N." surname="Freed" fullname="N. Freed">
+                          <organization/>
+                      </author>
+                      <author initials="J." surname="Klensin" fullname="J. Klensin">
+                          <organization/>
+                      </author>
+                      <author initials="T." surname="Hansen" fullname="T. Hansen">
+                          <organization/>
+                      </author>
+                      <date year="2013" month="January"/>
+                  </front>
+                  <seriesInfo name="BCP" value="13"/>
+                  <seriesInfo name="RFC" value="6838"/>
+                  <seriesInfo name="DOI" value="10.17487/RFC6838"/>
+              </reference>
+              
+              <reference anchor="RFC4566" target="http://www.rfc-editor.org/info/rfc4566">
+                  <front>
+                      <title>SDP: Session Description Protocol</title>
+                      <author initials="M." surname="Handley" fullname="M. Handley">
+                          <organization/>
+                      </author>
+                      <author initials="V." surname="Jacobson" fullname="V. Jacobson">
+                          <organization/>
+                      </author>
+                      <author initials="C." surname="Perkins" fullname="C. Perkins">
+                          <organization/>
+                      </author>
+                      <date year="2006" month="July"/>
+                  </front>
+                  <seriesInfo name="RFC" value="4566"/>
+                  <seriesInfo name="DOI" value="10.17487/RFC4566"/>
+              </reference>
+
+      <reference anchor="RFC7515" target="http://www.rfc-editor.org/info/rfc7515">
+        <front>
+          <title>JSON Web Signature (JWS)</title>
+          <author initials="M." surname="Jones" fullname="M. Jones">
+            <organization/>
+          </author>
+          <author initials="J." surname="Bradley" fullname="J. Bradley">
+            <organization/>
+          </author>
+          <author initials="N." surname="Sakimura" fullname="N. Sakimura">
+            <organization/>
+          </author>
+          <date year="2015" month="May"/>
+        </front>
+        <seriesInfo name="RFC" value="7515"/>
+        <seriesInfo name="DOI" value="10.17487/RFC7515"/>
+      </reference>
+
+      <reference anchor="RFC7518" target="http://www.rfc-editor.org/info/rfc7518">
+        <front>
+          <title>JSON Web Algorithms (JWA)</title>
+          <author initials="M." surname="Jones" fullname="M. Jones">
+            <organization/>
+          </author>
+          <date year="2015" month="May"/>
+        </front>
+        <seriesInfo name="RFC" value="7518"/>
+        <seriesInfo name="DOI" value="10.17487/RFC7518"/>
+      </reference>
+
+      <reference anchor="RFC7519" target="http://www.rfc-editor.org/info/rfc7519">
+        <front>
+          <title>JSON Web Token (JWT)</title>
+          <author initials="M." surname="Jones" fullname="M. Jones">
+            <organization/>
+          </author>
+          <author initials="J." surname="Bradley" fullname="J. Bradley">
+            <organization/>
+          </author>
+          <author initials="N." surname="Sakimura" fullname="N. Sakimura">
+            <organization/>
+          </author>
+          <date year="2015" month="May"/>
+        </front>
+        <seriesInfo name="RFC" value="7519"/>
+        <seriesInfo name="DOI" value="10.17487/RFC7519"/>
+      </reference>
+
+      <reference anchor="RFC7638" target="http://www.rfc-editor.org/info/rfc7638">
+        <front>
+          <title>JSON Web Key (JWK) Thumbprint</title>
+          <author initials="M." surname="Jones" fullname="M. Jones">
+            <organization/>
+          </author>
+          <author initials="N." surname="Sakimura" fullname="N. Sakimura">
+            <organization/>
+          </author>
+          <date year="2015" month="September"/>
+        </front>
+        <seriesInfo name="RFC" value="7638"/>
+        <seriesInfo name="DOI" value="10.17487/RFC7638"/>
+      </reference>
+        
+        </references>
+        <references title="Informative References">
+  
+      <reference anchor="RFC3261" target="http://www.rfc-editor.org/info/rfc3261">
+        <front>
+          <title>SIP: Session Initiation Protocol</title>
+          <author initials="J." surname="Rosenberg" fullname="J. Rosenberg">
+            <organization/>
+          </author>
+          <author initials="H." surname="Schulzrinne" fullname="H. Schulzrinne">
+            <organization/>
+          </author>
+          <author initials="G." surname="Camarillo" fullname="G. Camarillo">
+            <organization/>
+          </author>
+          <author initials="A." surname="Johnston" fullname="A. Johnston">
+            <organization/>
+          </author>
+          <author initials="J." surname="Peterson" fullname="J. Peterson">
+            <organization/>
+          </author>
+          <author initials="R." surname="Sparks" fullname="R. Sparks">
+            <organization/>
+          </author>
+          <author initials="M." surname="Handley" fullname="M. Handley">
+            <organization/>
+          </author>
+          <author initials="E." surname="Schooler" fullname="E. Schooler">
+            <organization/>
+          </author>
+          <date year="2002" month="June"/>
+        </front>
+        <seriesInfo name="RFC" value="3261"/>
+        <seriesInfo name="DOI" value="10.17487/RFC3261"/>
+      </reference>
+    
+      <reference anchor="RFC5280" target="http://www.rfc-editor.org/info/rfc5280">
+        <front>
+          <title>Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile</title>
+          <author initials="D." surname="Cooper" fullname="D. Cooper">
+            <organization/>
+          </author>
+          <author initials="S." surname="Santesson" fullname="S. Santesson">
+            <organization/>
+          </author>
+          <author initials="S." surname="Farrell" fullname="S. Farrell">
+            <organization/>
+          </author>
+          <author initials="S." surname="Boeyen" fullname="S. Boeyen">
+            <organization/>
+          </author>
+          <author initials="R." surname="Housley" fullname="R. Housley">
+            <organization/>
+          </author>
+          <author initials="W." surname="Polk" fullname="W. Polk">
+            <organization/>
+          </author>
+          <date year="2008" month="May"/>
+        </front>
+        <seriesInfo name="RFC" value="5280"/>
+        <seriesInfo name="DOI" value="10.17487/RFC5280"/>
+      </reference>
+    
+        <reference anchor="RFC7340" target="http://www.rfc-editor.org/info/rfc7340">
+            <front>
+                <title>
+                    Secure Telephone Identity Problem Statement and Requirements
+                </title>
+                <author initials="J." surname="Peterson" fullname="J. Peterson">
+                    <organization/>
+                </author>
+                <author initials="H." surname="Schulzrinne" fullname="H. Schulzrinne">
+                    <organization/>
+                </author>
+                <author initials="H." surname="Tschofenig" fullname="H. Tschofenig">
+                    <organization/>
+                </author>
+                <date year="2014" month="September"/>
+            </front>
+            <seriesInfo name="RFC" value="7340"/>
+            <seriesInfo name="DOI" value="10.17487/RFC7340"/>
+        </reference>
+    </references>
+
+    <section title="Example PASSporT JWS Serialization and Signature" anchor="sec.appendix_a">
+
+        <t>For PASSporT, there will always be a JWS with the following members:
+          <list style="symbols">
+            <t>"protected", with the value BASE64URL(UTF8(JWS Protected Header))</t>
+            <t>"payload", with the value BASE64URL (JWS Payload)</t>
+            <t>"signature", with the value BASE64URL(JWS Signature)</t>
+          </list> 
+        </t>
+
+        <t>Note: there will never be a JWS Unprotected Header for PASSporT.</t>
+
+        <t>First, an example PASSporT Protected Header is as follows:
+          <figure>
+            <artwork><![CDATA[
+    { 
+        "typ":"passport",
+        "alg":"ES256",
+        "x5u":"https://cert.example.org/passport.cer" 
+    }
+            ]]></artwork>
+          </figure>
+        </t>
+
+        <t>This would be serialized to the form (with line break used for display purposes only):
+          <figure>
+            <artwork><![CDATA[
+    {"alg":"ES256","typ":"passport","x5u":"https://cert.example.org/
+        passport.cer"}
+            ]]></artwork>
+          </figure>
+        </t>
+
+        <t>Encoding this with UTF8 and BASE64 encoding produces this value:
+          <figure>
+            <artwork><![CDATA[
+    eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
+    ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
+            ]]></artwork>
+          </figure>
+        </t>
+
+        <t>Second, an example PASSporT Payload is as follows:
+          <figure>
+            <artwork><![CDATA[
+    { 
+        "dest":{"uri":["sip:alice@example.com"]}
+        "iat":"1443208345",
+        "orig":{"tn":"12155551212"}
+    }
+            ]]></artwork>
+          </figure>
+        </t>
+
+        <t>This would be serialized to the form (with line break used for display purposes only):
+          <figure>
+            <artwork><![CDATA[
+    {"dest":{"uri":["sip:alice@example.com"]},"iat":"1443208345",
+        "orig":{"tn":"12155551212"}}
+            ]]></artwork>
+          </figure>
+        </t>
+
+        <t>Encoding this with the UTF8 and BASE64 encoding produces this value:
+          <figure>
+            <artwork><![CDATA[
+    eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhd
+    CI6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
+            ]]></artwork>
+          </figure>
+        </t>
+
+        <t>Computing the digital signature of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS Payload))
+          <figure>
+            <artwork><![CDATA[
+    rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYso
+    jNCpTzO3QfPOlckGaS6hEck7w
+            ]]></artwork>
+          </figure>
+        </t>
+
+        <t>The final PASSporT token is produced by concatenating the values in the order Header.Payload.Signature with period ('.') characters.  For the above example values this would produce the following (with line breaks between period used for readability purposes only):
+          <figure>
+            <artwork><![CDATA[
+    eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly
+    9jZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
+    .
+    eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhd
+    CI6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
+    .
+    rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYso
+    jNCpTzO3QfPOlckGaS6hEck7w
+            ]]></artwork>
+          </figure>
+        </t>
+        <section title="X.509 Private Key Certificate for Example" anchor="sec.appendix_a_1">
+            <t>
+                <figure>
+                    <artwork><![CDATA[
+    -----BEGIN EC PRIVATE KEY-----
+    MHcCAQEEIFeZ1R208QCvcu5GuYyMfG4W7sH4m99/7eHSDLpdYllFoAoGCCqGSM49
+    AwEHoUQDQgAE8HNbQd/TmvCKwPKHkMF9fScavGeH78YTU8qLS8I5HLHSSmlATLcs
+    lQMhNC/OhlWBYC626nIlo7XeebYS7Sb37g==
+    -----END EC PRIVATE KEY-----
+                ]]></artwork>
+              </figure>
+            </t>
+        </section>
+    
+        <section title="X.509 Public Key Certificate for Example" anchor="sec.appendix_a_2">
+
+            <t>
+                <figure>
+                    <artwork><![CDATA[
+    -----BEGIN PUBLIC KEY-----
+    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE8HNbQd/TmvCKwPKHkMF9fScavGeH
+    78YTU8qLS8I5HLHSSmlATLcslQMhNC/OhlWBYC626nIlo7XeebYS7Sb37g==
+    -----END PUBLIC KEY-----
+                ]]></artwork>
+              </figure>
+            </t>
+        </section>
+    </section>
+  </back>
+</rfc>

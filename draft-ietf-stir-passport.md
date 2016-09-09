@@ -1,7 +1,7 @@
 
 ### Persona Assertion Token (PASSporT)
 
-**draft-ietf-stir-passport-05**
+**draft-ietf-stir-passport-07**
 
 **Abstract**
 
@@ -13,7 +13,7 @@ In today's IP-enabled telecommunications world, there is a growing concern about
 
 This document defines a method for creating and validating a token that cryptographically verifies an originating identity, or more generally a URI or telephone number representing the originator of personal communications. Through extensions defined in this document, in Section 5.2, other information relevant to the personal communications can also be added to the token.  The goal of PASSporT is to provide a common framework for signing originating identity related information in an extensible way.  Additionally, this functionality is independent of any specific personal communications signaling call logic, so that the assertion of originating identity related information can be implemented in a flexible way and can be used in applications including end-to-end applications that require different signaling protocols or gateways between different communications systems.  It is anticipated that signaling protocol specific guidance will be provided in other related documents and specifications to specify how to use and transport PASSporT tokens, however this is intentionally out of scope for this document.  
 
-[I-D.ietf-stir-rfc4474bis] provides details of how to use PASSporT within SIP signaling for the signing and verification of telephone numbers.
+[I-D.ietf-stir-rfc4474bis] provides details of the use of PASSporT within SIP [RFC3261] signaling protocol for the signing and verification of telephone numbers.
 
 **2. PASSporT Token Overview**
 
@@ -44,7 +44,7 @@ Note that JWA defines other algorithms that may be utilized or updated in the fu
  
 **3.3 "x5u" (X.509 URL) Header Parameter**
 
-As defined in JWS Section 4.1.5., the "x5u" header parameter defines is used to provide a URI [RFC3986] referring to the resource for the X.509 public key certificate or certificate chain [RFC5280] corresponding to the key used to digitally sign the JWS. Generally, as defined in JWS section 4.1.5, this would correspond to an HTTPS or DNSSEC resource using integrity protection.
+As defined in JWS Section 4.1.5., the "x5u" header parameter defines a URI [RFC3986] referring to the resource for the X.509 public key certificate or certificate chain [RFC5280] corresponding to the key used to digitally sign the JWS. Generally, as defined in JWS section 4.1.5, this would correspond to an HTTPS or DNSSEC resource using integrity protection.
 
 **3.4 Example PASSporT header
 
@@ -122,7 +122,7 @@ Single Originator, with telephone number identity +12155551212, to Multiple Dest
 
 Some protocols that use PASSporT may also want to protect media security keys delivered within their signaling in order to bind those keys to the identities established in the signaling layers. The "mky" is an optional PASSporT claim defining the assertion of media key fingerprints carried in SDP [RFC4566] via the "a=fingerprint" attribute [RFC4572] Section 5. This claim can support either a single or multiple fingerprints appearing in a single SDP body corresponding to one or more media streams offered. 
 The "mky" claim MUST be formated in a JSON form including the "alg" and "dig" keys with the corresponding algorithm and hexadecimal values. If there are more that one fingerprint values associated with different media streams in SDP, the fingerprint values MUST be constructed as a JSON array denoted by bracket characters.
-For the 'dig' key value, the hash value MUST be the hexadecimal value without any colons. The "mky" array should order the JSON objects containing both "alg" and "dig" key values in lexiographic order of the "dig" string values and within each of those objects the JSON keys should have "alg" first and "dig" second.
+For the "dig" key value, the hash value MUST be the hexadecimal value without any colons. The "mky" array should order the JSON objects containing both "alg" and "dig" key values in lexiographic order of the "dig" string values and within each of those objects the JSON keys should have "alg" first and "dig" second.
 
 An example claim with "mky" claim is as follows:
 
@@ -181,11 +181,11 @@ Specifications that define extensions to the PASSporT mechanism MUST explicitly 
 
 An example set of extended claims, extending the first example in Section 4.1.2.4. using "bar" as the newly defined claim would be as follows:
 
-	{ 
+    { 
         "bar":"beyond all recognition"
-    	"dest":{"uri":["sip:alice@example.com"]},    		
-    	"iat":"1443208345",
-    	"orig":{"tn":"12155551212"}
+        "dest":{"uri":["sip:alice@example.com"]},    		
+        "iat":"1443208345",
+        "orig":{"tn":"12155551212"}
     }
 
 
@@ -193,7 +193,7 @@ An example set of extended claims, extending the first example in Section 4.1.2.
 
 JSON, as a canonical format, can include spaces, line breaks and key value pairs can occur in any order and therefore makes it, from a string format, non-deterministic. In order to make the digitial signature verification work deterministically, the JSON representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, specifically the JSON header object and JSON Claim object MUST be computed as follows. 
 
-The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3 Step 1. 
+The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3 Step 1 only.  Step 2 should not be performed and as noted this is still a legal JWK. 
 The PASSporT header and claim members MUST only follow the lexicographical ordering rules.  Any members that themselves contain JSON objects or arrays, such as "dest" or "mky" MUST follow their own lexiographical ordering and whitespace and line break rules.  This includes any header or claims defined in future specifications using PASSporT.
 
 **6.1 Example PASSport deterministic JSON form**
@@ -218,7 +218,6 @@ The initial JSON object is shown here:
            	AB3E4B652E7D463F5442CD54F1"
         }
       ],
-
     }
 
 The parent members of the JSON object are as follows:
@@ -235,13 +234,13 @@ Their lexicographic order is:
 * "mky"
 * "orig"
     
-The final constructed deterministic JSON serialization representation, with whitespace and line breaks removed, (with line brakes used for display purposes only) is:
+The final constructed deterministic JSON serialization representation, with whitespace and line breaks removed, (with line breaks used for display purposes only) is:
 
-	{"dest":{"uri":["sip:alice@example.com"],"iat":1443208345,"mky":
-	  [{"alg":"sha-256","dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD5
-	  4F17A03A27DF9B07F4619B2"},{"alg":"sha-256","dig":"4AADB9B13F82183B5
-	  40212DF3E5D496B19E57CAB3E4B652E7D463F5442CD54F1"}],
-	  "orig":{"tn":"12155551212"}}
+    {"dest":{"uri":["sip:alice@example.com"],"iat":1443208345,"mky":
+      [{"alg":"sha-256","dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD5
+      4F17A03A27DF9B07F4619B2"},{"alg":"sha-256","dig":"4AADB9B13F82183B5
+      40212DF3E5D496B19E57CAB3E4B652E7D463F5442CD54F1"}],
+      "orig":{"tn":"12155551212"}}
 
 **7. Security Considerations**
 
@@ -358,7 +357,7 @@ First, an example PASSporT Protected Header is as follows:
         "x5u":"https://cert.example.org/passport.cer" 
     }
 	
-This would be serialized to the form (with line brake used for display purposes only):
+This would be serialized to the form (with line break used for display purposes only):
 
 	{"alg":"ES256","typ":"passport","x5u":"https://cert.example.org
 		/passport.cer"}
@@ -376,7 +375,7 @@ Second, an example PASSporT Payload is as follows:
     	"orig":{"tn":"12155551212"}
     }
   
-This would be serialized to the form (with line brake used for display purposes only):
+This would be serialized to the form (with line break used for display purposes only):
 
 	{"dest":{"uri":["sip:alice@example.com"]},"iat":"1443208345",
 	    "orig":{"tn":"12155551212"}}
@@ -391,7 +390,7 @@ Computing the digital signature of the PASSporT Signing Input ASCII(BASE64URL(UT
 	rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
 	CpTzO3QfPOlckGaS6hEck7w
 	
-The final PASSporT token is produced by concatenating the values in the order Header.Payload.Signature with period ('.') characters.  For the above example values this would produce the following (with line brakes between period used for readability purposes only):
+The final PASSporT token is produced by concatenating the values in the order Header.Payload.Signature with period ('.') characters.  For the above example values this would produce the following (with line breaks between period used for readability purposes only):
 		
 	eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
 	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
