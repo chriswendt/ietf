@@ -122,7 +122,7 @@ Single Originator, with telephone number identity +12155551212, to Multiple Dest
 
 Some protocols that use PASSporT may also want to protect media security keys delivered within their signaling in order to bind those keys to the identities established in the signaling layers. The "mky" is an optional PASSporT claim defining the assertion of media key fingerprints carried in SDP [RFC4566] via the "a=fingerprint" attribute [RFC4572] Section 5. This claim can support either a single or multiple fingerprints appearing in a single SDP body corresponding to one or more media streams offered. 
 The "mky" claim MUST be formated in a JSON form including the "alg" and "dig" keys with the corresponding algorithm and hexadecimal values. If there are more that one fingerprint values associated with different media streams in SDP, the fingerprint values MUST be constructed as a JSON array denoted by bracket characters.
-For the "dig" key value, the hash value MUST be the hexadecimal value without any colons. The "mky" array should order the JSON objects containing both "alg" and "dig" key values in lexiographic order of the "dig" string values and within each of those objects the JSON keys should have "alg" first and "dig" second.
+For the "dig" key value, the hash value MUST be the hexadecimal value without any colons. The "mky" array MUST order the JSON objects containing both "alg" and "dig" key values in lexiographic order of the "alg" string first followed by the cooresponding lexiographic order of the "dig" string values. Within each of those objects the JSON keys MUST have "alg" first and "dig" second.
 
 An example claim with "mky" claim is as follows:
 
@@ -156,7 +156,13 @@ the PASSporT Payload object would be:
   
 **4.3. PASSporT Signature**
 
-The signature of the PASSporT is created as specified by JWS using the private key corresponding to the X.509 public key certificate referenced by the "x5u" header parameter. 
+The signature of the PASSporT is created as specified by JWS [RFC7515] Section 5.1 Steps 1 through 6.  PASSporT MUST use the JWS Protected Header.  For the JWS Payload and the JWS Protected Header, the lexiographic ordering and white space rules described above, and JSON serialization rules in Section 6 of this document MUST be followed.
+
+Appendix A of this document has a detailed example of how to follow the steps to create the JWS Signature.
+
+JWS [RFC7515] Section 5.1 Step 7 JWS JSON serialization is not supported for PASSporT.
+
+JWS [RFC7515] Section 5.1 Step 8 describes the method to create the final JWS Compact Serialization form of the PASSporT Token.
 
 **5. Extending PASSporT**
 
@@ -191,10 +197,10 @@ An example set of extended claims, extending the first example in Section 4.1.2.
 
 **6. Deterministic JSON Serialization**
 
-JSON, as a canonical format, can include spaces, line breaks and key value pairs can occur in any order and therefore makes it, from a string format, non-deterministic. In order to make the digitial signature verification work deterministically, the JSON representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, specifically the JSON header object and JSON Claim object MUST be computed as follows. 
+JSON, as a canonical format, can include spaces, line breaks and key value pairs can occur in any order and therefore makes it, from a string format, non-deterministic. In order to make the digitial signature verification work deterministically, the JSON representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, specifically the JWS Protected Header object and JWS Payload object MUST be computed as follows. 
 
-The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3 Step 1 only.  Step 2 should not be performed and as noted this is still a legal JWK. 
-The PASSporT header and claim members MUST only follow the lexicographical ordering rules.  Any members that themselves contain JSON objects or arrays, such as "dest" or "mky" MUST follow their own lexiographical ordering and whitespace and line break rules.  This includes any header or claims defined in future specifications using PASSporT.
+The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3 Step 1 only.  Step 2 should not be performed and as noted in JWK this is still a legal JWK object. 
+The PASSporT header and claim direct members MUST follow the lexicographical ordering rules.  Any top level JSON members that contain JSON objects or arrays, such as "dest" or "mky" MUST follow their own lexiographical ordering and whitespace and line break rules for the sub-elements.  This includes any header or claims defined in future specifications using PASSporT.
 
 **6.1 Example PASSport deterministic JSON form**
 
@@ -349,48 +355,52 @@ For PASSporT, there will always be a JWS with the following members:
 
 Note: there will never be a JWS Unprotected Header for PASSporT.
 
-First, an example PASSporT Protected Header is as follows:
+This example will follow the steps in JWS [RFC7515] Section 5.1, steps 1-6 and incorporates the additional steps required for PASSporT.
 
-	{ 
-        "alg":"ES256",
-    	"typ":"passport",
-        "x5u":"https://cert.example.org/passport.cer" 
-    }
-	
-This would be serialized to the form (with line break used for display purposes only):
-
-	{"alg":"ES256","typ":"passport","x5u":"https://cert.example.org
-		/passport.cer"}
-	
-Encoding this with UTF8 and BASE64 encoding produces this value:
-	
-	eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
-	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
-	
-Second, an example PASSporT Payload is as follows:
+Step 1 for JWS references the JWS Payload, an example PASSporT Payload is as follows:
 
 	{ 
     	"dest":{"uri":["sip:alice@example.com"]}
     	"iat":"1443208345",
     	"orig":{"tn":"12155551212"}
     }
-  
+    
 This would be serialized to the form (with line break used for display purposes only):
 
-	{"dest":{"uri":["sip:alice@example.com"]},"iat":"1443208345",
-	    "orig":{"tn":"12155551212"}}
-	
-Encoding this with the UTF8 and BASE64 encoding produces this value:
+    {"dest":{"uri":["sip:alice@example.com"]},"iat":"1443208345",
+        "orig":{"tn":"12155551212"}}
+        
+Step 2 Computes the BASE64URL(JWS Payload) producing this value:
 
-	eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhdCI
-	6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
+    eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhdCI
+    6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
+
+
+For Step 3, an example PASSporT Protected Header comprising the JOSE Header is as follows:
+
+    { 
+        "alg":"ES256",
+    	"typ":"passport",
+        "x5u":"https://cert.example.org/passport.cer" 
+    }
+
+This would be serialized to the form (with line break used for display purposes only):
+
+    {"alg":"ES256","typ":"passport","x5u":"https://cert.example.org
+        /passport.cer"}
+
+Step 4 Performs the BASE64URL(UTF8(JWS Protected Header)) operation and encoding produces this value:
+
+    eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
+    ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
+
 	
-Computing the digital signature of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS Payload))
+Step 5 and Step 6 performs the computation of the digital signature of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS Payload)) using ES256 as the algorithm and the BASE64URL(JWS Signature).
 
 	rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
 	CpTzO3QfPOlckGaS6hEck7w
 	
-The final PASSporT token is produced by concatenating the values in the order Header.Payload.Signature with period ('.') characters.  For the above example values this would produce the following (with line breaks between period used for readability purposes only):
+Step 8 describes how to create the final PASSporT token, concatenating the values in the order Header.Payload.Signature with period ('.') characters.  For the above example values this would produce the following (with line breaks between period used for readability purposes only):
 		
 	eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
 	ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
