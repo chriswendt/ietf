@@ -5,7 +5,7 @@
 
 **Abstract**
 
-This document defines a canonical string object or 'token' including a digitial signature for verifying the author of the token, their authority to author the token and the information asserted in the token, minimally, the  originating identity or 'persona' corresponding specifically to the originator of 'personal communications', or signalled communications between a set of parties with identities. The PASSporT token is cryptographically signed to protect the integrity of the identify the originator of a personal communications session (e.g. the telephone number or URI) and verify the assertion of the identity information at the destination. The cryptographic signature is defined with the intention that it can confidently verify the originating persona even when the signature is sent to the destination party over an insecure channel. PASSporT is particularly useful for many personal communications applications over IP networks and other multi-hop interconnection scenarios where the originating and destination parties may not have a direct trusted relationship.
+This document defines a canonical string object or 'token' including a digital signature for verifying the author of the token, their authority to author the token and the information asserted in the token, minimally, the  originating identity or 'persona' corresponding specifically to the originator of 'personal communications', or signalled communications between a set of parties with identities. The PASSporT token is cryptographically signed to protect the integrity of the identify the originator of a personal communications session (e.g. the telephone number or URI) and verify the assertion of the identity information at the destination. The cryptographic signature is defined with the intention that it can confidently verify the originating persona even when the signature is sent to the destination party over an insecure channel. PASSporT is particularly useful for many personal communications applications over IP networks and other multi-hop interconnection scenarios where the originating and destination parties may not have a direct trusted relationship.
 
 **1. Introduction**
 
@@ -17,7 +17,7 @@ This document defines a method for creating and validating a token that cryptogr
 
 **2. PASSporT Token Overview**
 
-JSON Web Token (JWT) [RFC7519] and JSON Web Signature (JWS) [RFC7515] and related specifications define a standard token format that can be used as a way of encapsulating claimed or asserted information with an associated digital signature using X.509 based certificates. JWT provides a set of claims in JSON format that can conveniently accomidate asserted originating identity information and is easily extensible for extension mechanisms defined below. Additionally, JWS provides a path for updating methods and cryptographic algorithms used for the associated digital signatures. 
+JSON Web Token (JWT) [RFC7519] and JSON Web Signature (JWS) [RFC7515] and related specifications define a standard token format that can be used as a way of encapsulating claimed or asserted information with an associated digital signature using X.509 based certificates. JWT provides a set of claims in JSON format that can conveniently accommodate asserted originating identity information and is easily extensible for extension mechanisms defined below. Additionally, JWS provides a path for updating methods and cryptographic algorithms used for the associated digital signatures. 
 
 JWS defines the use of JSON data structures in a specified canonical format for signing data corresponding to JOSE header, JWS Payload, and JWS Signature. JWT defines a set of claims that are represented by specified key value pairs which can be extended with custom keys for specific applications. The next sections define the header and claims that MUST be minimally used with JWT and JWS for PASSporT.
 
@@ -76,11 +76,11 @@ The JSON claim MUST include the "iat" [RFC7519] Section 4.1.6 defined claim Issu
 
 PASSporT defines claims that convey the identity of the origination and destination of personal communications.  Origination in the context of PASSporT and for a given application’s use of PASSporT is the point in the network that has the authority to assert the callers identity.  This authority is represented in PASSporT by the certificate holder and is signed at the applications choice of authoritative point(s) in the network, for example, at a device that has authenticated with a user, or at a network entity with an authenticated trust relationship with that device and it's user.  Destination represents the intended destination of the personal communications, i.e. the identity(s) being called by the caller, The destination point(s) determined by the application must have the capability to verify the PASSporT token and the digital signature. The PASSporT associated certificate is used to validate the authority of the originating signer, generally via a certificate chain to the trust anchor for that application.   
 
-The origination and destination identities are represented by two claims that are required for PASSporT, the "orig" and "dest" claims. Both "orig" and "dest" MUST have claims where the key represents an identity type and the value is the identity string, both defined in subsecquent subsections.  Currently, these identities can be represented as either telephone numbers or Uniform Resource Indicators (URIs).
+The origination and destination identities are represented by two claims that are required for PASSporT, the "orig" and "dest" claims. Both "orig" and "dest" MUST have claims where the key represents an identity type and the value is the identity string, both defined in subsequent subsections.  Currently, these identities can be represented as either telephone numbers or Uniform Resource Indicators (URIs).
 
 The "orig" JSON object MUST only have one key value pair representing the asserted identity of any type (currently either "tn" or "uri") of the originator of the personal communications signaling.
 
-The "dest" JSON object MUST have at least have one key value pair, but could have multiple identity types (i.e. "tn" and/or "uri") but only one of each.  If both "tn" and "uri" are included, the JSON object should list the "tn" array first and the "uri" array second.  Within the "tn" and "uri" arrays, the identity strings should be put in lexiographical order including the scheme-specific portion of the URI characters.  Additionaly, in the case of "dest" only, the identity type key value MUST be an array signaled by standard JSON brackets, even when there is a single identity value in the identity type key value. 
+The "dest" JSON object MUST have at least have one key value pair, but could have multiple identity types (i.e. "tn" and/or "uri") but only one of each.  If both "tn" and "uri" are included, the JSON object should list the "tn" array first and the "uri" array second.  Within the "tn" and "uri" arrays, the identity strings should be put in lexicographical order including the scheme-specific portion of the URI characters.  Additionally, in the case of "dest" only, the identity type key value MUST be an array signaled by standard JSON brackets, even when there is a single identity value in the identity type key value. 
 
 **4.2.1.1. "tn" - Telephone Number identity**
 
@@ -122,7 +122,7 @@ Single Originator, with telephone number identity +12155551212, to Multiple Dest
 
 Some protocols that use PASSporT may also want to protect media security keys delivered within their signaling in order to bind those keys to the identities established in the signaling layers. The "mky" is an optional PASSporT claim defining the assertion of media key fingerprints carried in SDP [RFC4566] via the "a=fingerprint" attribute [RFC4572] Section 5. This claim can support either a single or multiple fingerprints appearing in a single SDP body corresponding to one or more media streams offered. 
 The "mky" claim MUST be formated in a JSON form including the "alg" and "dig" keys with the corresponding algorithm and hexadecimal values. If there are more that one fingerprint values associated with different media streams in SDP, the fingerprint values MUST be constructed as a JSON array denoted by bracket characters.
-For the "dig" key value, the hash value MUST be the hexadecimal value without any colons. The "mky" array MUST order the JSON objects containing both "alg" and "dig" key values in lexiographic order of the "alg" string first followed by the cooresponding lexiographic order of the "dig" string values. Within each of those objects the JSON keys MUST have "alg" first and "dig" second.
+For the "dig" key value, the hash value MUST be the hexadecimal value without any colons. The "mky" array MUST order the JSON objects containing both "alg" and "dig" key values in lexicographic order of the "alg" string first followed by the corresponding lexicographic order of the "dig" string values. Within each of those objects the JSON keys MUST have "alg" first and "dig" second.
 
 An example claim with "mky" claim is as follows:
 
@@ -156,7 +156,7 @@ the PASSporT Payload object would be:
   
 **4.3. PASSporT Signature**
 
-The signature of the PASSporT is created as specified by JWS [RFC7515] Section 5.1 Steps 1 through 6.  PASSporT MUST use the JWS Protected Header.  For the JWS Payload and the JWS Protected Header, the lexiographic ordering and white space rules described above, and JSON serialization rules in Section 6 of this document MUST be followed.
+The signature of the PASSporT is created as specified by JWS [RFC7515] Section 5.1 Steps 1 through 6.  PASSporT MUST use the JWS Protected Header.  For the JWS Payload and the JWS Protected Header, the lexicographic ordering and white space rules described above, and JSON serialization rules in Section 6 of this document MUST be followed.
 
 Appendix A of this document has a detailed example of how to follow the steps to create the JWS Signature.
 
@@ -166,11 +166,11 @@ JWS [RFC7515] Section 5.1 Step 8 describes the method to create the final JWS Co
 
 **5. Extending PASSporT**
 
-PASSporT includes the bare minimum set of claims needed to securely assert the originating identity and support the secure propoerties discussed in various parts of this document. JWT supports a straight forward way to add additional claims by simply adding new claim key pairs. PASSporT can be extended beyond the defined base set of claims to represent other information requiring assertion or validation beyond the originating identity itself as needed.
+PASSporT includes the bare minimum set of claims needed to securely assert the originating identity and support the secure properties discussed in various parts of this document. JWT supports a straight forward way to add additional claims by simply adding new claim key pairs. PASSporT can be extended beyond the defined base set of claims to represent other information requiring assertion or validation beyond the originating identity itself as needed.
 
 **5.1 "ppt" (PASSporT) header parameter**
 
-For extension of the base set of claims defined in this document, a new JWS header parameter "ppt" MUST be used with a unique string.  Any PASSporT extension should be defined in a specification describing the PASSporT extension and the string used in the "ppt" hedaer string that defines any new claims that would extend the base set of claims of PASSporT.
+For extension of the base set of claims defined in this document, a new JWS header parameter "ppt" MUST be used with a unique string.  Any PASSporT extension should be defined in a specification describing the PASSporT extension and the string used in the "ppt" header string that defines any new claims that would extend the base set of claims of PASSporT.
 
 An example header with a PASSporT extension type of "foo" is as follows:
 
@@ -197,10 +197,10 @@ An example set of extended claims, extending the first example in Section 4.1.2.
 
 **6. Deterministic JSON Serialization**
 
-JSON, as a canonical format, can include spaces, line breaks and key value pairs can occur in any order and therefore makes it, from a string format, non-deterministic. In order to make the digitial signature verification work deterministically, the JSON representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, specifically the JWS Protected Header object and JWS Payload object MUST be computed as follows. 
+JSON, as a canonical format, can include spaces, line breaks and key value pairs can occur in any order and therefore makes it, from a string format, non-deterministic. In order to make the digital signature verification work deterministically, the JSON representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, specifically the JWS Protected Header object and JWS Payload object MUST be computed as follows. 
 
 The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3 Step 1 only.  Step 2 should not be performed; as noted in JWK this is still a legal JWK object. 
-The PASSporT header and claim direct members MUST follow the lexicographical ordering rules.  Any top level JSON members that contain JSON objects or arrays, such as "dest" or "mky" MUST follow their own lexiographical ordering and whitespace and line break rules for the sub-elements.  This includes any header or claims defined in future specifications using PASSporT.
+The PASSporT header and claim direct members MUST follow the lexicographical ordering rules.  Any top level JSON members that contain JSON objects or arrays, such as "dest" or "mky" MUST follow their own lexicographical ordering and whitespace and line break rules for the sub-elements.  This includes any header or claims defined in future specifications using PASSporT.
 
 **6.1 Example PASSport deterministic JSON form**
 
