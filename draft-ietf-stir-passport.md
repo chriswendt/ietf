@@ -199,7 +199,7 @@ An example set of extended claims, extending the first example in Section 4.1.2.
 
 JSON, as a canonical format, can include spaces, line breaks and key value pairs can occur in any order and therefore makes it, from a string format, non-deterministic. In order to make the digitial signature verification work deterministically, the JSON representation of the PASSporT Header and Claims, particularly if PASSporT is used across multiple signaling environments, specifically the JWS Protected Header object and JWS Payload object MUST be computed as follows. 
 
-The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3 Step 1 only.  Step 2 should not be performed and as noted in JWK this is still a legal JWK object. 
+The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3 Step 1 only.  Step 2 should not be performed; as noted in JWK this is still a legal JWK object. 
 The PASSporT header and claim direct members MUST follow the lexicographical ordering rules.  Any top level JSON members that contain JSON objects or arrays, such as "dest" or "mky" MUST follow their own lexiographical ordering and whitespace and line break rules for the sub-elements.  This includes any header or claims defined in future specifications using PASSporT.
 
 **6.1 Example PASSport deterministic JSON form**
@@ -353,9 +353,7 @@ For PASSporT, there will always be a JWS with the following members:
 * "payload", with the value BASE64URL (JWS Payload)
 * "signature", with the value BASE64URL(JWS Signature)
 
-Note: there will never be a JWS Unprotected Header for PASSporT.
-
-This example will follow the steps in JWS [RFC7515] Section 5.1, steps 1-6 and incorporates the additional steps required for PASSporT.
+This example will follow the steps in JWS [RFC7515] Section 5.1, steps 1-6 and 8 and incorporates the additional serialization steps required for PASSporT.
 
 Step 1 for JWS references the JWS Payload, an example PASSporT Payload is as follows:
 
@@ -370,7 +368,7 @@ This would be serialized to the form (with line break used for display purposes 
     {"dest":{"uri":["sip:alice@example.com"]},"iat":"1443208345",
         "orig":{"tn":"12155551212"}}
         
-Step 2 Computes the BASE64URL(JWS Payload) producing this value:
+Step 2 Computes the BASE64URL(JWS Payload) producing this value (with line break used for display purposes only):
 
     eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhdCI
     6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
@@ -389,7 +387,7 @@ This would be serialized to the form (with line break used for display purposes 
     {"alg":"ES256","typ":"passport","x5u":"https://cert.example.org
         /passport.cer"}
 
-Step 4 Performs the BASE64URL(UTF8(JWS Protected Header)) operation and encoding produces this value:
+Step 4 Performs the BASE64URL(UTF8(JWS Protected Header)) operation and encoding produces this value (with line break used for display purposes only):
 
     eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
     ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9

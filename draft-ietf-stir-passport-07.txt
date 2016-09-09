@@ -90,18 +90,18 @@ Table of Contents
        4.2.2.  "mky" - Media Key claim . . . . . . . . . . . . . . .   8
    5.  PASSporT Signature  . . . . . . . . . . . . . . . . . . . . .   9
    6.  Extending PASSporT  . . . . . . . . . . . . . . . . . . . . .   9
-     6.1.  "ppt" (PASSporT) header parameter . . . . . . . . . . . .   9
+     6.1.  "ppt" (PASSporT) header parameter . . . . . . . . . . . .  10
      6.2.  Extended PASSporT Claims  . . . . . . . . . . . . . . . .  10
-   7.  Deterministic JSON Serialization  . . . . . . . . . . . . . .  10
+   7.  Deterministic JSON Serialization  . . . . . . . . . . . . . .  11
      7.1.  Example PASSport deterministic JSON form  . . . . . . . .  11
    8.  Security Considerations . . . . . . . . . . . . . . . . . . .  12
      8.1.  Avoidance of replay and cut and paste attacks . . . . . .  12
-     8.2.  Solution Considerations . . . . . . . . . . . . . . . . .  12
+     8.2.  Solution Considerations . . . . . . . . . . . . . . . . .  13
      8.3.  Privacy Considerations  . . . . . . . . . . . . . . . . .  13
    9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  13
      9.1.  Media Type Registration . . . . . . . . . . . . . . . . .  13
        9.1.1.  Media Type Registry Contents Additions Requested  . .  13
-     9.2.  JSON Web Token Claims Registration  . . . . . . . . . . .  14
+     9.2.  JSON Web Token Claims Registration  . . . . . . . . . . .  15
 
 
 
@@ -110,15 +110,15 @@ Wendt & Peterson         Expires March 12, 2017                 [Page 2]
 Internet-Draft                  PASSporT                  September 2016
 
 
-       9.2.1.  Registry Contents Additions Requested . . . . . . . .  14
+       9.2.1.  Registry Contents Additions Requested . . . . . . . .  15
    10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  15
    11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  15
-     11.2.  Informative References . . . . . . . . . . . . . . . . .  16
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  16
+     11.2.  Informative References . . . . . . . . . . . . . . . . .  17
    Appendix A.  Example PASSporT JWS Serialization and Signature . .  17
-     A.1.  X.509 Private Key Certificate for Example . . . . . . . .  18
-     A.2.  X.509 Public Key Certificate for Example  . . . . . . . .  18
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  18
+     A.1.  X.509 Private Key Certificate for Example . . . . . . . .  19
+     A.2.  X.509 Public Key Certificate for Example  . . . . . . . .  19
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  19
 
 1.  Introduction
 
@@ -368,11 +368,11 @@ Internet-Draft                  PASSporT                  September 2016
    Single Destination, with URI identity 'sip:alice@example.com',
    example:
 
-   {
-       "dest":{"uri":["sip:alice@example.com"]},
-       "iat":"1443208345",
-       "orig":{"tn":"12155551212"}
-   }
+       {
+           "dest":{"uri":["sip:alice@example.com"]},
+           "iat":"1443208345",
+           "orig":{"tn":"12155551212"}
+       }
 
    Single Originator, with telephone number identity +12155551212, to
    Multiple Destination Identities, with telephone number identity
@@ -390,15 +390,15 @@ Wendt & Peterson         Expires March 12, 2017                 [Page 7]
 Internet-Draft                  PASSporT                  September 2016
 
 
-   {
-       "dest":{
-               "tn":["12125551212"],
-               "uri":["sip:alice@example.com",
-                   "sip:bob@example.net"]
-       },
-       "iat":"1443208345",
-       "orig":{"tn":"12155551212"}
-   }
+       {
+           "dest":{
+                   "tn":["12125551212"],
+                   "uri":["sip:alice@example.com",
+                       "sip:bob@example.net"]
+           },
+           "iat":"1443208345",
+           "orig":{"tn":"12155551212"}
+       }
 
 4.2.2.  "mky" - Media Key claim
 
@@ -418,22 +418,22 @@ Internet-Draft                  PASSporT                  September 2016
    constructed as a JSON array denoted by bracket characters.
 
    For the "dig" key value, the hash value MUST be the hexadecimal value
-   without any colons.  The "mky" array should order the JSON objects
+   without any colons.  The "mky" array MUST order the JSON objects
    containing both "alg" and "dig" key values in lexiographic order of
-   the "dig" string values and within each of those objects the JSON
-   keys should have "alg" first and "dig" second.
+   the "alg" string first followed by the cooresponding lexiographic
+   order of the "dig" string values.  Within each of those objects the
+   JSON keys MUST have "alg" first and "dig" second.
 
    An example claim with "mky" claim is as follows:
 
    For an SDP offer that includes the following fingerprint values,
 
-   a=fingerprint:sha-256 4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:
-   5D:49:6B:19:E5:7C:AB:3E:4B:65:2E:7D:46:3F:54:42:CD:54:F1
-   a=fingerprint:sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:
-   2E:7D:46:3F:54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2
+       a=fingerprint:sha-256 4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:
+       5D:49:6B:19:E5:7C:AB:3E:4B:65:2E:7D:46:3F:54:42:CD:54:F1
+       a=fingerprint:sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65:
+       2E:7D:46:3F:54:42:CD:54:F1:7A:03:A2:7D:F9:B0:7F:46:19:B2
 
    the PASSporT Payload object would be:
-
 
 
 
@@ -446,29 +446,41 @@ Wendt & Peterson         Expires March 12, 2017                 [Page 8]
 Internet-Draft                  PASSporT                  September 2016
 
 
-   {
-       "dest":{"uri":["sip:alice@example.com"]},
-       "iat":"1443208345",
-       "mky":[
        {
-          "alg":"sha-256",
-          "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
-           F17A03A27DF9B07F4619B2"
-       },
-       {
-          "alg":"sha-256",
-          "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
-           AB3E4B652E7D463F5442CD54F1"
+           "dest":{"uri":["sip:alice@example.com"]},
+           "iat":"1443208345",
+           "mky":[
+           {
+              "alg":"sha-256",
+              "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
+               F17A03A27DF9B07F4619B2"
+           },
+           {
+              "alg":"sha-256",
+              "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
+               AB3E4B652E7D463F5442CD54F1"
+           }
+           ],
+           "orig":{"tn":"12155551212"}
        }
-       ],
-       "orig":{"tn":"12155551212"}
-   }
 
 5.  PASSporT Signature
 
-   The signature of the PASSporT is created as specified by JWS using
-   the private key corresponding to the X.509 public key certificate
-   referenced by the "x5u" header parameter.
+   The signature of the PASSporT is created as specified by JWS
+   [RFC7515] Section 5.1 Steps 1 through 6.  PASSporT MUST use the JWS
+   Protected Header.  For the JWS Payload and the JWS Protected Header,
+   the lexiographic ordering and white space rules described above, and
+   JSON serialization rules in Section 6 of this document MUST be
+   followed.
+
+   Appendix A of this document has a detailed example of how to follow
+   the steps to create the JWS Signature.
+
+   JWS [RFC7515] Section 5.1 Step 7 JWS JSON serialization is not
+   supported for PASSporT.
+
+   JWS [RFC7515] Section 5.1 Step 8 describes the method to create the
+   final JWS Compact Serialization form of the PASSporT Token.
 
 6.  Extending PASSporT
 
@@ -479,6 +491,16 @@ Internet-Draft                  PASSporT                  September 2016
    pairs.  PASSporT can be extended beyond the defined base set of
    claims to represent other information requiring assertion or
    validation beyond the originating identity itself as needed.
+
+
+
+
+
+
+Wendt & Peterson         Expires March 12, 2017                 [Page 9]
+
+Internet-Draft                  PASSporT                  September 2016
+
 
 6.1.  "ppt" (PASSporT) header parameter
 
@@ -491,16 +513,6 @@ Internet-Draft                  PASSporT                  September 2016
 
    An example header with a PASSporT extension type of "foo" is as
    follows:
-
-
-
-
-
-
-Wendt & Peterson         Expires March 12, 2017                 [Page 9]
-
-Internet-Draft                  PASSporT                  September 2016
-
 
        {
            "alg":"ES256",
@@ -532,12 +544,19 @@ Internet-Draft                  PASSporT                  September 2016
    Section 4.1.2.4. using "bar" as the newly defined claim would be as
    follows:
 
-   {
-       "bar":"beyond all recognition"
-       "dest":{"uri":["sip:alice@example.com"]},
-       "iat":"1443208345",
-       "orig":{"tn":"12155551212"}
-   }
+       {
+           "bar":"beyond all recognition"
+           "dest":{"uri":["sip:alice@example.com"]},
+           "iat":"1443208345",
+           "orig":{"tn":"12155551212"}
+       }
+
+
+
+Wendt & Peterson         Expires March 12, 2017                [Page 10]
+
+Internet-Draft                  PASSporT                  September 2016
+
 
 7.  Deterministic JSON Serialization
 
@@ -547,26 +566,20 @@ Internet-Draft                  PASSporT                  September 2016
    signature verification work deterministically, the JSON
    representation of the PASSporT Header and Claims, particularly if
    PASSporT is used across multiple signaling environments, specifically
-   the JSON header object and JSON Claim object MUST be computed as
-   follows.
-
-
-
-
-Wendt & Peterson         Expires March 12, 2017                [Page 10]
-
-Internet-Draft                  PASSporT                  September 2016
-
+   the JWS Protected Header object and JWS Payload object MUST be
+   computed as follows.
 
    The JSON object MUST follow the rules for the construction of the
    thumbprint of a JSON Web Key (JWK) as defined in [RFC7638] Section 3
-   Step 1 only.  Step 2 should not be performed and as noted this is
-   still a legal JWK.  The PASSporT header and claim members MUST only
-   follow the lexicographical ordering rules.  Any members that
-   themselves contain JSON objects or arrays, such as "dest" or "mky"
-   MUST follow their own lexiographical ordering and whitespace and line
-   break rules.  This includes any header or claims defined in future
-   specifications using PASSporT.
+   Step 1 only.  Step 2 MUST NOT be performed; as noted in JWK this is
+   still a legal JWK object.
+
+   The PASSporT header and claim direct members MUST follow the
+   lexicographical ordering rules.  Any top level JSON members that
+   contain JSON objects or arrays, such as "dest" or "mky" MUST follow
+   their own lexiographical ordering and whitespace and line break rules
+   for the sub-elements.  This includes any header or claims defined in
+   future specifications using PASSporT.
 
 7.1.  Example PASSport deterministic JSON form
 
@@ -575,23 +588,31 @@ Internet-Draft                  PASSporT                  September 2016
 
    The initial JSON object is shown here:
 
-   {
-       "dest":{"uri":["sip:alice@example.com"]},
-       "orig":{"tn":"12155551212"}
-       "iat":"1443208345",
-       "mky":[
        {
-          "alg":"sha-256",
-          "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
-              F17A03A27DF9B07F4619B2"
-       },
-       {
-          "alg":"sha-256",
-          "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
-              AB3E4B652E7D463F5442CD54F1"
+           "dest":{"uri":["sip:alice@example.com"]},
+           "orig":{"tn":"12155551212"}
+           "iat":"1443208345",
+           "mky":[
+           {
+              "alg":"sha-256",
+              "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
+                  F17A03A27DF9B07F4619B2"
+           },
+           {
+              "alg":"sha-256",
+              "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
+                  AB3E4B652E7D463F5442CD54F1"
+           }
+         ],
        }
-     ],
-   }
+
+
+
+
+Wendt & Peterson         Expires March 12, 2017                [Page 11]
+
+Internet-Draft                  PASSporT                  September 2016
+
 
    The parent members of the JSON object are as follows:
 
@@ -607,13 +628,6 @@ Internet-Draft                  PASSporT                  September 2016
 
    o  "dest"
 
-
-
-Wendt & Peterson         Expires March 12, 2017                [Page 11]
-
-Internet-Draft                  PASSporT                  September 2016
-
-
    o  "iat"
 
    o  "mky"
@@ -624,11 +638,11 @@ Internet-Draft                  PASSporT                  September 2016
    representation, with whitespace and line breaks removed, (with line
    breaks used for display purposes only) is:
 
-   {"dest":{"uri":["sip:alice@example.com"],"iat":1443208345,"mky":
-     [{"alg":"sha-256","dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD5
-     4F17A03A27DF9B07F4619B2"},{"alg":"sha-256","dig":"4AADB9B13F82183B5
-     40212DF3E5D496B19E57CAB3E4B652E7D463F5442CD54F1"}],
-     "orig":{"tn":"12155551212"}}
+     {"dest":{"uri":["sip:alice@example.com"],"iat":1443208345,"mky":
+       [{"alg":"sha-256","dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442
+       CD54F17A03A27DF9B07F4619B2"},{"alg":"sha-256","dig":"4AADB9B13F
+       82183B540212DF3E5D496B19E57CAB3E4B652E7D463F5442CD54F1"}],
+       "orig":{"tn":"12155551212"}}
 
 8.  Security Considerations
 
@@ -648,6 +662,14 @@ Internet-Draft                  PASSporT                  September 2016
       originated.  It should also be within a relative time that is
       reasonable for clock drift and transmission time characteristics
       associated with the application using the PASSporT token.
+
+
+
+Wendt & Peterson         Expires March 12, 2017                [Page 12]
+
+Internet-Draft                  PASSporT                  September 2016
+
+
       Therefore, validation of the token should consider date and time
       correlation, which could be influenced by signaling protocol
       specific use and network time differences.
@@ -662,14 +684,6 @@ Internet-Draft                  PASSporT                  September 2016
    signature and the associated certificate requires consideration of
    the authentication and authority or reputation of the signer to
    attest to the identity being asserted.  It should be recognized that
-
-
-
-Wendt & Peterson         Expires March 12, 2017                [Page 12]
-
-Internet-Draft                  PASSporT                  September 2016
-
-
    the use of this token should not, in it's own right, be considered a
    full solution for absolute non-repudiation of the identity being
    asserted.  It can and often is the case that the end user that the
@@ -705,6 +719,13 @@ Internet-Draft                  PASSporT                  September 2016
 
    o  Type name: application
 
+
+
+Wendt & Peterson         Expires March 12, 2017                [Page 13]
+
+Internet-Draft                  PASSporT                  September 2016
+
+
    o  Subtype name: passport
 
    o  Required parameters: n/a
@@ -718,13 +739,6 @@ Internet-Draft                  PASSporT                  September 2016
 
    o  Security considerations: See the Security Considerations section
       of RFC 7515.
-
-
-
-Wendt & Peterson         Expires March 12, 2017                [Page 13]
-
-Internet-Draft                  PASSporT                  September 2016
-
 
    o  Interoperability considerations: n/a
 
@@ -756,6 +770,18 @@ Internet-Draft                  PASSporT                  September 2016
 
    o  Provisional registration?  No
 
+
+
+
+
+
+
+
+Wendt & Peterson         Expires March 12, 2017                [Page 14]
+
+Internet-Draft                  PASSporT                  September 2016
+
+
 9.2.  JSON Web Token Claims Registration
 
 9.2.1.  Registry Contents Additions Requested
@@ -774,13 +800,6 @@ Internet-Draft                  PASSporT                  September 2016
    o  Claim Description: Destination Identity String
 
    o  Change Controller: IESG
-
-
-
-Wendt & Peterson         Expires March 12, 2017                [Page 14]
-
-Internet-Draft                  PASSporT                  September 2016
-
 
    o  Specification Document(s): Section 3.2 of draft-ietf-stir-
       passport-05
@@ -807,13 +826,25 @@ Internet-Draft                  PASSporT                  September 2016
 
 11.  References
 
+
+
+
+
+
+
+
+Wendt & Peterson         Expires March 12, 2017                [Page 15]
+
+Internet-Draft                  PASSporT                  September 2016
+
+
 11.1.  Normative References
 
    [I-D.ietf-stir-rfc4474bis]
               Peterson, J., Jennings, C., Rescorla, E., and C. Wendt,
               "Authenticated Identity Management in the Session
-              Initiation Protocol (SIP)", draft-ietf-stir-rfc4474bis-10
-              (work in progress), July 2016.
+              Initiation Protocol (SIP)", draft-ietf-stir-rfc4474bis-12
+              (work in progress), August 2016.
 
    [RFC2046]  Freed, N. and N. Borenstein, "Multipurpose Internet Mail
               Extensions (MIME) Part Two: Media Types", RFC 2046,
@@ -828,15 +859,6 @@ Internet-Draft                  PASSporT                  September 2016
    [RFC4566]  Handley, M., Jacobson, V., and C. Perkins, "SDP: Session
               Description Protocol", RFC 4566, DOI 10.17487/RFC4566,
               July 2006, <http://www.rfc-editor.org/info/rfc4566>.
-
-
-
-
-
-Wendt & Peterson         Expires March 12, 2017                [Page 15]
-
-Internet-Draft                  PASSporT                  September 2016
-
 
    [RFC4572]  Lennox, J., "Connection-Oriented Media Transport over the
               Transport Layer Security (TLS) Protocol in the Session
@@ -865,6 +887,13 @@ Internet-Draft                  PASSporT                  September 2016
               Thumbprint", RFC 7638, DOI 10.17487/RFC7638, September
               2015, <http://www.rfc-editor.org/info/rfc7638>.
 
+
+
+Wendt & Peterson         Expires March 12, 2017                [Page 16]
+
+Internet-Draft                  PASSporT                  September 2016
+
+
 11.2.  Informative References
 
    [RFC3261]  Rosenberg, J., Schulzrinne, H., Camarillo, G., Johnston,
@@ -884,16 +913,6 @@ Internet-Draft                  PASSporT                  September 2016
               RFC 7340, DOI 10.17487/RFC7340, September 2014,
               <http://www.rfc-editor.org/info/rfc7340>.
 
-
-
-
-
-
-Wendt & Peterson         Expires March 12, 2017                [Page 16]
-
-Internet-Draft                  PASSporT                  September 2016
-
-
 Appendix A.  Example PASSporT JWS Serialization and Signature
 
    For PASSporT, there will always be a JWS with the following members:
@@ -904,28 +923,12 @@ Appendix A.  Example PASSporT JWS Serialization and Signature
 
    o  "signature", with the value BASE64URL(JWS Signature)
 
-   Note: there will never be a JWS Unprotected Header for PASSporT.
+   This example will follow the steps in JWS [RFC7515] Section 5.1,
+   steps 1-6 and 8 and incorporates the additional serialization steps
+   required for PASSporT.
 
-   First, an example PASSporT Protected Header is as follows:
-
-       {
-           "typ":"passport",
-           "alg":"ES256",
-           "x5u":"https://cert.example.org/passport.cer"
-       }
-
-   This would be serialized to the form (with line break used for
-   display purposes only):
-
-       {"alg":"ES256","typ":"passport","x5u":"https://cert.example.org/
-           passport.cer"}
-
-   Encoding this with UTF8 and BASE64 encoding produces this value:
-
-       eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
-       ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
-
-   Second, an example PASSporT Payload is as follows:
+   Step 1 for JWS references the JWS Payload, an example PASSporT
+   Payload is as follows:
 
        {
            "dest":{"uri":["sip:alice@example.com"]}
@@ -939,9 +942,6 @@ Appendix A.  Example PASSporT JWS Serialization and Signature
        {"dest":{"uri":["sip:alice@example.com"]},"iat":"1443208345",
            "orig":{"tn":"12155551212"}}
 
-   Encoding this with the UTF8 and BASE64 encoding produces this value:
-
-
 
 
 
@@ -950,20 +950,61 @@ Wendt & Peterson         Expires March 12, 2017                [Page 17]
 Internet-Draft                  PASSporT                  September 2016
 
 
+   Step 2 Computes the BASE64URL(JWS Payload) producing this value (with
+   line break used for display purposes only):
+
        eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhd
        CI6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
 
-   Computing the digital signature of the PASSporT Signing Input
-   ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS
-   Payload))
+   For Step 3, an example PASSporT Protected Header comprising the JOSE
+   Header is as follows:
+
+       {
+           "typ":"passport",
+           "alg":"ES256",
+           "x5u":"https://cert.example.org/passport.cer"
+       }
+
+   This would be serialized to the form (with line break used for
+   display purposes only):
+
+       {"alg":"ES256","typ":"passport","x5u":"https://cert.example.org/
+           passport.cer"}
+
+   Step 4 Performs the BASE64URL(UTF8(JWS Protected Header)) operation
+   and encoding produces this value (with line break used for display
+   purposes only):
+
+       eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
+       ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
+
+   Step 5 and Step 6 performs the computation of the digital signature
+   of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected
+   Header)) || '.' || BASE64URL(JWS Payload)) using ES256 as the
+   algorithm and the BASE64URL(JWS Signature).
 
        rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYso
        jNCpTzO3QfPOlckGaS6hEck7w
 
-   The final PASSporT token is produced by concatenating the values in
-   the order Header.Payload.Signature with period ('.') characters.  For
-   the above example values this would produce the following (with line
-   breaks between period used for readability purposes only):
+   Step 8 describes how to create the final PASSporT token,
+   concatenating the values in the order Header.Payload.Signature with
+   period ('.') characters.  For the above example values this would
+   produce the following (with line breaks between period used for
+   readability purposes only):
+
+
+
+
+
+
+
+
+
+
+Wendt & Peterson         Expires March 12, 2017                [Page 18]
+
+Internet-Draft                  PASSporT                  September 2016
+
 
        eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly
        9jZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
@@ -1000,12 +1041,6 @@ Authors' Addresses
    Email: chris-ietf@chriswendt.net
 
 
-
-Wendt & Peterson         Expires March 12, 2017                [Page 18]
-
-Internet-Draft                  PASSporT                  September 2016
-
-
    Jon Peterson
    Neustar Inc.
    1800 Sutter St Suite 570
@@ -1013,41 +1048,6 @@ Internet-Draft                  PASSporT                  September 2016
    US
 
    Email: jon.peterson@neustar.biz
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
