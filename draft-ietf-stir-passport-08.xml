@@ -227,6 +227,7 @@ a=fingerprint:sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65
 
 </section>
 </section>
+</section>
 <section anchor="passport_signature" title="PASSporT Signature">
 
 <t>The signature of the PASSporT is created as specified by JWS <xref target="RFC7515"/> Section 5.1 Steps 1 through 6. PASSporT MUST use the JWS Protected Header. For the JWS Payload and the JWS Protected Header, the lexicographic ordering and white space rules described above, and JSON serialization rules in <xref target="json_serialization"/> of this document MUST be followed.</t>
@@ -237,7 +238,6 @@ a=fingerprint:sha-256 02:1A:CC:54:27:AB:EB:9C:53:3F:3E:4B:65
 
 <t>JWS <xref target="RFC7515"/> Section 5.1 Step 8 describes the method to create the final JWS Compact Serialization form of the PASSporT Token.</t>
 
-</section>
 </section>
 <section anchor="compact_form_of_passport" title="Compact form of PASSporT">
 
@@ -459,11 +459,14 @@ Magic number(s): n/a
 
 <section anchor="registry-contents-additions-requested-1" title="Registry Contents Additions Requested">
 
-<t>Header Parameter Name: “ppt”
-* Header Parameter Description: PASSporT extension identifier
-* Header Parameter Usage Location(s): JWS
-* Change Controller: IESG
-* Specification Document(s): <xref target="ppt"/> of [RFCThis]</t>
+<t>Header Parameter Name: “ppt”</t>
+
+<t><list style="symbols">
+  <t>Header Parameter Description: PASSporT extension identifier</t>
+  <t>Header Parameter Usage Location(s): JWS</t>
+  <t>Change Controller: IESG</t>
+  <t>Specification Document(s): <xref target="ppt"/> of [RFCThis]</t>
+</list></t>
 
 </section>
 </section>

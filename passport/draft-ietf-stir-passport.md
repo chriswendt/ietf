@@ -209,7 +209,7 @@ the PASSporT Payload object would be:
 }
 ~~~~~~~~~~
 
-## PASSporT Signature {#passport_signature}
+# PASSporT Signature {#passport_signature}
 
 The signature of the PASSporT is created as specified by JWS {{RFC7515}} Section 5.1 Steps 1 through 6. PASSporT MUST use the JWS Protected Header. For the JWS Payload and the JWS Protected Header, the lexicographic ordering and white space rules described above, and JSON serialization rules in {{json_serialization}} of this document MUST be followed.
 
@@ -419,6 +419,7 @@ This section registers the "application/passport" media type {{RFC2046}} in the 
 ### Registry Contents Additions Requested
 
 Header Parameter Name: "ppt"
+
 * Header Parameter Description: PASSporT extension identifier
 * Header Parameter Usage Location(s): JWS
 * Change Controller: IESG

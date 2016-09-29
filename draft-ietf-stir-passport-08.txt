@@ -83,29 +83,29 @@ Table of Contents
      4.2.  PASSporT specific claims  . . . . . . . . . . . . . . . .   6
        4.2.1.  Originating and Destination Identity Claims . . . . .   6
        4.2.2.  "mky" - Media Key claim . . . . . . . . . . . . . . .   8
-     4.3.  PASSporT Signature  . . . . . . . . . . . . . . . . . . .   9
-   5.  Compact form of PASSporT  . . . . . . . . . . . . . . . . . .   9
-     5.1.  Example Compact form PASSporT Token . . . . . . . . . . .  10
-   6.  Extending PASSporT  . . . . . . . . . . . . . . . . . . . . .  10
-     6.1.  "ppt" (PASSporT) header parameter . . . . . . . . . . . .  11
-     6.2.  Example extended PASSporT header  . . . . . . . . . . . .  11
-     6.3.  Extended PASSporT Claims  . . . . . . . . . . . . . . . .  11
-   7.  Deterministic JSON Serialization  . . . . . . . . . . . . . .  12
-     7.1.  Example PASSport deterministic JSON form  . . . . . . . .  12
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  14
-     8.1.  Avoidance of replay and cut and paste attacks . . . . . .  14
-     8.2.  Solution Considerations . . . . . . . . . . . . . . . . .  14
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  15
-     9.1.  Media Type Registration . . . . . . . . . . . . . . . . .  15
-       9.1.1.  Media Type Registry Contents Additions Requested  . .  15
-     9.2.  JSON Web Token Claims Registration  . . . . . . . . . . .  16
-       9.2.1.  Registry Contents Additions Requested . . . . . . . .  16
-     9.3.  JSON Web Signature and Encryption Header Parameter
-           Registry  . . . . . . . . . . . . . . . . . . . . . . . .  16
-       9.3.1.  Registry Contents Additions Requested . . . . . . . .  16
-   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  16
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  17
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  17
+   5.  PASSporT Signature  . . . . . . . . . . . . . . . . . . . . .   9
+   6.  Compact form of PASSporT  . . . . . . . . . . . . . . . . . .   9
+     6.1.  Example Compact form PASSporT Token . . . . . . . . . . .  10
+   7.  Extending PASSporT  . . . . . . . . . . . . . . . . . . . . .  10
+     7.1.  "ppt" (PASSporT) header parameter . . . . . . . . . . . .  11
+     7.2.  Example extended PASSporT header  . . . . . . . . . . . .  11
+     7.3.  Extended PASSporT Claims  . . . . . . . . . . . . . . . .  11
+   8.  Deterministic JSON Serialization  . . . . . . . . . . . . . .  12
+     8.1.  Example PASSport deterministic JSON form  . . . . . . . .  12
+   9.  Security Considerations . . . . . . . . . . . . . . . . . . .  14
+     9.1.  Avoidance of replay and cut and paste attacks . . . . . .  14
+     9.2.  Solution Considerations . . . . . . . . . . . . . . . . .  14
+   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  15
+     10.1.  Media Type Registration  . . . . . . . . . . . . . . . .  15
+       10.1.1.  Media Type Registry Contents Additions Requested . .  15
+     10.2.  JSON Web Token Claims Registration . . . . . . . . . . .  16
+       10.2.1.  Registry Contents Additions Requested  . . . . . . .  16
+     10.3.  JSON Web Signature and Encryption Header Parameter
+            Registry . . . . . . . . . . . . . . . . . . . . . . . .  16
+       10.3.1.  Registry Contents Additions Requested  . . . . . . .  16
+   11. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  17
+   12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  17
+     12.1.  Normative References . . . . . . . . . . . . . . . . . .  17
 
 
 
@@ -114,7 +114,7 @@ Wendt & Peterson         Expires March 30, 2017                 [Page 2]
 Internet-Draft                  PASSporT                  September 2016
 
 
-     11.2.  Informative References . . . . . . . . . . . . . . . . .  18
+     12.2.  Informative References . . . . . . . . . . . . . . . . .  18
    Appendix A.  Example ES256 based PASSporT JWS Serialization and
                 Signature  . . . . . . . . . . . . . . . . . . . . .  18
      A.1.  X.509 Private Key for ES256 Example** . . . . . . . . . .  20
@@ -139,7 +139,7 @@ Internet-Draft                  PASSporT                  September 2016
    that cryptographically verifies an originating identity, or more
    generally a URI or telephone number representing the originator of
    personal communications.  Through extensions defined in this
-   document, in Section 6, other information relevant to the personal
+   document, in Section 7, other information relevant to the personal
    communications can also be added to the token.  The goal of PASSporT
    is to provide a common framework for signing originating identity
    related information in an extensible way.  Additionally, this
@@ -283,7 +283,7 @@ Internet-Draft                  PASSporT                  September 2016
 
 
    token against replay and cut and paste attacks, as explained further
-   in the security considerations in Section 8.
+   in the security considerations in Section 9.
 
 4.2.  PASSporT specific claims
 
@@ -468,13 +468,13 @@ Internet-Draft                  PASSporT                  September 2016
        "orig":{"tn":"12155551212"}
    }
 
-4.3.  PASSporT Signature
+5.  PASSporT Signature
 
    The signature of the PASSporT is created as specified by JWS
    [RFC7515] Section 5.1 Steps 1 through 6.  PASSporT MUST use the JWS
    Protected Header.  For the JWS Payload and the JWS Protected Header,
    the lexicographic ordering and white space rules described above, and
-   JSON serialization rules in Section 7 of this document MUST be
+   JSON serialization rules in Section 8 of this document MUST be
    followed.
 
    Appendix A of this document has a detailed example of how to follow
@@ -486,7 +486,7 @@ Internet-Draft                  PASSporT                  September 2016
    JWS [RFC7515] Section 5.1 Step 8 describes the method to create the
    final JWS Compact Serialization form of the PASSporT Token.
 
-5.  Compact form of PASSporT
+6.  Compact form of PASSporT
 
    For a using protocol of PASSporT, the PASSporT Claims as well as the
    PASSporT Header may include redundant or default information that
@@ -507,12 +507,12 @@ Internet-Draft                  PASSporT                  September 2016
 
 
    periods to represent the header and claim objects being removed,
-   followed by PASSporT signature as defined in Section 4.3, and the
-   need for the destination to reconstruct the header and claim objects
-   in order to verify the signature.
+   followed by PASSporT signature as defined in Section 5, and the need
+   for the destination to reconstruct the header and claim objects in
+   order to verify the signature.
 
    In order to construct the Compact form of the PASSporT string, the
-   procedure described in Section 4.3 with the exception of Step 8
+   procedure described in Section 5 with the exception of Step 8
    described in JWS [RFC7515] Section 5.1.  This step would be replaced
    by the following construction of the compact form of PASSporT,
    '..' || BASE64URL(JWS Signature).
@@ -522,7 +522,7 @@ Internet-Draft                  PASSporT                  September 2016
    can be reconstructed from information in the signaling protocol being
    used.
 
-5.1.  Example Compact form PASSporT Token
+6.1.  Example Compact form PASSporT Token
 
    The compact form of the following example token (with line breaks
    between period used for readability purposes only)
@@ -542,7 +542,7 @@ Internet-Draft                  PASSporT                  September 2016
      ..rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
      CpTzO3QfPOlckGaS6hEck7w
 
-6.  Extending PASSporT
+7.  Extending PASSporT
 
    PASSporT includes the bare minimum set of claims needed to securely
    assert the originating identity and support the secure properties
@@ -562,7 +562,7 @@ Wendt & Peterson         Expires March 30, 2017                [Page 10]
 Internet-Draft                  PASSporT                  September 2016
 
 
-6.1.  "ppt" (PASSporT) header parameter
+7.1.  "ppt" (PASSporT) header parameter
 
    Any using protocol can extend the payload of PASSporT with additional
    JWT claims.  JWT claims are managed by an existing IANA registry as
@@ -578,7 +578,7 @@ Internet-Draft                  PASSporT                  September 2016
    unsupported "ppt".
 
    Using protocols that carry the compact form of PASSporT, defined in
-   Section 5, instead of the full form MUST use only mandatory
+   Section 6, instead of the full form MUST use only mandatory
    extensions signaled with "ppt" - if a using protocol were to add
    additional optional claims to a PASSporT object it carried in compact
    form, relying parties would have no way to reconstruct the token.
@@ -586,7 +586,7 @@ Internet-Draft                  PASSporT                  September 2016
    MUST have some field to signal "ppt" to relying parties, as the
    compact form of PASSporT omits the JOSE header.
 
-6.2.  Example extended PASSporT header
+7.2.  Example extended PASSporT header
 
    An example header with a PASSporT extension type of "foo" is as
    follows:
@@ -598,7 +598,7 @@ Internet-Draft                  PASSporT                  September 2016
        "x5u":"https://tel.example.org/passport.cer"
    }
 
-6.3.  Extended PASSporT Claims
+7.3.  Extended PASSporT Claims
 
    Specifications that define extensions to the PASSporT mechanism MUST
    explicitly specify what claims they include beyond the base set of
@@ -637,7 +637,7 @@ Internet-Draft                  PASSporT                  September 2016
        "orig":{"tn":"12155551212"}
    }
 
-7.  Deterministic JSON Serialization
+8.  Deterministic JSON Serialization
 
    JSON, as a canonical format, can include spaces and line breaks, and
    key value pairs can occur in any order.  It is therefore a non-
@@ -658,7 +658,7 @@ Internet-Draft                  PASSporT                  September 2016
    rules for the sub-elements.  This includes any header or claims
    defined in future specifications using PASSporT.
 
-7.1.  Example PASSport deterministic JSON form
+8.1.  Example PASSport deterministic JSON form
 
    This section demonstrate the deterministic JSON serialization for the
    example PASSporT Payload shown in Section 4.2.1.4.
@@ -730,9 +730,9 @@ Wendt & Peterson         Expires March 30, 2017                [Page 13]
 Internet-Draft                  PASSporT                  September 2016
 
 
-8.  Security Considerations
+9.  Security Considerations
 
-8.1.  Avoidance of replay and cut and paste attacks
+9.1.  Avoidance of replay and cut and paste attacks
 
    There are a number of security considerations for use of the token
    for avoidance of replay and cut and paste attacks.  PASSporT tokens
@@ -755,7 +755,7 @@ Internet-Draft                  PASSporT                  September 2016
       previously originated message to send to another destination
       party.
 
-8.2.  Solution Considerations
+9.2.  Solution Considerations
 
    The use of PASSporT tokens based on the validation of the digital
    signature and the associated certificate requires consideration of
@@ -786,11 +786,11 @@ Wendt & Peterson         Expires March 30, 2017                [Page 14]
 Internet-Draft                  PASSporT                  September 2016
 
 
-9.  IANA Considerations
+10.  IANA Considerations
 
-9.1.  Media Type Registration
+10.1.  Media Type Registration
 
-9.1.1.  Media Type Registry Contents Additions Requested
+10.1.1.  Media Type Registry Contents Additions Requested
 
    This section registers the "application/passport" media type
    [RFC2046] in the "Media Types" registry in the manner described in
@@ -848,9 +848,9 @@ Internet-Draft                  PASSporT                  September 2016
 
    o  Provisional registration?  No
 
-9.2.  JSON Web Token Claims Registration
+10.2.  JSON Web Token Claims Registration
 
-9.2.1.  Registry Contents Additions Requested
+10.2.1.  Registry Contents Additions Requested
 
    o  Claim Name: "orig"
 
@@ -876,20 +876,20 @@ Internet-Draft                  PASSporT                  September 2016
 
    o  Specification Document(s): Section 4.2.2 of [RFCThis]
 
-9.3.  JSON Web Signature and Encryption Header Parameter Registry
+10.3.  JSON Web Signature and Encryption Header Parameter Registry
 
-9.3.1.  Registry Contents Additions Requested
+10.3.1.  Registry Contents Additions Requested
 
-   Header Parameter Name: "ppt" * Header Parameter Description: PASSporT
-   extension identifier * Header Parameter Usage Location(s): JWS *
-   Change Controller: IESG * Specification Document(s): Section 6.1 of
-   [RFCThis]
+   Header Parameter Name: "ppt"
 
-10.  Acknowledgements
+   o  Header Parameter Description: PASSporT extension identifier
 
-   Particular thanks to members of the ATIS and SIP Forum NNI Task Group
-   including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill,
-   Christer Holmberg, Victor Pascual Avila, Mary Barnes, Eric Burger for
+   o  Header Parameter Usage Location(s): JWS
+
+   o  Change Controller: IESG
+
+   o  Specification Document(s): Section 7.1 of [RFCThis]
+
 
 
 
@@ -898,15 +898,20 @@ Wendt & Peterson         Expires March 30, 2017                [Page 16]
 Internet-Draft                  PASSporT                  September 2016
 
 
+11.  Acknowledgements
+
+   Particular thanks to members of the ATIS and SIP Forum NNI Task Group
+   including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill,
+   Christer Holmberg, Victor Pascual Avila, Mary Barnes, Eric Burger for
    their review, ideas, and contributions also thanks to Henning
    Schulzrinne, Russ Housley, Alan Johnston, Richard Barnes, Mark
    Miller, Ted Hardie, Dave Crocker, Robert Sparks for valuable feedback
    on the technical and security aspects of the document.  Additional
    thanks to Harsha Bellur for assistance in coding the example tokens.
 
-11.  References
+12.  References
 
-11.1.  Normative References
+12.1.  Normative References
 
    [I-D.ietf-stir-rfc4474bis]
               Peterson, J., Jennings, C., Rescorla, E., and C. Wendt,
@@ -939,13 +944,8 @@ Internet-Draft                  PASSporT                  September 2016
               RFC 6838, DOI 10.17487/RFC6838, January 2013,
               <http://www.rfc-editor.org/info/rfc6838>.
 
-   [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
-              Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
-              2015, <http://www.rfc-editor.org/info/rfc7515>.
 
-   [RFC7518]  Jones, M., "JSON Web Algorithms (JWA)", RFC 7518,
-              DOI 10.17487/RFC7518, May 2015,
-              <http://www.rfc-editor.org/info/rfc7518>.
+
 
 
 
@@ -953,6 +953,14 @@ Wendt & Peterson         Expires March 30, 2017                [Page 17]
 
 Internet-Draft                  PASSporT                  September 2016
 
+
+   [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
+              Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
+              2015, <http://www.rfc-editor.org/info/rfc7515>.
+
+   [RFC7518]  Jones, M., "JSON Web Algorithms (JWA)", RFC 7518,
+              DOI 10.17487/RFC7518, May 2015,
+              <http://www.rfc-editor.org/info/rfc7518>.
 
    [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
@@ -962,7 +970,7 @@ Internet-Draft                  PASSporT                  September 2016
               Thumbprint", RFC 7638, DOI 10.17487/RFC7638, September
               2015, <http://www.rfc-editor.org/info/rfc7638>.
 
-11.2.  Informative References
+12.2.  Informative References
 
    [RFC3261]  Rosenberg, J., Schulzrinne, H., Camarillo, G., Johnston,
               A., Peterson, J., Sparks, R., Handley, M., and E.
@@ -992,14 +1000,6 @@ Appendix A.  Example ES256 based PASSporT JWS Serialization and
 
    o  "signature", with the value BASE64URL(JWS Signature)
 
-   This example will follow the steps in JWS [RFC7515] Section 5.1,
-   steps 1-6 and 8 and incorporates the additional serialization steps
-   required for PASSporT.
-
-   Step 1 for JWS references the JWS Payload, an example PASSporT
-   Payload is as follows:
-
-
 
 
 
@@ -1009,6 +1009,13 @@ Wendt & Peterson         Expires March 30, 2017                [Page 18]
 
 Internet-Draft                  PASSporT                  September 2016
 
+
+   This example will follow the steps in JWS [RFC7515] Section 5.1,
+   steps 1-6 and 8 and incorporates the additional serialization steps
+   required for PASSporT.
+
+   Step 1 for JWS references the JWS Payload, an example PASSporT
+   Payload is as follows:
 
    {
        "dest":{"uri":["sip:alice@example.com"]}
@@ -1050,13 +1057,6 @@ Internet-Draft                  PASSporT                  September 2016
    eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
    ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
 
-   Step 5 and Step 6 performs the computation of the digital signature
-   of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected
-   Header)) || '.' || BASE64URL(JWS Payload)) using ES256 as the
-   algorithm and the BASE64URL(JWS Signature).
-
-   rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
-   CpTzO3QfPOlckGaS6hEck7w
 
 
 
@@ -1065,6 +1065,14 @@ Wendt & Peterson         Expires March 30, 2017                [Page 19]
 
 Internet-Draft                  PASSporT                  September 2016
 
+
+   Step 5 and Step 6 performs the computation of the digital signature
+   of the PASSporT Signing Input ASCII(BASE64URL(UTF8(JWS Protected
+   Header)) || '.' || BASE64URL(JWS Payload)) using ES256 as the
+   algorithm and the BASE64URL(JWS Signature).
+
+   rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
+   CpTzO3QfPOlckGaS6hEck7w
 
    Step 8 describes how to create the final PASSporT token,
    concatenating the values in the order Header.Payload.Signature with
@@ -1107,6 +1115,13 @@ Authors' Addresses
    Email: chris-ietf@chriswendt.net
 
 
+
+
+Wendt & Peterson         Expires March 30, 2017                [Page 20]
+
+Internet-Draft                  PASSporT                  September 2016
+
+
    Jon Peterson
    Neustar Inc.
    1800 Sutter St Suite 570
@@ -1117,4 +1132,45 @@ Authors' Addresses
 
 
 
-Wendt & Peterson         Expires March 30, 2017                [Page 20]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Wendt & Peterson         Expires March 30, 2017                [Page 21]
