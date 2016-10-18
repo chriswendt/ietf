@@ -196,7 +196,7 @@ Internet-Draft                  PASSporT                    October 2016
    authority is represented by the certificate credentials and the
    signature and PASSporT object is created and initiated to the
    destination(s) at the applications choice of authoritative point(s)
-   in the network.  For example, the PASSporT object could be create at
+   in the network.  For example, the PASSporT object could be created at
    a device that has authenticated with a user, or at a network entity
    with an authenticated trust relationship with that device and it's
    user.  Destination identities represent the intended destination of
