@@ -63,6 +63,11 @@ This document defines a method for creating and validating a token that cryptogr
 
 {{I-D.ietf-stir-rfc4474bis}} provides details of the use of PASSporT within SIP {{RFC3261}} signaling protocol for the signing and verification of telephone numbers and SIP URIs.
 
+# Terminology
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in RFC 2119 {{!RFC2119}}.
 
 # PASSporT Token Overview {#passport_token_overview}
 
