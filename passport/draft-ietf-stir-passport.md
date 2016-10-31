@@ -1,8 +1,8 @@
 ---
 title: Personal Assertion Token (PASSporT)
 abbrev: PASSporT
-docname: draft-ietf-stir-passport-09
-date: 2016-10-17
+docname: draft-ietf-stir-passport-10
+date: 2016-10-31
 category: std
 
 
@@ -34,6 +34,7 @@ author:
 
 normative:
   I-D.ietf-stir-rfc4474bis:
+  I-D.ietf-mmusic-4572-update:
   RFC2046:
   RFC3986:
   RFC4566:
@@ -43,6 +44,12 @@ normative:
   RFC7518:
   RFC7519:
   RFC7638:
+  UNICODE:
+    target: http://www.unicode.org/versions/latest/
+    title: The Unicode Standard
+    author:
+      organization: The Unicode Consortium
+    date: 2016-06-21
 
 informative:
   RFC3261:
@@ -105,9 +112,9 @@ An example of the header, would be the following, including the specified passpo
 
 ~~~~~~~~~~
 {
-    "typ":"passport",
-    "alg":"ES256",
-    "x5u":"https://cert.example.org/passport.cer"
+  "typ":"passport",
+  "alg":"ES256",
+  "x5u":"https://cert.example.org/passport.cer"
 }
 ~~~~~~~~~~
 
@@ -135,7 +142,7 @@ The "orig" claim is a JSON object with the claim name of "orig" and a claim valu
 
 Note, as explained in {{passport_token_overview}}, the originating identity represents the calling party and may or may not correspond to the authoritative signer of the token.
 
-The "dest" is a JSON object with the claim name of "dest" and MUST have at least have one identity claim object. The"dest" claim value is an array containing one or more identity claim JSON objects representing the destination identities of any type (currently "tn" or "uri"). If the "dest" claim value array contains both "tn" and "uri" claim names, the JSON object should list the "tn" array first and the "uri" array second. Within the "tn" and "uri" arrays, the identity strings should be put in lexicographical order including the scheme-specific portion of the URI characters.
+The "dest" is a JSON object with the claim name of "dest" and MUST have at least have one identity claim object. The "dest" claim value is an array containing one or more identity claim JSON objects representing the destination identities of any type (currently "tn" or "uri"). If the "dest" claim value array contains both "tn" and "uri" claim names, the JSON object should list the "tn" array first and the "uri" array second. Within the "tn" and "uri" arrays, the identity strings should be put in lexicographical order including the scheme-specific portion of the URI characters.
 
 Note, as explained in {{passport_token_overview}}, the destination identity represents the called party and may or may not correspond to the authoritative party verifying the token signature.
 
@@ -159,9 +166,9 @@ Single originator, with telephone number identity +12155551212, to single destin
 
 ~~~~~~~~~~
 {
-    "dest":{"uri":["sip:alice@example.com"]},
-    "iat":"1443208345",
-    "orig":{"tn":"12155551212"}
+  "dest":{"uri":["sip:alice@example.com"]},
+  "iat":1443208345,
+  "orig":{"tn":"12155551212"}
 }
 ~~~~~~~~~~
 
@@ -169,23 +176,28 @@ Single originator, with telephone number identity +12155551212, to multiple dest
 
 ~~~~~~~~~~
 {
-    "dest":{
+  "dest":{
     "tn":["12125551212"],
-        "uri":["sip:alice@example.com",
-            "sip:bob@example.net"]
-    },
-    "iat":"1443208345",
-    "orig":{"tn":"12155551212"}
+    "uri":["sip:alice@example.com",
+      "sip:bob@example.net"]
+  },
+  "iat":1443208345,
+  "orig":{"tn":"12155551212"}
 }
 ~~~~~~~~~~
 
 ### "mky" - Media Key claim {#mky}
 
-Some protocols that use PASSporT may also want to protect media security keys delivered within their signaling in order to bind those keys to the identities established in the signaling layers. The "mky" is an optional PASSporT claim defining the assertion of media key fingerprints carried in SDP {{RFC4566}} via the "a=fingerprint" attribute {{RFC4572}} Section 5. This claim can support either a single or multiple fingerprints appearing in a single SDP body corresponding to one or more media streams offered.
-The "mky" claim MUST be formatted in a JSON form including the "alg" and "dig" claims with the corresponding algorithm and hexadecimal values. If there is more than one fingerprint value associated with different media streams in SDP, the fingerprint values MUST be constructed as a JSON array denoted by bracket characters.
+Some protocols that use PASSporT may also want to protect media security keys delivered within their signaling in order to bind those keys to the identities established in the signaling layers. The "mky" is an optional PASSporT claim defining the assertion of media key fingerprints carried in SDP {{RFC4566}} via the "a=fingerprint" attribute {{RFC4572}} Section 5. This claim can support either a single or multiple fingerprints appearing in a single SDP body corresponding to one or more media streams offered as defined in {{I-D.ietf-mmusic-4572-update}}.
+
+The "mky" claim MUST be formatted as a JSON object with an array including the "alg" and "dig" claims with the corresponding algorithm and hexadecimal values. If there is more than one fingerprint value associated with different media streams in SDP, the fingerprint values MUST be constructed as a JSON array denoted by bracket characters.
 For the "dig" claim, the claim value MUST be the hash hexadecimal value without any colons.
 
-The "mky" claim is a JSON object with a claim name of "mky" and a claim value of a JSON array.  The "mky" claim value JSON array MUST contain JSON objects with exactly one of both corresponding "alg" and "dig" claim objects.  The order of the JSON array should be in lexicographic order of the "alg" claims first followed by the corresponding lexicographic order of the "dig" claim values when there is repeated "alg" claims. Within each of the "mky" claim array objects the claim objects MUST have "alg" first and "dig" second.
+The "mky" claim is a JSON object with a claim name of "mky" and a claim value of a JSON array denoted by brackets.  The "mky" claim value JSON array MUST be constructed as follows:
+
+1. Take each "a=fingerprint" lines carried in the SDP.
+2. Sort the lines based on the UTF8 encoding of the concatenation of the "alg" and "dig" claim value strings.
+3. Encode the array in the order of the sorted lines, where each "mky" array element is a JSON object with two elements corresponding to the "alg" and "dig" objects, with "alg" first and "dig" second.
 
 An example claim with "mky" claim is as follows:
 
@@ -202,21 +214,21 @@ the PASSporT Payload object would be:
 
 ~~~~~~~~~~
 {
-    "dest":{"uri":["sip:alice@example.com"]},
-    "iat":"1443208345",
-    "mky":[
-        {
-           "alg":"sha-256",
-           "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
-           	F17A03A27DF9B07F4619B2"
-        },
-        {
-           "alg":"sha-256",
-           "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
-           	AB3E4B652E7D463F5442CD54F1"
-        }
-      ],
-    "orig":{"tn":"12155551212"}
+  "dest":{"uri":["sip:alice@example.com"]},
+  "iat":1443208345,
+  "mky":[
+    {
+      "alg":"sha-256",
+      "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
+      	F17A03A27DF9B07F4619B2"
+    },
+    {
+      "alg":"sha-256",
+      "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
+      	AB3E4B652E7D463F5442CD54F1"
+    }
+  ],
+  "orig":{"tn":"12155551212"}
 }
 ~~~~~~~~~~
 
@@ -248,21 +260,21 @@ Note that the full form of the PASSporT token, containing the entire header, pay
 The compact form of the following example token (with line breaks between period used for readability purposes only)
 
 ~~~~~~~~~~
-  eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
-  ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
-  .
-  eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhdCI
-  6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
-  .
-  rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
-  CpTzO3QfPOlckGaS6hEck7w
+eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
+ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
+.
+eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhdCI
+6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
+.
+rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
+CpTzO3QfPOlckGaS6hEck7w
 ~~~~~~~~~~
 
 would be as follows (with line breaks between period used for readability purposes only)
 
 ~~~~~~~~~~
-  ..rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
-  CpTzO3QfPOlckGaS6hEck7w
+..rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
+CpTzO3QfPOlckGaS6hEck7w
 ~~~~~~~~~~
 
 # Extending PASSporT {#extending_passport}
@@ -283,10 +295,10 @@ An example header with a PASSporT extension type of "foo" is as follows:
 
 ~~~~~~~~~~
 {
-    "alg":"ES256",
-    "ppt":"foo",
-    "typ":"passport",
-    "x5u":"https://tel.example.org/passport.cer"
+  "alg":"ES256",
+  "ppt":"foo",
+  "typ":"passport",
+  "x5u":"https://tel.example.org/passport.cer"
 }
 ~~~~~~~~~~
 
@@ -298,18 +310,26 @@ An example set of extended claims, extending the first example in {{passport_pay
 
 ~~~~~~~~~~
 {
-    "bar":"beyond all recognition"
-    "dest":{"uri":["sip:alice@example.com"]},
-    "iat":"1443208345",
-    "orig":{"tn":"12155551212"}
+  "bar":"beyond all recognition"
+  "dest":{"uri":["sip:alice@example.com"]},
+  "iat":1443208345,
+  "orig":{"tn":"12155551212"}
 }
 ~~~~~~~~~~
 
 # Deterministic JSON Serialization {#json_serialization}
 
-JSON, as a canonical format, can include spaces and line breaks, and key value pairs can occur in any order. It is therefore a non-deterministic string format. In order to make the digital signature verification work deterministically, the JSON representation of the JWS Protected Header object and JWS Payload object MUST be computed as follows.
+JSON objects can include spaces and line breaks, and key value pairs can occur in any order. It is therefore a non-deterministic string format. In order to make the digital signature verification work deterministically, the JSON representation of the JWS Protected Header object and JWS Payload object MUST be computed as follows.
 
-The JSON object MUST follow the rules for the construction of the thumbprint of a JSON Web Key (JWK) as defined in {{RFC7638}} Section 3 Step 1 only. Step 2 should not be performed; as noted in JWK this is still a legal JWK object.
+The JSON object MUST follow the following rules.  These rules are based on the thumbprint of a JSON Web Key (JWK) as defined in Section 3 Step 1 of {{RFC7638}}.  
+
+1. The JSON object MUST contain no whitespace or line breaks before or after any syntactic elements.
+2. JSON objects MUST have the keys ordered lexicographically by the Unicode {{UNICODE}} code points of the member names.   
+3. JSON value literals MUST be lowercase.
+4. JSON numbers are to be encoded as integers unless the field is defined to be encoded otherwise.
+5. Encoding rules MUST be applied recursively to member values and array values.
+
+Note: For any PASSporT extension claims, member names within the scope of a JSON object MUST NOT be equal to other member names, otherwise serialization will not be deterministic.
 
 ## Example PASSport deterministic JSON form
 
@@ -319,19 +339,19 @@ The initial JSON object is shown here:
 
 ~~~~~~~~~~
 {
-    "dest":{"uri":["sip:alice@example.com"]},
-    "orig":{"tn":"12155551212"}
-    "iat":"1443208345",
-    "mky":[
+  "dest":{"uri":["sip:alice@example.com"]},
+  "orig":{"tn":"12155551212"}
+  "iat":1443208345,
+  "mky":[
     {
-       "alg":"sha-256",
-       "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
-       	F17A03A27DF9B07F4619B2"
+      "alg":"sha-256",
+      "dig":"021ACC5427ABEB9C533F3E4B652E7D463F5442CD54
+      	F17A03A27DF9B07F4619B2"
     },
     {
-       "alg":"sha-256",
-       "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
-       	AB3E4B652E7D463F5442CD54F1"
+      "alg":"sha-256",
+      "dig":"4AADB9B13F82183B540212DF3E5D496B19E57C
+      	AB3E4B652E7D463F5442CD54F1"
     }
   ],
 }
@@ -384,13 +404,13 @@ The use of PASSporT tokens based on the validation of the digital signature and 
 
 ### Media Type Registry Contents Additions Requested
 
-This section registers the "application/passport" media type {{RFC2046}} in the "Media Types" registry in the manner described in {{RFC6838}}, which can be used to indicate that the content is a PASSporT defined JWT and JWS.
+This section registers the "application/passport" media type {{RFC2046}} in the "Media Types" registry in the manner described in {{RFC6838}}, which can be used to indicate that the content is a PASSporT defined JWT.
 
 * Type name: application
 * Subtype name: passport
 * Required parameters: n/a
 * Optional parameters: n/a
-* Encoding considerations: 8bit; application/passport values outside the US-ASCII range are encoded using percent encoding as described in Section 2.1 of {{RFC3986}} (some values may be the empty string), each separated from the next by a single period ('.') character.
+* Encoding considerations: 8bit; application/passport values are encoded as a series of base64url-encoded values (some of which may be the empty string) separated by period ('.') characters..
 * Security considerations: See the Security Considerations Section of {{RFC7515}}.
 * Interoperability considerations: n/a
 * Published specification: [RFCThis]
@@ -439,9 +459,13 @@ Header Parameter Name: "ppt"
 * Change Controller: IESG
 * Specification Document(s): {{ppt}} of [RFCThis]
 
+## PASSporT Extension Registry Request
+
+The IANA is requested to create a new PASSporT Type registry for ‘ppt’ parameter values. That parameter and its values are defined in {{ppt}}. New registry entries must contain the name of the ‘ppt’ parameter value and the specification in which the value is described. The policy for this registry is Specification Required.
+
 # Acknowledgements
 
-Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, Richard Barnes, Mark Miller, Ted Hardie, Dave Crocker, Robert Sparks for valuable feedback on the technical and security aspects of the document. Additional thanks to Harsha Bellur for assistance in coding the example tokens.
+Particular thanks to members of the ATIS and SIP Forum NNI Task Group including Jim McEchern, Martin Dolly, Richard Shockey, John Barnhill, Christer Holmberg, Victor Pascual Avila, Mary Barnes, Eric Burger for their review, ideas, and contributions also thanks to Henning Schulzrinne, Russ Housley, Alan Johnston, Richard Barnes, Mark Miller, Ted Hardie, Dave Crocker, Robert Sparks, Jim Schaad for valuable feedback on the technical and security aspects of the document. Additional thanks to Harsha Bellur for assistance in coding the example tokens.
 
 --- back
 
@@ -459,16 +483,16 @@ Step 1 for JWS references the JWS Payload, an example PASSporT Payload is as fol
 
 ~~~~~~~~~~
 {
-    "dest":{"uri":["sip:alice@example.com"]}
-    "iat":"1443208345",
-    "orig":{"tn":"12155551212"}
+  "dest":{"uri":["sip:alice@example.com"]}
+  "iat":1471375418,
+  "orig":{"tn":"12155551212"}
 }
 ~~~~~~~~~~
 
 This would be serialized to the form (with line break used for display purposes only):
 
 ~~~~~~~~~~
-{"dest":{"uri":["sip:alice@example.com"]},"iat":"1443208345",
+{"dest":{"uri":["sip:alice@example.com"]},"iat":1471375418,
 "orig":{"tn":"12155551212"}}
 ~~~~~~~~~~
 
@@ -476,16 +500,16 @@ Step 2 Computes the BASE64URL(JWS Payload) producing this value (with line break
 
 ~~~~~~~~~~
 eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhdCI
-6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
+6MTQ3MTM3NTQxOCwib3JpZyI6eyJ0biI6IjEyMTU1NTUxMjEyIn19
 ~~~~~~~~~~
 
 For Step 3, an example PASSporT Protected Header comprising the JOSE Header is as follows:
 
 ~~~~~~~~~~
 {
-    "alg":"ES256",
-    "typ":"passport",
-    "x5u":"https://cert.example.org/passport.cer"
+  "alg":"ES256",
+  "typ":"passport",
+  "x5u":"https://cert.example.org/passport.cer"
 }
 ~~~~~~~~~~
 
@@ -493,7 +517,7 @@ This would be serialized to the form (with line break used for display purposes 
 
 ~~~~~~~~~~
 {"alg":"ES256","typ":"passport","x5u":"https://cert.example.org
-    /passport.cer"}
+  /passport.cer"}
 ~~~~~~~~~~
 
 Step 4 Performs the BASE64URL(UTF8(JWS Protected Header)) operation and encoding produces this value (with line break used for display purposes only):
@@ -508,8 +532,8 @@ ASCII(BASE64URL(UTF8(JWS Protected Header)) || '.' || BASE64URL(JWS Payload))
 using ES256 as the algorithm and the BASE64URL(JWS Signature).
 
 ~~~~~~~~~~
-rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
-CpTzO3QfPOlckGaS6hEck7w
+VLBCIVDCaeK6M4hLJb6SHQvacAQVvoiiEOWQ_iUkqk79UD81fHQ0E1b3_GluIkb
+a7UWYRM47ZbNFdOJquE35cw
 ~~~~~~~~~~
 
 Step 8 describes how to create the final PASSporT token, concatenating the values in the order Header.Payload.Signature with period ('.') characters. For the above example values this would produce the following (with line breaks between period used for readability purposes only):
@@ -519,20 +543,20 @@ eyJhbGciOiJFUzI1NiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly9j
 ZXJ0LmV4YW1wbGUub3JnL3Bhc3Nwb3J0LmNlciJ9
 .
 eyJkZXN0Ijp7InVyaSI6WyJzaXA6YWxpY2VAZXhhbXBsZS5jb20iXX0sImlhdCI
-6IjE0NDMyMDgzNDUiLCJvcmlnIjp7InRuIjoiMTIxNTU1NTEyMTIifX0
+6MTQ3MTM3NTQxOCwib3JpZyI6eyJ0biI6IjEyMTU1NTUxMjEyIn19
 .
-rq3pjT1hoRwakEGjHCnWSwUnshd0-zJ6F1VOgFWSjHBr8Qjpjlk-cpFYpFYsojN
-CpTzO3QfPOlckGaS6hEck7w
+VLBCIVDCaeK6M4hLJb6SHQvacAQVvoiiEOWQ_iUkqk79UD81fHQ0E1b3_GluIkb
+a7UWYRM47ZbNFdOJquE35cw
 ~~~~~~~~~~
 
-## X.509 Private Key for ES256 Example**
+## X.509 Private Key in PKCS#8 format for ES256 Example**
 
 ~~~~~~~~~~
------BEGIN EC PRIVATE KEY-----
-MHcCAQEEIFeZ1R208QCvcu5GuYyMfG4W7sH4m99/7eHSDLpdYllFoAoGCCqGSM49
-AwEHoUQDQgAE8HNbQd/TmvCKwPKHkMF9fScavGeH78YTU8qLS8I5HLHSSmlATLcs
-lQMhNC/OhlWBYC626nIlo7XeebYS7Sb37g==
------END EC PRIVATE KEY-----
+-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgi7q2TZvN9VDFg8Vy
+qCP06bETrR2v8MRvr89rn4i+UAahRANCAAQWfaj1HUETpoNCrOtp9KA8o0V79IuW
+ARKt9C1cFPkyd3FBP4SeiNZxQhDrD0tdBHls3/wFe8++K2FrPyQF9vuh
+-----END PRIVATE KEY——
 ~~~~~~~~~~
 
 ## X.509 Public Key for ES256 Example**
