@@ -1,8 +1,8 @@
 ---
 title: Personal Assertion Token (PASSporT)
 abbrev: PASSporT
-docname: draft-ietf-stir-passport-10
-date: 2016-10-31
+docname: draft-ietf-stir-passport-11
+date: 2017-02-09
 category: std
 
 
@@ -40,6 +40,7 @@ normative:
   RFC4566:
   RFC4572:
   RFC6838:
+  RFC6979:
   RFC7515:
   RFC7518:
   RFC7519:
@@ -102,6 +103,8 @@ The "alg" (Algorithm) Header Parameter is defined in JWS {{RFC7515}} Section 4.1
 
 For the creation and verification of PASSporT tokens and their digital signatures, implementations MUST support ES256 as defined in JWA {{RFC7518}} Section 3.4. Implementations MAY support other algorithms registered in the JSON Web Signature and Encryption Algorithms registry created by {{RFC7518}}. The contents of that registry may be updated in the future depending on cryptographic strength requirements guided by current security best practice. The mandatory-to-support algorithm for PASSporT tokens may likewise be updated in future updates to this document.
 
+Implementations of PASSporT digital signatures using ES256 as defined above SHOULD use deterministic ECDSA if/when supported for the reasons stated in {{RFC6979}}.
+
 ## "x5u" (X.509 URL) Header Parameter
 
 As defined in JWS {{RFC7515}} Section 4.1.5., the "x5u" header parameter defines a URI {{RFC3986}} referring to the resource for the X.509 public key certificate or certificate chain {{RFC5280}} corresponding to the key used to digitally sign the JWS. Generally, as defined in JWS {{RFC7515}} section 4.1.5, this would correspond to an HTTPS or DNSSEC resource using integrity protection.
@@ -124,7 +127,7 @@ The token claims consist of the information which needs to be verified at the de
 
 PASSporT defines the use of a standard JWT defined claim as well as custom claims corresponding to the two parties associated with personal communications, the originator and destination as detailed below.
 
-Any claim names or claim values outside the US-ASCII range should follow the default JSON serialization defined in {{RFC7519}} Section 7.
+Any claim names MUST use the US-ASCII character set. Any claim values can container characters that are outside the US-ASCII range, however MUST follow the default JSON serialization defined in {{RFC7519}} Section 7.
 
 ## JWT defined claims
 
